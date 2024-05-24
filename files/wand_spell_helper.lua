@@ -115,7 +115,7 @@ function create_wand_price(wand_data)
 			end
 		end
 	end
-	return math.ceil(price * mod_config.buy_wand_price_multiplier);
+	return math.ceil(price * ModSettingGet("persistence.buy_wand_price_multiplier"));
 end
 
 function create_wand(wand_data)
@@ -155,7 +155,7 @@ end
 function create_spell_price(action_id)
 	for i = 1, #actions do
 		if actions[i].id == action_id then
-			return math.ceil(actions[i].price * mod_config.buy_spell_price_multiplier);
+			return math.ceil(actions[i].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
 		end
 	end
 end

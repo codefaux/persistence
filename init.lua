@@ -1,4 +1,5 @@
 dofile_once("mods/persistence/files/helper.lua");
+dofile("data/scripts/lib/mod_settings.lua") -- see this file for documentation on some of the features.
 
 local is_in_lobby = false;
 local inventory_open = false;
@@ -9,7 +10,7 @@ local lobby_x, lobby_y;
 
 local menu_open = false;
 local function enter_lobby()
-	if mod_config.enable_edit_wands_in_lobby then
+	if ModSettingGet("persistence.enable_edit_wands_in_lobby") then
 		enable_edit_wands_in_lobby();
 	end
 	show_lobby_gui();
@@ -135,7 +136,7 @@ function OnWorldPostUpdate()
 	local px, py = EntityGetTransform(get_player_id());
 		local is_in_workshop_before = is_in_workshop;
 		is_in_workshop = false;
-		for _, workshop in ipairs(EntityGetWithTag(mod_config.reuseable_holy_mountain and "persistence_workshop" or "workshop")) do
+		for _, workshop in ipairs(EntityGetWithTag(ModSettingGet("persistence.reuseable_holy_mountain") and "persistence_workshop" or "workshop")) do
 			local x, y = EntityGetTransform(workshop);
 			local hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent");
 			local min_x = tonumber(ComponentGetValue(hitbox_comp, "aabb_min_x")) + x;
@@ -144,10 +145,10 @@ function OnWorldPostUpdate()
 			local max_y = tonumber(ComponentGetValue(hitbox_comp, "aabb_max_y")) + y;
 			if aabb_check(px, py, min_x, min_y, max_x, max_y) then
 				if not is_in_workshop and not is_in_workshop_before then
-					if mod_config.enable_teleport_back_up then
+					if ModSettingGet("persistence.enable_teleport_back_up") then
 						show_teleport_gui();
 					end
-					if mod_config.enable_menu_in_holy_mountain then
+					if ModSettingGet("persistence.enable_menu_in_holy_mountain") then
 						enter_lobby();
 						if inventory_open then
 							hide_menu_gui();
@@ -158,10 +159,10 @@ function OnWorldPostUpdate()
 			end
 		end
 		if not is_in_workshop and is_in_workshop_before then
-			if mod_config.enable_teleport_back_up then
+			if ModSettingGet("persistence.enable_teleport_back_up") then
 				hide_teleport_gui();
 			end
-			if mod_config.enable_menu_in_holy_mountain then
+			if ModSettingGet("persistence.enable_menu_in_holy_mountain") then
 				exit_lobby();
 			end
 		end
@@ -186,7 +187,7 @@ function OnPlayerSpawned(player_entity)
 	dofile_once("mods/persistence/config.lua");
 	lobby_collider = EntityGetWithName("persistence_lobby_collider");
 	if lobby_collider == nil or lobby_collider == 0 then
-		if mod_config.spawn_location_as_lobby_location then
+		if ModSettingGet("persistence.move_lobby_to_spawn") then
 			local x, y = EntityGetTransform(get_player_id());
 			lobby_collider = EntityLoad("mods/persistence/files/lobby_collider.xml", x, y);
 			lobby_x, lobby_y = EntityGetTransform(lobby_collider);
@@ -212,18 +213,19 @@ function OnPostPlayerSpawned()
 			set_selected_save_id(0);
 		else
 			load_save_ids();
-			if mod_config.always_choose_save_id >= 0 then
-				if mod_config.always_choose_save_id == 0 then
+			local load_slot_id = tonumber(ModSettingGet("persistence.always_choose_save_id"))
+			if load_slot_id >= 0 then
+				if load_slot_id == 0 then
 					set_selected_save_id(0);
 				else
-					if get_save_ids()[mod_config.always_choose_save_id] == nil then
-						set_selected_save_id(mod_config.always_choose_save_id);
-						create_new_save(mod_config.always_choose_save_id);
-						OnSaveAvailable(mod_config.always_choose_save_id);
+					if get_save_ids()[load_slot_id] == nil then
+						set_selected_save_id(load_slot_id);
+						create_new_save(load_slot_id);
+						OnSaveAvailable(load_slot_id);
 					else
-						set_selected_save_id(mod_config.always_choose_save_id);
-						load(mod_config.always_choose_save_id);
-						OnSaveAvailable(mod_config.always_choose_save_id);
+						set_selected_save_id(load_slot_id);
+						load(load_slot_id);
+						OnSaveAvailable(load_slot_id);
 					end
 				end
 			else
@@ -249,7 +251,7 @@ function OnPlayerDied(player_entity)
 		return;
 	end
 	local money = get_player_money();
-	local money_to_save = math.floor(money * mod_config.money_to_keep_on_death);
-	GamePrintImportant("You died", "You lost " .. tostring(money - money_to_save) .. " Gold");
+	local money_to_save = math.floor(money * ModSettingGet("persistence.money_saved_on_death") );
+	GamePrintImportant("You died", tostring(money_to_save) .. " Gold was saved.");
 	set_safe_money(get_selected_save_id(), math.abs(get_safe_money(get_selected_save_id()) + money_to_save));
 end

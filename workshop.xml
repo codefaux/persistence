@@ -1,6 +1,6 @@
 <Mod
 	name="Persistence"
-	description=""
+	description="Add some Lite to your Rogue"
 	tags="gameplay,game modes,tweaks"
 	dont_upload_folders=".vscode|.git"
 	dont_upload_files=".gitignore|README.md|files/debug.lua">

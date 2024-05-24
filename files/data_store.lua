@@ -728,7 +728,7 @@ function research_wand_price(save_id, entity_id)
 		end
 	end
 
-	return math.ceil(price * mod_config.research_wand_price_multiplier);
+	return math.ceil(price * ModSettingGet("persistence.research_wand_price_multiplier"));
 end
 
 function research_wand(save_id, entity_id)
@@ -798,7 +798,7 @@ function research_spell_price(entity_id)
 	end
 	for i = 1, #actions do
 		if actions[i].id == action_id then
-			return math.ceil(actions[i].price * mod_config.research_spell_price_multiplier);
+			return math.ceil(actions[i].price * ModSettingGet("persistence.research_spell_price_multiplier"));
 		end
 	end
 end

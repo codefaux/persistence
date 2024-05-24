@@ -1,3 +1,5 @@
+dofile("data/scripts/lib/mod_settings.lua") -- see this file for documentation on some of the features.
+
 function pad_number(number, length)
 	local output = tostring(number);
 	for i = 1, length - #output do

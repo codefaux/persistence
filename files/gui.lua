@@ -66,37 +66,37 @@ function show_money_gui()
 		local safe_money = get_safe_money(save_id);
 		local player_money = get_player_money();
 
-		GuiLayoutBeginHorizontal(gui, 85, 15);
+		GuiLayoutBeginHorizontal(gui, 76, 35);
 		GuiLayoutBeginVertical(gui, 0, 0);
 		if safe_money < 1 then
-			GuiText(gui, 0, 0, "^ 1$");
+			GuiText(gui, 0, 0, " Take $ 1");
 		else
-			if GuiButton(gui, 0, 0, "^ 1$", get_next_id()) then
+			if GuiButton(gui, 0, 0, " Take $ 1", get_next_id()) then
 				transfer_money_to_player(save_id, 1);
 			end
 		end
 		if safe_money < 10 then
-			GuiText(gui, 0, 0, "^ 10$");
+			GuiText(gui, 0, 0, " Take $ 10");
 		else
-			if GuiButton(gui, 0, 0, "^ 10$", get_next_id()) then
+			if GuiButton(gui, 0, 0, " Take $ 10", get_next_id()) then
 				transfer_money_to_player(save_id, 10);
 			end
 		end
 		if safe_money < 100 then
-			GuiText(gui, 0, 0, "^ 100$");
+			GuiText(gui, 0, 0, " Take $ 100");
 		else
-			if GuiButton(gui, 0, 0, "^ 100$", get_next_id()) then
+			if GuiButton(gui, 0, 0, " Take $ 100", get_next_id()) then
 				transfer_money_to_player(save_id, 100);
 			end
 		end
 		if safe_money < 1000 then
-			GuiText(gui, 0, 0, "^ 1000$");
+			GuiText(gui, 0, 0, " Take $ 1000");
 		else
-			if GuiButton(gui, 0, 0, "^ 1000$", get_next_id()) then
+			if GuiButton(gui, 0, 0, " Take $ 1000", get_next_id()) then
 				transfer_money_to_player(save_id, 1000);
 			end
 		end
-		if GuiButton(gui, 0, 0, "^ ALL", get_next_id()) then
+		if GuiButton(gui, 0, 0, " Take ALL", get_next_id()) then
 			transfer_money_to_player(save_id, safe_money);
 		end
 		GuiLayoutEnd(gui);
@@ -105,42 +105,43 @@ function show_money_gui()
 		GuiLayoutAddHorizontalSpacing(gui);
 		GuiLayoutAddHorizontalSpacing(gui);
 		GuiLayoutAddHorizontalSpacing(gui);
+		GuiLayoutAddHorizontalSpacing(gui);
 		GuiLayoutBeginVertical(gui, 0, 0);
-		if GuiButton(gui, 0, 0, "v ALL", get_next_id()) then
-			transfer_money_to_safe(save_id, player_money);
-		end
-		if player_money < 1000 then
-			GuiText(gui, 0, 0, "v 1000$");
-		else
-			if GuiButton(gui, 0, 0, "v 1000$", get_next_id()) then
-				transfer_money_to_safe(save_id, 1000);
-			end
-		end
-		if player_money < 100 then
-			GuiText(gui, 0, 0, "v 100$");
-		else
-			if GuiButton(gui, 0, 0, "v 100$", get_next_id()) then
-				transfer_money_to_safe(save_id, 100);
-			end
-		end
-		if player_money < 10 then
-			GuiText(gui, 0, 0, "v 10$");
-		else
-			if GuiButton(gui, 0, 0, "v 10$", get_next_id()) then
-				transfer_money_to_safe(save_id, 10);
-			end
-		end
 		if player_money < 1 then
-			GuiText(gui, 0, 0, "v 1$");
+			GuiText(gui, 0, 0, " Stash $ 1");
 		else
-			if GuiButton(gui, 0, 0, "v 1$", get_next_id()) then
+			if GuiButton(gui, 0, 0, " Stash $ 1", get_next_id()) then
 				transfer_money_to_safe(save_id, 1);
 			end
 		end
+		if player_money < 10 then
+			GuiText(gui, 0, 0, " Stash $ 10");
+		else
+			if GuiButton(gui, 0, 0, " Stash $ 10", get_next_id()) then
+				transfer_money_to_safe(save_id, 10);
+			end
+		end
+		if player_money < 100 then
+			GuiText(gui, 0, 0, " Stash $ 100");
+		else
+			if GuiButton(gui, 0, 0, " Stash $ 100", get_next_id()) then
+				transfer_money_to_safe(save_id, 100);
+			end
+		end
+		if player_money < 1000 then
+			GuiText(gui, 0, 0, " Stash $ 1000");
+		else
+			if GuiButton(gui, 0, 0, " Stash $ 1000", get_next_id()) then
+				transfer_money_to_safe(save_id, 1000);
+			end
+		end
+		if GuiButton(gui, 0, 0, "Stash ALL", get_next_id()) then
+			transfer_money_to_safe(save_id, player_money);
+		end
 		GuiLayoutEnd(gui);
 		GuiLayoutEnd(gui);
-		GuiLayoutBeginHorizontal(gui, 86, 31);
-		GuiText(gui, 0, 0, " $" .. tostring(safe_money));
+		GuiLayoutBeginHorizontal(gui, 80, 53);
+		GuiText(gui, 0, 0, "Stashed: $ " .. tostring(safe_money));
 		GuiLayoutEnd(gui);
 	end };
 end
@@ -154,11 +155,11 @@ function show_teleport_gui()
 	active_windows["teleport"] = { false, function(get_next_id)
 		GuiLayoutBeginHorizontal(gui, 45, 1);
 		if teleport_confirmation then
-			if GuiButton(gui, 0, 0, "Press again to teleport", get_next_id()) then
+			if GuiButton(gui, 0, 0, "Press again to teleport to Lobby", get_next_id()) then
 				teleport_back_to_lobby();
 			end
 		else
-			if GuiButton(gui, 0, 0, "Teleport back up", get_next_id()) then
+			if GuiButton(gui, 0, 0, "Teleport to Lobby", get_next_id()) then
 				teleport_confirmation = true;
 			end
 		end
@@ -188,7 +189,7 @@ function show_research_wands_gui()
 		GuiLayoutBeginHorizontal(gui, 30, 30);
 		GuiLayoutBeginVertical(gui, 0, 0);
 		for i = 1, 4 do
-			GuiText(gui, 0, 0, "Inventory Slot " .. tostring(i) .. ":");
+			GuiText(gui, 0, 0, "Wand Slot " .. tostring(i) .. ":");
 		end
 		GuiLayoutEnd(gui);
 		GuiLayoutAddHorizontalSpacing(gui);
@@ -201,15 +202,15 @@ function show_research_wands_gui()
 				local is_new = research_wand_is_new(get_selected_save_id(), wands[i].entity_id);
 				if is_new then
 					if price > player_money then
-						GuiText(gui, 0, 0, tostring(price) .. "$");
+						GuiText(gui, 0, 0, "$ " .. tostring(price));
 					else
 						if #wands[i].wand_data.spells > 0 then
-							if GuiButton(gui, 0, 0, tostring(price) .. "$", get_next_id()) then
+							if GuiButton(gui, 0, 0, "$ " .. tostring(price), get_next_id()) then
 								research_wand(get_selected_save_id(), wands[i].entity_id);
 								wands[i] = nil;
 							end
 						else
-							if GuiButton(gui, 0, 0, tostring(price) .. "$", get_next_id()) then
+							if GuiButton(gui, 0, 0, "$ " .. tostring(price), get_next_id()) then
 								research_wand(get_selected_save_id(), wands[i].entity_id);
 								wands[i] = nil;
 							end
@@ -235,7 +236,7 @@ function show_research_wands_gui()
 				local is_new = research_wand_is_new(get_selected_save_id(), wands[i].entity_id);
 				if is_new then
 					if price > player_money then
-						GuiText(gui, 0, 0, "You can't afford that");
+						GuiText(gui, 0, 0, "(Too expensive)");
 					else
 						if #wands[i].wand_data.spells > 0 then
 							GuiText(gui, 0, 0, "WARNING: The spells on this wand will be lost");
@@ -296,9 +297,9 @@ function show_research_spells_gui()
 			GuiLayoutBeginVertical(gui, 0, 0);
 			for _, value in ipairs(spell_data) do
 				if player_money < value.price then
-					GuiText(gui, 0, 0, tostring(value.price) .. "$");
+					GuiText(gui, 0, 0, "$ " .. tostring(value.price));
 				else
-					if GuiButton(gui, 0, 0, tostring(value.price) .. "$", get_next_id()) then
+					if GuiButton(gui, 0, 0, "$ " .. tostring(value.price), get_next_id()) then
 						research_spell(get_selected_save_id(), value.entity_id);
 						hide_research_spells_gui();
 						show_research_spells_gui();
@@ -899,9 +900,9 @@ function show_buy_wands_gui()
 
 			GuiLayoutBeginHorizontal(gui, 20, 95);
 			if player_money < price then
-				GuiText(gui, 0, 0, tostring(price) .. "$ You can't afford that");
+				GuiText(gui, 0, 0, "$ " .. tostring(price) .. " (Too expensive)");
 			else
-				if GuiButton(gui, 0, 0, tostring(price) .. "$ Buy", get_next_id()) then
+				if GuiButton(gui, 0, 0, "$ " .. tostring(price) .. " -- Buy", get_next_id()) then
 					create_wand(wand_data_selected);
 				end
 			end
@@ -948,9 +949,9 @@ function show_buy_spells_gui()
 			GuiLayoutBeginVertical(gui, 0, 0);
 			for _, value in ipairs(columns[page_number * 2 - 1]) do
 				if player_money < value.price then
-					GuiText(gui, 0, 0, tostring(value.price) .. "$");
+					GuiText(gui, 0, 0, "$ " .. tostring(value.price));
 				else
-					if GuiButton(gui, 0, 0, tostring(value.price) .. "$", get_next_id()) then
+					if GuiButton(gui, 0, 0, "$ " .. tostring(value.price), get_next_id()) then
 						create_spell(value.id);
 					end
 				end
@@ -971,9 +972,9 @@ function show_buy_spells_gui()
 			GuiLayoutBeginVertical(gui, 0, 0);
 			for _, value in ipairs(columns[page_number * 2]) do
 				if player_money < value.price then
-					GuiText(gui, 0, 0, tostring(value.price) .. "$");
+					GuiText(gui, 0, 0, "$ " .. tostring(value.price));
 				else
-					if GuiButton(gui, 0, 0, tostring(value.price) .. "$", get_next_id()) then
+					if GuiButton(gui, 0, 0, "$ " .. tostring(value.price), get_next_id()) then
 						create_spell(value.id);
 					end
 				end
@@ -1020,7 +1021,7 @@ function show_menu_gui()
 	hide_buy_wands_gui();
 	hide_buy_spells_gui();
 	active_windows["menu"] = { false, function(get_next_id)
-		GuiLayoutBeginVertical(gui, 1, 30);
+		GuiLayoutBeginVertical(gui, 1, 35);
 		if GuiButton(gui, research_wands_open and 10 or 0, 0, "Research Wands", get_next_id()) then
 			hide_research_spells_gui();
 			hide_buy_wands_gui();

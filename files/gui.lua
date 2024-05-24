@@ -202,22 +202,22 @@ function show_research_wands_gui()
 				local is_new = research_wand_is_new(get_selected_save_id(), wands[i].entity_id);
 				if is_new then
 					if price > player_money then
-						GuiText(gui, 0, 0, "$ " .. tostring(price));
+						GuiText(gui, 0, 0, " $" .. tostring(price));
 					else
 						if #wands[i].wand_data.spells > 0 then
-							if GuiButton(gui, 0, 0, "$ " .. tostring(price), get_next_id()) then
+							if GuiButton(gui, 0, 0, " $" .. tostring(price), get_next_id()) then
 								research_wand(get_selected_save_id(), wands[i].entity_id);
 								wands[i] = nil;
 							end
 						else
-							if GuiButton(gui, 0, 0, "$ " .. tostring(price), get_next_id()) then
+							if GuiButton(gui, 0, 0, " $" .. tostring(price), get_next_id()) then
 								research_wand(get_selected_save_id(), wands[i].entity_id);
 								wands[i] = nil;
 							end
 						end
 					end
 				else
-					GuiText(gui, 0, 0, "0$");
+					GuiText(gui, 0, 0, " $0");
 				end
 			else
 				GuiText(gui, 0, 0, " ");
@@ -297,9 +297,9 @@ function show_research_spells_gui()
 			GuiLayoutBeginVertical(gui, 0, 0);
 			for _, value in ipairs(spell_data) do
 				if player_money < value.price then
-					GuiText(gui, 0, 0, "$ " .. tostring(value.price));
+					GuiText(gui, 0, 0, " $ " .. tostring(value.price) .. "(Too expensive)");
 				else
-					if GuiButton(gui, 0, 0, "$ " .. tostring(value.price), get_next_id()) then
+					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
 						research_spell(get_selected_save_id(), value.entity_id);
 						hide_research_spells_gui();
 						show_research_spells_gui();
@@ -900,9 +900,9 @@ function show_buy_wands_gui()
 
 			GuiLayoutBeginHorizontal(gui, 20, 95);
 			if player_money < price then
-				GuiText(gui, 0, 0, "$ " .. tostring(price) .. " (Too expensive)");
+				GuiText(gui, 0, 0, " $ " .. tostring(price) .. " (Too expensive)");
 			else
-				if GuiButton(gui, 0, 0, "$ " .. tostring(price) .. " -- Buy", get_next_id()) then
+				if GuiButton(gui, 0, 0, " $ " .. tostring(price) .. " -- Buy", get_next_id()) then
 					create_wand(wand_data_selected);
 				end
 			end
@@ -949,9 +949,9 @@ function show_buy_spells_gui()
 			GuiLayoutBeginVertical(gui, 0, 0);
 			for _, value in ipairs(columns[page_number * 2 - 1]) do
 				if player_money < value.price then
-					GuiText(gui, 0, 0, "$ " .. tostring(value.price));
+					GuiText(gui, 0, 0, " $ " .. tostring(value.price));
 				else
-					if GuiButton(gui, 0, 0, "$ " .. tostring(value.price), get_next_id()) then
+					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
 						create_spell(value.id);
 					end
 				end
@@ -972,9 +972,9 @@ function show_buy_spells_gui()
 			GuiLayoutBeginVertical(gui, 0, 0);
 			for _, value in ipairs(columns[page_number * 2]) do
 				if player_money < value.price then
-					GuiText(gui, 0, 0, "$ " .. tostring(value.price));
+					GuiText(gui, 0, 0, " $ " .. tostring(value.price));
 				else
-					if GuiButton(gui, 0, 0, "$ " .. tostring(value.price), get_next_id()) then
+					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
 						create_spell(value.id);
 					end
 				end

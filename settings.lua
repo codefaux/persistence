@@ -23,6 +23,11 @@ mod_settings_version = 1 -- This is a magic global that can be used to migrate s
 mod_settings =
 {
   {
+    id = "restart_warning",
+    ui_name = "-- NOTE: These settings will not apply until you start a New Game. --",
+    not_setting = true,
+  },
+  {
     category_id = "liteness_settings",
     ui_name = "LITENESS",
     ui_description = "'Lite-ness' settings (Keep gold, etc)",
@@ -122,7 +127,7 @@ mod_settings =
 				id = "enable_edit_wands_in_lobby",
 				ui_name = "Allow editing Wands in Lobby",
 				ui_description = "Only allowed in Holy Mountain / with perk normally",
-				value_default = true,
+				value_default = false,
 				scope = MOD_SETTING_SCOPE_RUNTIME,
 			},
       {

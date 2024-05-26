@@ -66,7 +66,7 @@ function show_money_gui()
 		local safe_money = get_safe_money(save_id);
 		local player_money = get_player_money();
 
-		GuiLayoutBeginHorizontal(gui, 76, 35);
+		GuiLayoutBeginHorizontal(gui, 76, 25);
 		GuiLayoutBeginVertical(gui, 0, 0);
 		if safe_money < 1 then
 			GuiText(gui, 0, 0, " Take $ 1");
@@ -140,7 +140,7 @@ function show_money_gui()
 		end
 		GuiLayoutEnd(gui);
 		GuiLayoutEnd(gui);
-		GuiLayoutBeginHorizontal(gui, 80, 53);
+		GuiLayoutBeginHorizontal(gui, 80, 42);
 		GuiText(gui, 0, 0, "Stashed: $ " .. tostring(safe_money));
 		GuiLayoutEnd(gui);
 	end };
@@ -1021,7 +1021,7 @@ function show_menu_gui()
 	hide_buy_wands_gui();
 	hide_buy_spells_gui();
 	active_windows["menu"] = { false, function(get_next_id)
-		GuiLayoutBeginVertical(gui, 1, 35);
+		GuiLayoutBeginVertical(gui, 1, 20);
 		if GuiButton(gui, research_wands_open and 10 or 0, 0, "Research Wands", get_next_id()) then
 			hide_research_spells_gui();
 			hide_buy_wands_gui();

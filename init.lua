@@ -27,16 +27,18 @@ function teleport_back_to_lobby()
 	EntitySetTransform(get_player_id(), lobby_x, lobby_y);
 end
 
-function disable_controlls()
-	EntitySetComponentIsEnabled(get_player_id(), get_inventory_gui(), false);
-	EntitySetComponentIsEnabled(get_player_id(), get_inventory2(), false);
-	EntitySetComponentIsEnabled(get_player_id(), get_controls_component(), false);
+function disable_controls()
+	local player_id = get_player_id();
+	EntitySetComponentIsEnabled(player_id, get_inventory_gui(), false);
+	EntitySetComponentIsEnabled(player_id, get_inventory2(), false);
+	EntitySetComponentIsEnabled(player_id, get_controls_component(), false);
 end
 
-function enable_controlls()
-	EntitySetComponentIsEnabled(get_player_id(), get_controls_component(), true);
-	EntitySetComponentIsEnabled(get_player_id(), get_inventory2(), true);
-	EntitySetComponentIsEnabled(get_player_id(), get_inventory_gui(), true);
+function enable_controls()
+	local player_id = get_player_id();
+	EntitySetComponentIsEnabled(player_id, get_controls_component(), true);
+	EntitySetComponentIsEnabled(player_id, get_inventory2(), true);
+	EntitySetComponentIsEnabled(player_id, get_inventory_gui(), true);
 end
 
 function update_screen_size()
@@ -44,7 +46,7 @@ function update_screen_size()
 	if teleport_component ~= nil and teleport_component ~= 0 then
 		EntitySetComponentIsEnabled(get_player_id(), teleport_component, true);
 	else
-		EntityAddComponent(get_player_id(), "TeleportComponent", {});
+		EntityAddComponent2(get_player_id(), "TeleportComponent", {});
 	end
 end
 
@@ -229,7 +231,7 @@ function OnPostPlayerSpawned()
 					end
 				end
 			else
-				disable_controlls();
+				disable_controls();
 				show_save_selector_gui();
 			end
 		end

@@ -28,7 +28,7 @@ function show_save_selector_gui()
 					create_new_save(i);
 					hide_save_selector_gui();
 					OnSaveAvailable(i);
-					enable_controlls();
+					enable_controls();
 				end
 			else
 				if GuiButton(gui, 20, 0, "Load save", get_next_id()) then
@@ -36,7 +36,7 @@ function show_save_selector_gui()
 					load(i);
 					hide_save_selector_gui();
 					OnSaveAvailable(i);
-					enable_controlls();
+					enable_controls();
 				end
 				if delete_save_confirmation == i then
 					if GuiButton(gui, 20, 0, "Press again to delete", get_next_id()) then
@@ -53,7 +53,7 @@ function show_save_selector_gui()
 		if GuiButton(gui, 0, 20, "Play without this mod", get_next_id()) then
 			set_selected_save_id(0);
 			hide_save_selector_gui();
-			enable_controlls();
+			enable_controls();
 		end
 		GuiLayoutEnd(gui);
 	end };
@@ -63,8 +63,10 @@ function hide_save_selector_gui()
 	active_windows["save_selector"] = nil;
 end
 
+local money_open = false;
 function show_money_gui()
-	active_windows["money"] = { false, function(get_next_id)
+	money_open = true;
+	active_windows["money"] = { true, function(get_next_id)
 		local save_id = get_selected_save_id();
 		local safe_money = get_safe_money(save_id);
 		local player_money = get_player_money();
@@ -115,6 +117,7 @@ function show_money_gui()
 end
 
 function hide_money_gui()
+	money_open = false;
 	active_windows["money"] = nil;
 end
 
@@ -744,13 +747,27 @@ function hide_buy_spells_gui()
 end
 
 function show_menu_gui()
+	local is_enabled = true;
+	hide_money_gui();
 	hide_research_wands_gui();
 	hide_research_spells_gui();
 	hide_buy_wands_gui();
 	hide_buy_spells_gui();
 	active_windows["menu"] = { false, function(get_next_id)
-		GuiLayoutBeginVertical(gui, 1, 20);
+		GuiLayoutBeginVertical(gui, 1, 45);
+		if GuiButton(gui, money_open and 10 or 0, 0, "Money", get_next_id()) then
+			hide_research_spells_gui();
+			hide_buy_wands_gui();
+			hide_buy_spells_gui();
+			hide_research_wands_gui();
+			if money_open then
+				hide_money_gui();
+			else
+				show_money_gui();
+			end
+		end
 		if GuiButton(gui, research_wands_open and 10 or 0, 0, "Research Wands", get_next_id()) then
+			hide_money_gui();
 			hide_research_spells_gui();
 			hide_buy_wands_gui();
 			hide_buy_spells_gui();
@@ -761,6 +778,7 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, research_spells_open and 10 or 0, 0, "Research Spells", get_next_id()) then
+			hide_money_gui();
 			hide_research_wands_gui();
 			hide_buy_wands_gui();
 			hide_buy_spells_gui();
@@ -771,6 +789,7 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, buy_wands_open and 10 or 0, 0, "Buy Wands", get_next_id()) then
+			hide_money_gui();
 			hide_research_wands_gui();
 			hide_research_spells_gui();
 			hide_buy_spells_gui();
@@ -781,6 +800,7 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, buy_spells_open and 10 or 0, 0, "Buy Spells", get_next_id()) then
+			hide_money_gui();
 			hide_research_wands_gui();
 			hide_research_spells_gui();
 			hide_buy_wands_gui();
@@ -795,6 +815,7 @@ function show_menu_gui()
 end
 
 function hide_menu_gui()
+	hide_money_gui();
 	hide_research_wands_gui();
 	hide_research_spells_gui();
 	hide_buy_wands_gui();
@@ -804,12 +825,12 @@ end
 
 function show_lobby_gui()
 	show_menu_gui();
-	show_money_gui();
+	-- show_money_gui();
 end
 
 function hide_lobby_gui()
 	hide_menu_gui();
-	hide_money_gui();
+	-- hide_money_gui();
 end
 
 function hide_all_gui()
@@ -817,27 +838,46 @@ function hide_all_gui()
 end
 
 function gui_update()
-	if gui ~= nil then
-		if active_windows ~= nil then
-			local is_dark_background = false;
-			GuiStartFrame(gui);
-			for _, window in pairs(active_windows) do
-				if window[1] then
-					is_dark_background = true;
-				end
-			end
-			if is_dark_background then
-				local cx, cy = GameGetCameraPos();
-				GameCreateSpriteForXFrames("mods/persistence/files/gui_darken.png", cx, cy);
-			end
-			local start_gui_id = 14796823;
-			for name, window in pairs(active_windows) do
-				local gui_id = start_gui_id + simple_string_hash(name);
-				window[2](function()
-					gui_id = gui_id + 1;
-					return gui_id;
-				end);
+	if money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open then
+		-- if is_enabled == true then
+		  disable_controls();
+			-- is_enabled = false;
+		-- end
+	else
+		-- if is_enabled == false then
+			enable_controls();
+			-- is_enabled = true;
+		-- end
+	end
+
+	if gui ~= nil and active_windows ~= nil then
+		local is_dark_background = false;
+		GuiStartFrame(gui);
+		for _, window in pairs(active_windows) do
+			if window[1] then
+				is_dark_background = true;
 			end
 		end
+		if is_dark_background then
+			local cx, cy = GameGetCameraPos();
+			GameCreateSpriteForXFrames("mods/persistence/files/gui_darken.png", cx, cy);
+			-- if is_enabled == true then
+			-- 	disable_controls();
+			-- 	is_enabled = false;
+			-- end
+		end
+		local start_gui_id = 14796823;
+		for name, window in pairs(active_windows) do
+			local gui_id = start_gui_id + simple_string_hash(name);
+			window[2](function()
+				gui_id = gui_id + 1;
+				return gui_id;
+			end);
+		end
+	-- else
+	-- 	if is_enabled == false then
+	-- 		enable_controls();
+	-- 		is_enabled = true;
+	-- 	end
 	end
 end

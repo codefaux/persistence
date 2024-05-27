@@ -65,40 +65,27 @@ function show_money_gui()
 		local save_id = get_selected_save_id();
 		local safe_money = get_safe_money(save_id);
 		local player_money = get_player_money();
+		local money_amts = {1, 10, 100, 1000};
 
 		GuiLayoutBeginHorizontal(gui, 76, 25);
 		GuiLayoutBeginVertical(gui, 0, 0);
-		if safe_money < 1 then
-			GuiText(gui, 0, 0, " Take $ 1");
-		else
-			if GuiButton(gui, 0, 0, " Take $ 1", get_next_id()) then
-				transfer_money_to_player(save_id, 1);
+
+		for _, money_amt in ipairs(money_amts) do
+			if safe_money < money_amt then
+				GuiColorSetForNextWidget(gui, 0.25, 0.25, 0.25, 1);
+				GuiText(gui, 0, 0, "Take $ " .. money_amt);
+			else
+				if GuiButton(gui, 0, 0, "Take $ " .. money_amt, get_next_id()) then
+					transfer_money_to_player(save_id, money_amt);
+				end
 			end
 		end
-		if safe_money < 10 then
-			GuiText(gui, 0, 0, " Take $ 10");
-		else
-			if GuiButton(gui, 0, 0, " Take $ 10", get_next_id()) then
-				transfer_money_to_player(save_id, 10);
-			end
-		end
-		if safe_money < 100 then
-			GuiText(gui, 0, 0, " Take $ 100");
-		else
-			if GuiButton(gui, 0, 0, " Take $ 100", get_next_id()) then
-				transfer_money_to_player(save_id, 100);
-			end
-		end
-		if safe_money < 1000 then
-			GuiText(gui, 0, 0, " Take $ 1000");
-		else
-			if GuiButton(gui, 0, 0, " Take $ 1000", get_next_id()) then
-				transfer_money_to_player(save_id, 1000);
-			end
-		end
-		if GuiButton(gui, 0, 0, " Take ALL", get_next_id()) then
+
+		if GuiButton(gui, 0, 0, "Take ALL", get_next_id()) then
 			transfer_money_to_player(save_id, safe_money);
 		end
+
+
 		GuiLayoutEnd(gui);
 		GuiLayoutAddHorizontalSpacing(gui);
 		GuiLayoutAddHorizontalSpacing(gui);
@@ -107,34 +94,18 @@ function show_money_gui()
 		GuiLayoutAddHorizontalSpacing(gui);
 		GuiLayoutAddHorizontalSpacing(gui);
 		GuiLayoutBeginVertical(gui, 0, 0);
-		if player_money < 1 then
-			GuiText(gui, 0, 0, " Stash $ 1");
-		else
-			if GuiButton(gui, 0, 0, " Stash $ 1", get_next_id()) then
-				transfer_money_to_safe(save_id, 1);
+
+		for _, money_amt in ipairs(money_amts) do
+			if player_money < money_amt then
+				GuiColorSetForNextWidget(gui, 0.25, 0.25, 0.25, 1);
+				GuiText(gui, 0, 0, "Stash $ " .. money_amt);
+			else
+				if GuiButton(gui, 0, 0, "Stash $ " .. money_amt, get_next_id()) then
+					transfer_money_to_safe(save_id, money_amt);
+				end
 			end
 		end
-		if player_money < 10 then
-			GuiText(gui, 0, 0, " Stash $ 10");
-		else
-			if GuiButton(gui, 0, 0, " Stash $ 10", get_next_id()) then
-				transfer_money_to_safe(save_id, 10);
-			end
-		end
-		if player_money < 100 then
-			GuiText(gui, 0, 0, " Stash $ 100");
-		else
-			if GuiButton(gui, 0, 0, " Stash $ 100", get_next_id()) then
-				transfer_money_to_safe(save_id, 100);
-			end
-		end
-		if player_money < 1000 then
-			GuiText(gui, 0, 0, " Stash $ 1000");
-		else
-			if GuiButton(gui, 0, 0, " Stash $ 1000", get_next_id()) then
-				transfer_money_to_safe(save_id, 1000);
-			end
-		end
+
 		if GuiButton(gui, 0, 0, "Stash ALL", get_next_id()) then
 			transfer_money_to_safe(save_id, player_money);
 		end
@@ -335,27 +306,31 @@ function show_buy_wands_gui()
 	local save_id = get_selected_save_id();
 	if can_create_wand(save_id) then
 		local window_nr = 0;
-		local spells_per_cast = get_spells_per_cast(save_id);
+		local spells_per_cast_min = 1;
+		local spells_per_cast_max = get_spells_per_cast(save_id);
 		local cast_delay_min = get_cast_delay_min(save_id);
 		local cast_delay_max = get_cast_delay_max(save_id);
 		local recharge_time_min = get_recharge_time_min(save_id);
 		local recharge_time_max = get_recharge_time_max(save_id);
+		local mana_min = 1;
 		local mana_max = get_mana_max(save_id);
-		local mana_charge_speed = get_mana_charge_speed(save_id);
-		local capacity = get_capacity(save_id);
+		local mana_charge_speed_min = 1;
+		local mana_charge_speed_max = get_mana_charge_speed(save_id);
+		local capacity_min = 1;
+		local capacity_max = get_capacity(save_id);
 		local spread_min = get_spread_min(save_id);
 		local spread_max = get_spread_max(save_id);
 		local wand_types = get_wand_types(save_id);
 		local always_cast_spells = get_always_cast_spells(save_id);
 		local wand_data_selected = {
 			["shuffle"] = true,
-			["spells_per_cast"] = spells_per_cast_min,
+			["spells_per_cast"] = math.floor((spells_per_cast_min + spells_per_cast_max)/2),
 			["cast_delay"] = math.floor((cast_delay_min + cast_delay_max)/2),
 			["recharge_time"] = math.floor((recharge_time_min + recharge_time_max)/2),
-			["mana_max"] = mana_max_min,
-			["mana_charge_speed"] = mana_charge_speed_min,
-			["capacity"] = capacity_min,
-			["spread"] = spread_min,
+			["mana_max"] = math.floor((mana_min + mana_max)/2),
+			["mana_charge_speed"] = math.floor((mana_charge_speed_min + mana_charge_speed_max)/2),
+			["capacity"] = math.floor((capacity_min + capacity_max) / 2),
+			["spread"] = math.floor((spread_min + spread_max) / 2),
 			["always_cast_spells"] = {},
 			["wand_type"] = "default_1";
 		};
@@ -363,6 +338,12 @@ function show_buy_wands_gui()
 
 		local spells_page_number = 1;
 		local spell_data = {};
+
+		local wand_stat_names = {"spells_per_cast", "cast_delay",  "recharge_time",        "mana_max",  "mana_charge_speed",  "capacity",     "spread" };
+		local wand_stat_scales = {      {1, 5, 10},   {1, 6, 60},      {1, 6, 60},       {1, 10, 100},         {1, 10, 100},  {1, 5, 10},  {.1, 1, 10},  };
+		local wand_stat_limits = {};
+		wand_stat_limits.min = {spells_per_cast_min, cast_delay_min, recharge_time_min, mana_min, mana_charge_speed_min, capacity_min, spread_min };
+		wand_stat_limits.max = {spells_per_cast_max, cast_delay_max, recharge_time_max, mana_max, mana_charge_speed_max, capacity_max, spread_max };
 
 		for i = 1, #actions do
 			if always_cast_spells[actions[i].id] ~= nil then
@@ -427,165 +408,57 @@ function show_buy_wands_gui()
 				GuiText(gui, 0, 0, "$inventory_alwayscasts");
 				GuiText(gui, 0, 0, "Wand design");
 				GuiLayoutEnd(gui);
+
+
+				-- TODO: Disallow zero "Spells/Cast"
+
+				for scale=3, 1, -1 do
+					GuiLayoutAddHorizontalSpacing(gui);
+					GuiLayoutAddHorizontalSpacing(gui);
+					GuiLayoutAddHorizontalSpacing(gui);
+					GuiLayoutBeginVertical(gui, 0, 0);
+
+					if (scale == 1 and wand_data_selected["shuffle"] == true) then
+						if GuiButton(gui, 0, 0, "<", get_next_id()) then
+							wand_data_selected["shuffle"] = false;
+						end
+						-- GuiTooltip(gui, "$menu_no",);
+					else
+						GuiButton(gui, 0, 0, "  ", get_next_id());
+					end
+
+					for arr_idx, wand_stat_name in ipairs(wand_stat_names) do
+						local stat_data = wand_data_selected[wand_stat_name];
+						local stat_step = wand_stat_scales[arr_idx][scale];
+						local lower_scale = scale-1>=1 and scale-1 or 1;
+						local stat_smstep = wand_stat_scales[arr_idx][lower_scale];
+						local stat_min = wand_stat_limits.min[arr_idx];
+
+
+						if stat_data - stat_smstep >= stat_min  then
+							if stat_data - stat_step <= stat_min then
+								if GuiButton(gui, 0, 0, "|" .. string.rep("<", scale-1), get_next_id()) then
+									wand_data_selected[wand_stat_name] = stat_min;
+								end
+							else
+								if GuiButton(gui, 0, 0, string.rep("<", scale), get_next_id()) then
+									wand_data_selected[wand_stat_name] = stat_data - stat_step;
+								end
+							end
+							-- GuiTooltip(gui, "-" .. stat_lgstep, "");
+						else
+							GuiButton(gui, 0, 0, "      ", get_next_id());
+						end
+					end -- ipairs(wand_stat_names)
+					GuiText(gui, 0, 0, "      ");
+					GuiLayoutEnd(gui);
+				end -- scale
+
+
 				GuiLayoutAddHorizontalSpacing(gui);
 				GuiLayoutAddHorizontalSpacing(gui);
 				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutBeginVertical(gui, 0, 0);
-				GuiText(gui, 0, 0, " ");
-				GuiText(gui, 0, 0, " ");
-				if wand_data_selected["cast_delay"] - 60 >= cast_delay_min then
-					if GuiButton(gui, 0, 0, "<<<", get_next_id()) then
-						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] - 60;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				if wand_data_selected["recharge_time"] - 60 >= recharge_time_min then
-					if GuiButton(gui, 0, 0, "<<<", get_next_id()) then
-						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] - 60;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				if wand_data_selected["mana_max"] - 100 >= mana_max_min then
-					if GuiButton(gui, 0, 0, "<<<", get_next_id()) then
-						wand_data_selected["mana_max"] = wand_data_selected["mana_max"] - 100;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				if wand_data_selected["mana_charge_speed"] - 100 >= mana_charge_speed_min then
-					if GuiButton(gui, 0, 0, "<<<", get_next_id()) then
-						wand_data_selected["mana_charge_speed"] = wand_data_selected["mana_charge_speed"] - 100;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				GuiText(gui, 0, 0, " ");
-				if wand_data_selected["spread"] - 10 >= spread_min then
-					if GuiButton(gui, 0, 0, "<<<<", get_next_id()) then
-						wand_data_selected["spread"] = wand_data_selected["spread"] - 10;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				GuiText(gui, 0, 0, "      ");
-				GuiLayoutEnd(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutBeginVertical(gui, 0, 0);
-				GuiText(gui, 0, 0, " ");
-				GuiText(gui, 0, 0, " ");
-				if wand_data_selected["cast_delay"] - 6 >= cast_delay_min then
-					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] - 6;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["recharge_time"] - 6 >= recharge_time_min then
-					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] - 6;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["mana_max"] - 10 >= mana_max_min then
-					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						wand_data_selected["mana_max"] = wand_data_selected["mana_max"] - 10;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["mana_charge_speed"] - 10 >= mana_charge_speed_min then
-					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						wand_data_selected["mana_charge_speed"] = wand_data_selected["mana_charge_speed"] - 10;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["capacity"] - 10 >= capacity_min then
-					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						wand_data_selected["capacity"] = wand_data_selected["capacity"] - 10;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["spread"] - 1 >= spread_min then
-					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						wand_data_selected["spread"] = wand_data_selected["spread"] - 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				GuiText(gui, 0, 0, "    ");
-				GuiLayoutEnd(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutBeginVertical(gui, 0, 0);
-				if wand_data_selected["shuffle"] == true then
-					if GuiButton(gui, 0, 0, "<", get_next_id()) then
-						wand_data_selected["shuffle"] = false;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["spells_per_cast"] > spells_per_cast_min then
-					if GuiButton(gui, 0, 0, "<", get_next_id()) then
-						wand_data_selected["spells_per_cast"] = wand_data_selected["spells_per_cast"] - 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["cast_delay"] > cast_delay_min then
-					if GuiButton(gui, 0, 0, "<", get_next_id()) then
-						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] - 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["recharge_time"] > recharge_time_min then
-					if GuiButton(gui, 0, 0, "<", get_next_id()) then
-						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] - 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["mana_max"] > mana_max_min then
-					if GuiButton(gui, 0, 0, "<", get_next_id()) then
-						wand_data_selected["mana_max"] = wand_data_selected["mana_max"] - 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["mana_charge_speed"] > mana_charge_speed_min then
-					if GuiButton(gui, 0, 0, "<", get_next_id()) then
-						wand_data_selected["mana_charge_speed"] = wand_data_selected["mana_charge_speed"] - 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["capacity"] > capacity_min then
-					if GuiButton(gui, 0, 0, "<", get_next_id()) then
-						wand_data_selected["capacity"] = wand_data_selected["capacity"] - 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["spread"] - 0.1 >= spread_min then
-					if GuiButton(gui, 0, 0, "<", get_next_id()) then
-						wand_data_selected["spread"] = wand_data_selected["spread"] - 0.1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				GuiText(gui, 0, 0, "  ");
-				GuiLayoutEnd(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
+
 				GuiLayoutBeginVertical(gui, 0, 0);
 				GuiText(gui, 0, 0, wand_data_selected["shuffle"] and "$menu_yes" or "$menu_no");
 				GuiText(gui, 0, 0, tostring(wand_data_selected["spells_per_cast"]));
@@ -602,162 +475,49 @@ function show_buy_wands_gui()
 					window_nr = 2;
 				end
 				GuiLayoutEnd(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutBeginVertical(gui, 0, 0);
-				if wand_data_selected["shuffle"] == false then
-					if GuiButton(gui, 0, 0, ">", get_next_id()) then
-						wand_data_selected["shuffle"] = true;
+
+
+				for scale=1, 3, 1 do
+					GuiLayoutAddHorizontalSpacing(gui);
+					GuiLayoutAddHorizontalSpacing(gui);
+					GuiLayoutAddHorizontalSpacing(gui);
+					GuiLayoutBeginVertical(gui, 0, 0);
+
+					if (scale == 1 and wand_data_selected["shuffle"] == false) then
+						if GuiButton(gui, 0, 0, ">", get_next_id()) then
+							wand_data_selected["shuffle"] = true;
+						end
+						-- GuiTooltip(gui, "$menu_yes",);
+					else
+						GuiButton(gui, 0, 0, "  ", get_next_id());
 					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["spells_per_cast"] < spells_per_cast then
-					if GuiButton(gui, 0, 0, ">", get_next_id()) then
-						wand_data_selected["spells_per_cast"] = wand_data_selected["spells_per_cast"] + 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["cast_delay"] < cast_delay_max then
-					if GuiButton(gui, 0, 0, ">", get_next_id()) then
-						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] + 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["recharge_time"] < recharge_time_max then
-					if GuiButton(gui, 0, 0, ">", get_next_id()) then
-						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] + 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["mana_max"] < mana_max then
-					if GuiButton(gui, 0, 0, ">", get_next_id()) then
-						wand_data_selected["mana_max"] = wand_data_selected["mana_max"] + 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["mana_charge_speed"] < mana_charge_speed then
-					if GuiButton(gui, 0, 0, ">", get_next_id()) then
-						wand_data_selected["mana_charge_speed"] = wand_data_selected["mana_charge_speed"] + 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["capacity"] < capacity then
-					if GuiButton(gui, 0, 0, ">", get_next_id()) then
-						wand_data_selected["capacity"] = wand_data_selected["capacity"] + 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				if wand_data_selected["spread"] + 0.1 <= spread_max then
-					if GuiButton(gui, 0, 0, ">", get_next_id()) then
-						wand_data_selected["spread"] = wand_data_selected["spread"] + 0.1;
-					end
-				else
-					GuiButton(gui, 0, 0, "  ", get_next_id());
-				end
-				GuiText(gui, 0, 0, "  ");
-				GuiLayoutEnd(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutBeginVertical(gui, 0, 0);
-				GuiText(gui, 0, 0, " ");
-				GuiText(gui, 0, 0, " ");
-				if wand_data_selected["cast_delay"] + 6 <= cast_delay_max then
-					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] + 6;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["recharge_time"] + 6 <= recharge_time_max then
-					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] + 6;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["mana_max"] + 10 <= mana_max then
-					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						wand_data_selected["mana_max"] = wand_data_selected["mana_max"] + 10;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["mana_charge_speed"] + 10 <= mana_charge_speed then
-					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						wand_data_selected["mana_charge_speed"] = wand_data_selected["mana_charge_speed"] + 10;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["capacity"] + 10 <= capacity then
-					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						wand_data_selected["capacity"] = wand_data_selected["capacity"] + 10;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				if wand_data_selected["spread"] + 1 <= spread_max then
-					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						wand_data_selected["spread"] = wand_data_selected["spread"] + 1;
-					end
-				else
-					GuiButton(gui, 0, 0, "    ", get_next_id());
-				end
-				GuiText(gui, 0, 0, "    ");
-				GuiLayoutEnd(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutAddHorizontalSpacing(gui);
-				GuiLayoutBeginVertical(gui, 0, 0);
-				GuiText(gui, 0, 0, " ");
-				GuiText(gui, 0, 0, " ");
-				if wand_data_selected["cast_delay"] + 60 <= cast_delay_max then
-					if GuiButton(gui, 0, 0, ">>>", get_next_id()) then
-						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] + 60;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				if wand_data_selected["recharge_time"] + 60 <= recharge_time_max then
-					if GuiButton(gui, 0, 0, ">>>", get_next_id()) then
-						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] + 60;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				if wand_data_selected["mana_max"] + 100 <= mana_max then
-					if GuiButton(gui, 0, 0, ">>>", get_next_id()) then
-						wand_data_selected["mana_max"] = wand_data_selected["mana_max"] + 100;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				if wand_data_selected["mana_charge_speed"] + 100 <= mana_charge_speed then
-					if GuiButton(gui, 0, 0, ">>>", get_next_id()) then
-						wand_data_selected["mana_charge_speed"] = wand_data_selected["mana_charge_speed"] + 100;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				GuiText(gui, 0, 0, " ");
-				if wand_data_selected["spread"] + 10 <= spread_max then
-					if GuiButton(gui, 0, 0, ">>>", get_next_id()) then
-						wand_data_selected["spread"] = wand_data_selected["spread"] + 10;
-					end
-				else
-					GuiButton(gui, 0, 0, "      ", get_next_id());
-				end
-				GuiText(gui, 0, 0, "      ");
-				GuiLayoutEnd(gui);
+
+					for arr_idx, wand_stat_name in ipairs(wand_stat_names) do
+						local stat_data = wand_data_selected[wand_stat_name];
+						local stat_step = wand_stat_scales[arr_idx][scale];
+						local lower_scale = scale-1>0 and scale-1 or 1;
+						local stat_smstep = wand_stat_scales[arr_idx][lower_scale];
+						local stat_max = wand_stat_limits.max[arr_idx];
+
+						if stat_data + stat_smstep <= stat_max then
+						 if stat_data + stat_step >= stat_max  then
+							if GuiButton(gui, 0, 0, string.rep(">", scale-1) .. "|", get_next_id()) then
+								wand_data_selected[wand_stat_name] = stat_max;
+							end
+						else
+								if GuiButton(gui, 0, 0, string.rep(">", scale), get_next_id()) then
+									wand_data_selected[wand_stat_name] = stat_data + stat_step;
+								end
+							end
+							-- GuiTooltip(gui, "+" .. stat_step, "");
+						else
+							GuiButton(gui, 0, 0, "      ", get_next_id());
+						end
+					end -- ipairs(wand_stat_names)
+					GuiText(gui, 0, 0, "      ");
+					GuiLayoutEnd(gui);
+				end -- scale
+
 				GuiLayoutEnd(gui);
 				gui_sprite(22, 48, wand_type_to_sprite_file(wand_data_selected["wand_type"]));
 

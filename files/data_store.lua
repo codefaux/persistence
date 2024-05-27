@@ -161,12 +161,12 @@ function delete_save(save_id)
 end
 
 function get_player_money()
-	local money = tonumber(ComponentGetValue(get_wallet(), "money"));
+	local money = tonumber(ComponentGetValue2(get_wallet(), "money"));
 	return money == nil and 0 or money;
 end
 
 function set_player_money(value)
-	ComponentSetValue(get_wallet(), "money", value);
+	ComponentSetValue2(get_wallet(), "money", value);
 end
 
 function load(save_id)

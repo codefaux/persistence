@@ -127,10 +127,10 @@ function OnWorldPostUpdate()
 			custom_workshop = EntityLoad("mods/persistence/files/workshop_collider.xml", x, y);
 			local workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent");
 			local custom_workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(custom_workshop, "HitboxComponent");
-			ComponentSetValue(custom_workshop_hitbox_comp, "aabb_min_x", ComponentGetValue(workshop_hitbox_comp, "aabb_min_x"));
-			ComponentSetValue(custom_workshop_hitbox_comp, "aabb_min_y", ComponentGetValue(workshop_hitbox_comp, "aabb_min_y"));
-			ComponentSetValue(custom_workshop_hitbox_comp, "aabb_max_x", ComponentGetValue(workshop_hitbox_comp, "aabb_max_x"));
-			ComponentSetValue(custom_workshop_hitbox_comp, "aabb_max_y", ComponentGetValue(workshop_hitbox_comp, "aabb_max_y"));
+			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_x"));
+			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_y"));
+			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_x"));
+			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_y"));
 		end
 	end
 	local px, py = EntityGetTransform(get_player_id());
@@ -139,10 +139,10 @@ function OnWorldPostUpdate()
 		for _, workshop in ipairs(EntityGetWithTag(ModSettingGet("persistence.reuseable_holy_mountain") and "persistence_workshop" or "workshop")) do
 			local x, y = EntityGetTransform(workshop);
 			local hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent");
-			local min_x = tonumber(ComponentGetValue(hitbox_comp, "aabb_min_x")) + x;
-			local min_y = tonumber(ComponentGetValue(hitbox_comp, "aabb_min_y")) + y;
-			local max_x = tonumber(ComponentGetValue(hitbox_comp, "aabb_max_x")) + x;
-			local max_y = tonumber(ComponentGetValue(hitbox_comp, "aabb_max_y")) + y;
+			local min_x = tonumber(ComponentGetValue2(hitbox_comp, "aabb_min_x")) + x;
+			local min_y = tonumber(ComponentGetValue2(hitbox_comp, "aabb_min_y")) + y;
+			local max_x = tonumber(ComponentGetValue2(hitbox_comp, "aabb_max_x")) + x;
+			local max_y = tonumber(ComponentGetValue2(hitbox_comp, "aabb_max_y")) + y;
 			if aabb_check(px, py, min_x, min_y, max_x, max_y) then
 				if not is_in_workshop and not is_in_workshop_before then
 					if ModSettingGet("persistence.enable_teleport_back_up") then
@@ -166,7 +166,7 @@ function OnWorldPostUpdate()
 				exit_lobby();
 			end
 		end
-	if tonumber(ComponentGetValue(get_inventory_gui(), "mActive")) == 1 then
+	if tonumber(ComponentGetValue2(get_inventory_gui(), "mActive")) == 1 then
 		if not inventory_open then
 			inventory_open = true;
 			if menu_open then

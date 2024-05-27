@@ -39,15 +39,15 @@ function read_wand(entity_id)
 	local wand_data = {};
 	for _, comp in ipairs(EntityGetAllComponents(entity_id)) do
 		if ComponentGetTypeName(comp) == "AbilityComponent" then
-			wand_data["shuffle"] = tonumber(ComponentObjectGetValue(comp, "gun_config", "shuffle_deck_when_empty")) == 1 and true or false;
-			wand_data["spells_per_cast"] = tonumber(ComponentObjectGetValue(comp, "gun_config", "actions_per_round"));
-			wand_data["cast_delay"] = tonumber(ComponentObjectGetValue(comp, "gunaction_config", "fire_rate_wait"));
-			wand_data["recharge_time"] = tonumber(ComponentObjectGetValue(comp, "gun_config", "reload_time"));
-			wand_data["mana_max"] = tonumber(ComponentGetValue(comp, "mana_max"));
-			wand_data["mana_charge_speed"] = tonumber(ComponentGetValue(comp, "mana_charge_speed"));
-			wand_data["capacity"] = tonumber(ComponentObjectGetValue(comp, "gun_config", "deck_capacity"));
-			wand_data["spread"] = tonumber(ComponentObjectGetValue(comp, "gunaction_config", "spread_degrees"));
-			wand_data["wand_type"] = sprite_file_to_wand_type(ComponentGetValue(comp, "sprite_file"));
+			wand_data["shuffle"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "shuffle_deck_when_empty")) == 1 and true or false;
+			wand_data["spells_per_cast"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "actions_per_round"));
+			wand_data["cast_delay"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "fire_rate_wait"));
+			wand_data["recharge_time"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "reload_time"));
+			wand_data["mana_max"] = tonumber(ComponentGetValue2(comp, "mana_max"));
+			wand_data["mana_charge_speed"] = tonumber(ComponentGetValue2(comp, "mana_charge_speed"));
+			wand_data["capacity"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "deck_capacity"));
+			wand_data["spread"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "spread_degrees"));
+			wand_data["wand_type"] = sprite_file_to_wand_type(ComponentGetValue2(comp, "sprite_file"));
 			break;
 		end
 	end
@@ -58,8 +58,8 @@ function read_wand(entity_id)
 		for _, child_id in ipairs(childs) do
 			local item_action_comp = EntityGetFirstComponentIncludingDisabled(child_id, "ItemActionComponent");
 			if item_action_comp ~= nil and item_action_comp ~= 0 then
-				local action_id = ComponentGetValue(item_action_comp, "action_id");
-				if tonumber(ComponentGetValue(EntityGetFirstComponentIncludingDisabled(child_id, "ItemComponent"), "permanently_attached")) == 1 then
+				local action_id = ComponentGetValue2(item_action_comp, "action_id");
+				if tonumber(ComponentGetValue2(EntityGetFirstComponentIncludingDisabled(child_id, "ItemComponent"), "permanently_attached")) == 1 then
 					table.insert(wand_data["always_cast_spells"], action_id);
 				else
 					table.insert(wand_data["spells"], action_id);
@@ -74,7 +74,7 @@ end
 function read_spell(entity_id)
 	for _, comp_id in ipairs(EntityGetAllComponents(entity_id)) do
 		if ComponentGetTypeName(comp_id) == "ItemActionComponent" then
-			return ComponentGetValue(comp_id, "action_id");
+			return ComponentGetValue2(comp_id, "action_id");
 		end
 	end
 end
@@ -129,18 +129,18 @@ function create_wand(wand_data)
 	local ability_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent");
 	local wand = wand_type_to_wand(wand_data["wand_type"]);
 
-	ComponentSetValue(ability_comp, "ui_name", wand.name);
-	ComponentObjectSetValue(ability_comp, "gun_config", "shuffle_deck_when_empty", wand_data["shuffle"] and "1" or "0");
-	ComponentObjectSetValue(ability_comp, "gun_config", "actions_per_round", wand_data["spells_per_cast"]);
-	ComponentObjectSetValue(ability_comp, "gunaction_config", "fire_rate_wait", wand_data["cast_delay"]);
-	ComponentObjectSetValue(ability_comp, "gun_config", "reload_time", wand_data["recharge_time"]);
-	ComponentSetValue(ability_comp, "mana_max", wand_data["mana_max"]);
-	ComponentSetValue(ability_comp, "mana", wand_data["mana_max"]);
-	ComponentSetValue(ability_comp, "mana_charge_speed", wand_data["mana_charge_speed"]);
-	ComponentObjectSetValue(ability_comp, "gun_config", "deck_capacity", wand_data["capacity"]);
-	ComponentObjectSetValue(ability_comp, "gunaction_config", "spread_degrees", wand_data["spread"]);
-	ComponentObjectSetValue(ability_comp, "gunaction_config", "speed_multiplier", 1);
-	ComponentSetValue(ability_comp, "item_recoil_recovery_speed", 15);
+	ComponentSetValue2(ability_comp, "ui_name", wand.name);
+	ComponentObjectSetValue2(ability_comp, "gun_config", "shuffle_deck_when_empty", wand_data["shuffle"] and "1" or "0");
+	ComponentObjectSetValue2(ability_comp, "gun_config", "actions_per_round", wand_data["spells_per_cast"]);
+	ComponentObjectSetValue2(ability_comp, "gunaction_config", "fire_rate_wait", wand_data["cast_delay"]);
+	ComponentObjectSetValue2(ability_comp, "gun_config", "reload_time", wand_data["recharge_time"]);
+	ComponentSetValue2(ability_comp, "mana_max", wand_data["mana_max"]);
+	ComponentSetValue2(ability_comp, "mana", wand_data["mana_max"]);
+	ComponentSetValue2(ability_comp, "mana_charge_speed", wand_data["mana_charge_speed"]);
+	ComponentObjectSetValue2(ability_comp, "gun_config", "deck_capacity", wand_data["capacity"]);
+	ComponentObjectSetValue2(ability_comp, "gunaction_config", "spread_degrees", wand_data["spread"]);
+	ComponentObjectSetValue2(ability_comp, "gunaction_config", "speed_multiplier", 1);
+	ComponentSetValue2(ability_comp, "item_recoil_recovery_speed", 15);
 	if #wand_data["always_cast_spells"] > 0 then
 		for i = 1, #wand_data["always_cast_spells"] do
 			AddGunActionPermanent(entity_id, wand_data["always_cast_spells"][i]);

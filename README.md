@@ -17,7 +17,7 @@ I don't use Discord or other information sources which are ephemeral in nature, 
 
 
 
-This mod allows you to bank money for future use. You can bank automatically on death (amount configurable, 10%~100%, default 25%) or manually mid-run at the Lobby area.
+This mod allows you to bank money for future uses including wand crafting and spell purchase. You can bank automatically on death (amount configurable, 10%~100%, default 25%) or manually mid-run at the Lobby area.
 
 The "Lobby" area is, by default, the area between the stones with key bindings on them where you spawn, just outside the cave.
 

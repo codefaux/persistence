@@ -4,7 +4,7 @@ dofile("data/scripts/lib/mod_settings.lua") -- see this file for documentation o
 local is_in_lobby = false;
 local inventory_open = false;
 local screen_size_x, screen_size_y;
-local lobby_collider;
+local lobby_collider; ---type: @entity_id
 local lobby_collider_enabled = false;
 local lobby_x, lobby_y;
 
@@ -14,13 +14,11 @@ local function enter_lobby()
 		enable_edit_wands_in_lobby();
 	end
 	show_lobby_gui();
-	menu_open = true;
 end
 
 local function exit_lobby()
 	disable_edit_wands_in_lobby();
 	hide_lobby_gui();
-	menu_open = false;
 end
 
 function teleport_back_to_lobby()
@@ -139,7 +137,7 @@ function OnWorldPostUpdate()
 	local px, py = EntityGetTransform(get_player_id());
 		local is_in_workshop_before = is_in_workshop;
 		is_in_workshop = false;
-		for _, workshop in ipairs(EntityGetWithTag(ModSettingGet("persistence.reuseable_holy_mountain") and "persistence_workshop" or "workshop")) do
+		for _, workshop in ipairs(EntityGetWithTag(ModSettingGet("persistence.reusable_holy_mountain") and "persistence_workshop" or "workshop")) do
 			local x, y = EntityGetTransform(workshop);
 			local hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent");
 			local min_x = tonumber(ComponentGetValue2(hitbox_comp, "aabb_min_x")) + x;
@@ -176,7 +174,6 @@ function OnWorldPostUpdate()
 			inventory_open = true;
 			if menu_open then
 				hide_lobby_gui();
-				-- hide_menu_gui();
 			end
 		end
 	else
@@ -184,7 +181,6 @@ function OnWorldPostUpdate()
 			inventory_open = false;
 			if menu_open then
 				show_lobby_gui();
-				-- show_menu_gui();
 			end
 		end
 	end
@@ -257,8 +253,6 @@ function OnPlayerDied(player_entity)
 	if get_selected_save_id() == nil or get_selected_save_id() == 0 then
 		return;
 	end
-
-	-- TODO: Persistence progress UI
 
 	local money = get_player_money();
 	local money_to_save = math.floor(money * ModSettingGet("persistence.money_saved_on_death") );

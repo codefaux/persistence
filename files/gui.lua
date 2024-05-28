@@ -242,7 +242,7 @@ function show_research_spells_gui()
 	for i = 1, #spell_entity_ids do
 		local action_id = read_spell(spell_entity_ids[i]);
 		if action_id ~= nil then
-			if researched_spells[action_id] == nil then
+			if researched_spells == nil or researched_spells[action_id] == nil then
 				spell_data_temp[action_id] = spell_entity_ids[i];
 			end
 		end
@@ -344,7 +344,7 @@ function show_buy_wands_gui()
 		wand_stat_limits.max = {spells_per_cast_max, cast_delay_max, recharge_time_max, mana_max, mana_charge_speed_max, capacity_max, spread_max };
 
 		for i = 1, #actions do
-			if always_cast_spells[actions[i].id] ~= nil then
+			if always_cast_spells ~= nil and always_cast_spells[actions[i].id] ~= nil then
 				table.insert(spell_data, {
 					["id"] = actions[i].id,
 					["name"] = GameTextGetTranslatedOrNot(actions[i].name),
@@ -668,7 +668,7 @@ function show_buy_spells_gui()
 	local spell_data = {};
 
 	for i = 1, #actions do
-		if spells[actions[i].id] ~= nil then
+		if spells ~= nil and spells[actions[i].id] ~= nil then
 			table.insert(spell_data, {
 				["id"] = actions[i].id,
 				["name"] = GameTextGetTranslatedOrNot(actions[i].name),

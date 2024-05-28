@@ -127,7 +127,7 @@ end
 
 function create_new_save(save_id)
 	delete_save(save_id);
-	load(save_id);
+	local retval = load(save_id);
 	AddFlagPersistent(flag_prefix .. "_" .. tostring(save_id));
 end
 
@@ -632,7 +632,7 @@ function research_wand_is_new(save_id, entity_id)
 			return true;
 		end
 	end
-	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 then
+	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
 		for i = 1, #wand_data["always_cast_spells"] do
 			if always_cast_spells[wand_data["always_cast_spells"][i]] == nil then
 				for j = 1, #actions do
@@ -643,7 +643,7 @@ function research_wand_is_new(save_id, entity_id)
 			end
 		end
 	end
-	if wand_types[wand_data["wand_type"]] == nil then
+	if wand_types == nil or wand_types[wand_data["wand_type"]] == nil then
 		if wand_type_to_wand(wand_data["wand_type"]) ~= nil then
 			return true;
 		end
@@ -710,7 +710,7 @@ function research_wand_price(save_id, entity_id)
 			price = price + (wand_data["spread"] - spread_max) * 10;
 		end
 	end
-	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 then
+	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
 		for i = 1, #wand_data["always_cast_spells"] do
 			if always_cast_spells[wand_data["always_cast_spells"][i]] == nil then
 				for j = 1, #actions do
@@ -722,7 +722,7 @@ function research_wand_price(save_id, entity_id)
 			end
 		end
 	end
-	if wand_types[wand_data["wand_type"]] == nil then
+	if wand_types == nil or wand_types[wand_data["wand_type"]] == nil then
 		if wand_type_to_wand(wand_data["wand_type"]) ~= nil then
 			price = math.max(100, price);
 		end

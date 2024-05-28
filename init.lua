@@ -171,18 +171,20 @@ function OnWorldPostUpdate()
 				exit_lobby();
 			end
 		end
-	if tonumber(ComponentGetValue2(get_inventory_gui(), "mActive")) == 1 then
+	if ComponentGetValue2(get_inventory_gui(), "mActive") then
 		if not inventory_open then
 			inventory_open = true;
 			if menu_open then
-				hide_menu_gui();
+				hide_lobby_gui();
+				-- hide_menu_gui();
 			end
 		end
 	else
 		if inventory_open then
 			inventory_open = false;
 			if menu_open then
-				show_menu_gui();
+				show_lobby_gui();
+				-- show_menu_gui();
 			end
 		end
 	end

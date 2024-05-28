@@ -824,11 +824,13 @@ function hide_menu_gui()
 end
 
 function show_lobby_gui()
+	menu_open = true;
 	show_menu_gui();
 	-- show_money_gui();
 end
 
 function hide_lobby_gui()
+	menu_open = false;
 	hide_menu_gui();
 	-- hide_money_gui();
 end

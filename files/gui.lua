@@ -833,13 +833,11 @@ end
 function show_lobby_gui()
 	menu_open = true;
 	show_menu_gui();
-	-- show_money_gui();
 end
 
 function hide_lobby_gui()
 	menu_open = false;
 	hide_menu_gui();
-	-- hide_money_gui();
 end
 
 function hide_all_gui()
@@ -870,10 +868,6 @@ function gui_update()
 		if is_dark_background then
 			local cx, cy = GameGetCameraPos();
 			GameCreateSpriteForXFrames("mods/persistence/files/gui_darken.png", cx, cy);
-			-- if is_enabled == true then
-			-- 	disable_controls();
-			-- 	is_enabled = false;
-			-- end
 		end
 		local start_gui_id = 14796823;
 		for name, window in pairs(active_windows) do
@@ -883,10 +877,5 @@ function gui_update()
 				return gui_id;
 			end);
 		end
-	-- else
-	-- 	if is_enabled == false then
-	-- 		enable_controls();
-	-- 		is_enabled = true;
-	-- 	end
 	end
 end

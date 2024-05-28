@@ -24,6 +24,7 @@ local function exit_lobby()
 end
 
 function teleport_back_to_lobby()
+	disable_edit_wands_in_lobby();
 	EntitySetTransform(get_player_id(), lobby_x, lobby_y);
 end
 
@@ -161,6 +162,8 @@ function OnWorldPostUpdate()
 			end
 		end
 		if not is_in_workshop and is_in_workshop_before then
+			disable_edit_wands_in_lobby();
+
 			if ModSettingGet("persistence.enable_teleport_back_up") then
 				hide_teleport_gui();
 			end
@@ -252,6 +255,9 @@ function OnPlayerDied(player_entity)
 	if get_selected_save_id() == nil or get_selected_save_id() == 0 then
 		return;
 	end
+
+	-- TODO: Persistence progress UI
+
 	local money = get_player_money();
 	local money_to_save = math.floor(money * ModSettingGet("persistence.money_saved_on_death") );
 	GamePrintImportant("You died", " $ " .. tostring(money_to_save) .. " was saved.");

@@ -130,7 +130,7 @@ function create_wand(wand_data)
 	local wand = wand_type_to_wand(wand_data["wand_type"]);
 
 	ComponentSetValue2(ability_comp, "ui_name", wand.name);
-	ComponentObjectSetValue2(ability_comp, "gun_config", "shuffle_deck_when_empty", wand_data["shuffle"] and "1" or "0");
+	ComponentObjectSetValue2(ability_comp, "gun_config", "shuffle_deck_when_empty", wand_data["shuffle"] and true or false);
 	ComponentObjectSetValue2(ability_comp, "gun_config", "actions_per_round", wand_data["spells_per_cast"]);
 	ComponentObjectSetValue2(ability_comp, "gunaction_config", "fire_rate_wait", wand_data["cast_delay"]);
 	ComponentObjectSetValue2(ability_comp, "gun_config", "reload_time", wand_data["recharge_time"]);

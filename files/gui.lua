@@ -72,7 +72,12 @@ function show_money_gui()
 		local player_money = get_player_money();
 		local money_amts = {1, 10, 100, 1000};
 
-		GuiLayoutBeginHorizontal(gui, 76, 25, false, 0, 0);
+		GuiLayoutBeginHorizontal(gui, 80, 21);
+		GuiText(gui, 0, 0, "Player: $ " .. tostring(player_money));
+		GuiLayoutEnd(gui);
+
+		GuiLayoutBeginVertical(gui, 76, 25, false, gui_margin_x, gui_margin_y);
+		GuiLayoutBeginHorizontal(gui, 0, 0, false, 0, 0);
 		GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 
 		for _, money_amt in ipairs(money_amts) do
@@ -110,7 +115,9 @@ function show_money_gui()
 		end
 		GuiLayoutEnd(gui);
 		GuiLayoutEnd(gui);
-		GuiLayoutBeginHorizontal(gui, 80, 42);
+		GuiLayoutEnd(gui);
+
+		GuiLayoutBeginHorizontal(gui, 80, 43);
 		GuiText(gui, 0, 0, "Stashed: $ " .. tostring(safe_money));
 		GuiLayoutEnd(gui);
 	end };

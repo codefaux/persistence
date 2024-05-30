@@ -56,6 +56,8 @@ Documentation in flux, check back for updates. I'm still figuring all this out.
 My changes so far:
 - In-game Mod Options menu support instead of manually finding/editing lua files
 
+- Datastore
+-- Fixed 'Wand Templates stick to each other' due to Lua always using by-ref assignment
 
 - Reworked Money GUI
 -- Added as sub-tab as other menus
@@ -70,6 +72,7 @@ My changes so far:
 -- Added icon as GUI element instead of sprite (showed as faded/beneath GUI before)
 -- Moved icon to top, added tilt angle for style
 -- Added icon to Saved Template list
+-- Added on-hover stats for saved templates
 
 - Buy Spells GUI
 -- Shifted positions
@@ -81,7 +84,9 @@ My changes so far:
 -- Colorized unavailable options
 -- Move to loop-driven iteration instead of verbose static generation of GUI elements
 
-- Tabs lock controls while open. Click tab again to close. Pending fix. (Anyone know how to read user keybindings? I want my mod to match system keybinds to eg. close menus in case user rebinds tab/i for example.)
+- ALL GUIs
+-- Tabs lock controls while open. Click tab again to close. Pending fix. (Anyone know how to read user keybindings? I want my mod to match system keybinds to eg. close menus in case user rebinds tab/i for example.)
+-- Background fixed so wands/text no longer appears 'on top of' darkness
 
 TODO: (Help wanted -- If you have experience and are willing to help, please comment at Github or here.)
 - Translations for strings

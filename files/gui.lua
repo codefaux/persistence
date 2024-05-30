@@ -10,12 +10,6 @@ local active_windows = {};
 local gui_margin_x = 8;
 local gui_margin_y = 1;
 
-local function gui_sprite(x, y, file_path)
-	local cx, cy = GameGetCameraPos();
-	local size_x, size_y = get_screen_size();
-	GameCreateSpriteForXFrames(file_path, cx - size_x / 2 + size_x * (x / 100), cy - size_y / 2 + size_y * (y / 100), false);
-end
-
 function show_save_selector_gui()
 	local delete_save_confirmation = 0;
 	active_windows["save_selector"] = { true, function (get_next_id)
@@ -453,7 +447,6 @@ function show_buy_wands_gui()
 				end -- scale
 
 				GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-				-- GuiImage(gui, get_next_id(), 0, 0, wand_type_to_sprite_file(wand_data_selected["wand_type"]), 1, 1, 1, 5.49779); -- radians are annoying
 				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 					window_nr = WINDOW_ID.id_pick_icon;
 				end
@@ -834,10 +827,6 @@ function show_menu_gui()
 		end
 		GuiText(gui, 0, 0, " ");
 		if GuiButton(gui, money_open and 10 or 0, 0, "Money", get_next_id()) then
-			-- hide_research_spells_gui();
-			-- hide_buy_wands_gui();
-			-- hide_buy_spells_gui();
-			-- hide_research_wands_gui();
 			if money_open then
 				hide_money_gui();
 			else
@@ -845,7 +834,6 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, research_wands_open and 10 or 0, 0, "Research Wands", get_next_id()) then
-			-- hide_money_gui();
 			hide_research_spells_gui();
 			hide_buy_wands_gui();
 			hide_buy_spells_gui();
@@ -856,7 +844,6 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, research_spells_open and 10 or 0, 0, "Research Spells", get_next_id()) then
-			-- hide_money_gui();
 			hide_research_wands_gui();
 			hide_buy_wands_gui();
 			hide_buy_spells_gui();
@@ -867,7 +854,6 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, buy_wands_open and 10 or 0, 0, "Buy Wands", get_next_id()) then
-			-- hide_money_gui();
 			hide_research_wands_gui();
 			hide_research_spells_gui();
 			hide_buy_spells_gui();
@@ -878,7 +864,6 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, buy_spells_open and 10 or 0, 0, "Buy Spells", get_next_id()) then
-			-- hide_money_gui();
 			hide_research_wands_gui();
 			hide_research_spells_gui();
 			hide_buy_wands_gui();
@@ -917,15 +902,9 @@ end
 
 function gui_update()
 	if money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open then
-		-- if is_enabled == true then
 		  disable_controls();
-			-- is_enabled = false;
-		-- end
 	else
-		-- if is_enabled == false then
 			enable_controls();
-			-- is_enabled = true;
-		-- end
 	end
 
 	if gui ~= nil and active_windows ~= nil then

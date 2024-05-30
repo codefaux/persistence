@@ -394,7 +394,7 @@ function show_buy_wands_gui()
 			local price = create_wand_price(wand_data_selected);
 			if window_nr == WINDOW_ID.id_base then
 				GuiLayoutBeginLayer(gui);
-				GuiLayoutBeginHorizontal(gui, 44, 16);
+				GuiLayoutBeginHorizontal(gui, 43, 17);
 				GuiImage(gui, get_next_id(), 0, 0, wand_type_to_sprite_file(wand_data_selected["wand_type"]), 1, 1, 1, math.rad(-45)); -- radians are annoying
 				GuiLayoutEnd(gui);
 				GuiLayoutEndLayer(gui);
@@ -936,11 +936,11 @@ function gui_update()
 				is_dark_background = true;
 			end
 		end
+		local start_gui_id = 14796823;
 		if is_dark_background then
 			local cx, cy = GameGetCameraPos();
-			GameCreateSpriteForXFrames("mods/persistence/files/gui_darken.png", cx, cy);
+			GuiImage(gui, start_gui_id - 1, 0, 0, "mods/persistence/files/gui_darken.png", 1, 1, 1, 0);
 		end
-		local start_gui_id = 14796823;
 		for name, window in pairs(active_windows) do
 			local gui_id = start_gui_id + simple_string_hash(name);
 			window[2](function()

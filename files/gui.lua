@@ -10,12 +10,6 @@ local active_windows = {};
 local gui_margin_x = 8;
 local gui_margin_y = 1;
 
-local function gui_sprite(x, y, file_path)
-	local cx, cy = GameGetCameraPos();
-	local size_x, size_y = get_screen_size();
-	GameCreateSpriteForXFrames(file_path, cx - size_x / 2 + size_x * (x / 100), cy - size_y / 2 + size_y * (y / 100), false);
-end
-
 function show_save_selector_gui()
 	local delete_save_confirmation = 0;
 	active_windows["save_selector"] = { true, function (get_next_id)
@@ -72,17 +66,13 @@ function show_money_gui()
 		local player_money = get_player_money();
 		local money_amts = {1, 10, 100, 1000};
 
-		GuiLayoutBeginHorizontal(gui, 80, 21);
-		GuiText(gui, 0, 0, "Player: $ " .. tostring(player_money));
-		GuiLayoutEnd(gui);
-
-		GuiLayoutBeginVertical(gui, 76, 25, false, gui_margin_x, gui_margin_y);
+		GuiLayoutBeginVertical(gui, 80, 15, false, gui_margin_x, gui_margin_y);
 		GuiLayoutBeginHorizontal(gui, 0, 0, false, 0, 0);
 		GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 
 		for _, money_amt in ipairs(money_amts) do
 			if safe_money < money_amt then
-				GuiColorSetForNextWidget(gui, 0.25, 0.25, 0.25, 1);
+				GuiColorSetForNextWidget(gui, 0.33, 0.33, 0.33, 1);
 				GuiText(gui, 0, 0, "Take $ " .. money_amt);
 			else
 				if GuiButton(gui, 0, 0, "Take $ " .. money_amt, get_next_id()) then
@@ -101,7 +91,7 @@ function show_money_gui()
 
 		for _, money_amt in ipairs(money_amts) do
 			if player_money < money_amt then
-				GuiColorSetForNextWidget(gui, 0.25, 0.25, 0.25, 1);
+				GuiColorSetForNextWidget(gui, 0.33, 0.33, 0.33, 1);
 				GuiText(gui, 0, 0, "Stash $ " .. money_amt);
 			else
 				if GuiButton(gui, 0, 0, "Stash $ " .. money_amt, get_next_id()) then
@@ -117,7 +107,7 @@ function show_money_gui()
 		GuiLayoutEnd(gui);
 		GuiLayoutEnd(gui);
 
-		GuiLayoutBeginHorizontal(gui, 80, 43);
+		GuiLayoutBeginHorizontal(gui, 84, 33);
 		GuiText(gui, 0, 0, "Stashed: $ " .. tostring(safe_money));
 		GuiLayoutEnd(gui);
 	end };
@@ -177,25 +167,26 @@ function show_research_wands_gui()
 				local is_new = research_wand_is_new(get_selected_save_id(), wands[i].entity_id);
 				if is_new then
 					if price > player_money then
+						GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
 						GuiText(gui, 0, 0, " $" .. tostring(price));
 					else
 						if #wands[i].wand_data.spells > 0 then
-							if GuiButton(gui, 0, 0, " $" .. tostring(price), get_next_id()) then
-								research_wand(get_selected_save_id(), wands[i].entity_id);
-								wands[i] = nil;
-							end
+							GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
 						else
-							if GuiButton(gui, 0, 0, " $" .. tostring(price), get_next_id()) then
-								research_wand(get_selected_save_id(), wands[i].entity_id);
-								wands[i] = nil;
-							end
+							GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+						end
+						if GuiButton(gui, 0, 0, " $" .. tostring(price), get_next_id()) then
+							research_wand(get_selected_save_id(), wands[i].entity_id);
+							wands[i] = nil;
 						end
 					end
 				else
+					GuiColorSetForNextWidget(gui, 1, 0.75, 0.75, 0.75);
 					GuiText(gui, 0, 0, " $0");
 				end
 			else
-				GuiText(gui, 0, 0, " ");
+				GuiColorSetForNextWidget(gui, 1, 0.75, 0.75, 0.75);
+				GuiText(gui, 0, 0, " x ");
 			end
 		end
 		GuiLayoutEnd(gui);
@@ -263,12 +254,14 @@ function show_research_spells_gui()
 	active_windows["research_spells"] = { true, function(get_next_id)
 		if #spell_data > 0 then
 			local player_money = get_player_money();
-			GuiLayoutBeginHorizontal(gui, 40, 15);
+			GuiLayoutBeginHorizontal(gui, 30, 10);
 			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 			for _, value in ipairs(spell_data) do
 				if player_money < value.price then
-					GuiText(gui, 0, 0, " $ " .. tostring(value.price) .. "(Too expensive)");
+					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
+					GuiText(gui, 0, 0, " $ " .. tostring(value.price));
 				else
+					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
 						research_spell(get_selected_save_id(), value.entity_id);
 						hide_research_spells_gui();
@@ -277,7 +270,7 @@ function show_research_spells_gui()
 				end
 			end
 			GuiLayoutEnd(gui);
-			GuiLayoutBeginVertical(gui, 0, 0);
+			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 			for _, value in ipairs(spell_data) do
 				GuiText(gui, 0, 0, value.name);
 			end
@@ -301,7 +294,8 @@ function show_buy_wands_gui()
 	buy_wands_open = true;
 	local save_id = get_selected_save_id();
 	if can_create_wand(save_id) then
-		local window_nr = 0;
+		local WINDOW_ID = { id_base=0, id_pick_alwayscast=1, id_pick_icon=2};
+		local window_nr = WINDOW_ID.id_base;
 		local gui_margin_y = 2; -- Override
 		local gui_margin_short_x = 5;
 		local spells_per_cast_min = 1;
@@ -392,9 +386,16 @@ function show_buy_wands_gui()
 		active_windows["buy_wands"] = { true, function(get_next_id)
 			local player_money = get_player_money();
 			local price = create_wand_price(wand_data_selected);
-			if window_nr == 0 then
-				GuiLayoutBeginHorizontal(gui, 20, 15);
+			if window_nr == WINDOW_ID.id_base then
+				GuiLayoutBeginLayer(gui);
+				GuiLayoutBeginHorizontal(gui, 43, 17);
+				GuiImage(gui, get_next_id(), 0, 0, wand_type_to_sprite_file(wand_data_selected["wand_type"]), 1, 1, 1, math.rad(-45)); -- radians are annoying
+				GuiLayoutEnd(gui);
+				GuiLayoutEndLayer(gui);
+
+				GuiLayoutBeginHorizontal(gui, 25, 20);
 				GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+				GuiText(gui, 0, 0, "Wand design");
 				GuiText(gui, 0, 0, "$inventory_shuffle");
 				GuiText(gui, 0, 0, "$inventory_actionspercast");
 				GuiText(gui, 0, 0, "$inventory_castdelay");
@@ -404,11 +405,11 @@ function show_buy_wands_gui()
 				GuiText(gui, 0, 0, "$inventory_capacity");
 				GuiText(gui, 0, 0, "$inventory_spread");
 				GuiText(gui, 0, 0, "$inventory_alwayscasts");
-				GuiText(gui, 0, 0, "Wand design");
 				GuiLayoutEnd(gui);
 
 				for scale=3, 1, -1 do
 					GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_short_x, gui_margin_y);
+					GuiText(gui, 0, 0, " "); -- filler for select
 
 					if (scale == 1 and wand_data_selected["shuffle"] == true) then
 						if GuiButton(gui, 0, 0, "<", get_next_id()) then
@@ -442,11 +443,13 @@ function show_buy_wands_gui()
 							GuiButton(gui, 0, 0, " ", get_next_id());
 						end
 					end -- ipairs(wand_stat_names)
-					GuiText(gui, 0, 0, " ");
 					GuiLayoutEnd(gui);
 				end -- scale
 
 				GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
+					window_nr = WINDOW_ID.id_pick_icon;
+				end
 				GuiText(gui, 0, 0, wand_data_selected["shuffle"] and "$menu_yes" or "$menu_no");
 				GuiText(gui, 0, 0, tostring(wand_data_selected["spells_per_cast"]));
 				GuiText(gui, 0, 0, tostring(math.floor((wand_data_selected["cast_delay"] / 60) * 100 + 0.5) / 100));
@@ -456,16 +459,14 @@ function show_buy_wands_gui()
 				GuiText(gui, 0, 0, tostring(wand_data_selected["capacity"]));
 				GuiText(gui, 0, 0, tostring(math.floor(wand_data_selected["spread"] * 10 + 0.5) / 10));
 				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
-					window_nr = 1;
-				end
-				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
-					window_nr = 2;
+					window_nr = WINDOW_ID.id_pick_alwayscast;
 				end
 				GuiLayoutEnd(gui);
 
 
 				for scale=1, 3, 1 do
 					GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_short_x, gui_margin_y);
+					GuiText(gui, 0, 0, " "); -- filler for img select
 
 					if (scale == 1 and wand_data_selected["shuffle"] == false) then
 						if GuiButton(gui, 0, 0, ">", get_next_id()) then
@@ -498,38 +499,95 @@ function show_buy_wands_gui()
 							GuiButton(gui, 0, 0, " ", get_next_id());
 						end
 					end
-					GuiText(gui, 0, 0, " ");
 					GuiLayoutEnd(gui);
 				end
-
 				GuiLayoutEnd(gui);
-				gui_sprite(22, 48, wand_type_to_sprite_file(wand_data_selected["wand_type"]));
 
-				GuiLayoutBeginVertical(gui, 80, 50);
+				GuiLayoutBeginHorizontal(gui, 31, 60, false, gui_margin_x, gui_margin_y);
+				GuiText(gui, 0, 0, "Purchase Price:");
+				if player_money < price then
+					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
+					GuiText(gui, 0, 0, " $ " .. tostring(price));
+				else
+					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+					if GuiButton(gui, 0, 0, " $ " .. tostring(price), get_next_id()) then
+						create_wand(wand_data_selected);
+					end
+				end
+				GuiLayoutEnd(gui);
+
 				for i = 1, get_template_count() do
-					GuiText(gui, 0, 0, "Wand template slot " .. pad_number(i, #tostring(get_template_count())) .. ":");
-					if get_template(save_id, i) == nil then
-						if GuiButton(gui, 40, 0, "Save template", get_next_id()) then
+					local template_preview = get_template(save_id, i);
+					local template_hover = 0;
+					GuiLayoutBeginVertical(gui, 80, 44 + ((i-1) * 11));
+					GuiText(gui, 0, 0, "Template Slot " .. pad_number(i, #tostring(get_template_count())) .. ":");
+					if template_preview == nil then	-- Template empty
+						if GuiButton(gui, 16, 6, "Save template", get_next_id()) then
 							set_template(save_id, i, wand_data_selected);
 						end
-					else
-						if GuiButton(gui, 40, 0, "Load template", get_next_id()) then
-							wand_data_selected = get_template(save_id, i);
+					else -- Template exists
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
+						end
+						GuiLayoutBeginHorizontal(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+						GuiImage(gui, get_next_id(), 0, 15, wand_type_to_sprite_file(template_preview["wand_type"]), 1, 1, 1, math.rad(-45)); -- radians are annoying
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
+						end
+
+						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+						if GuiButton(gui, 0, 0, "Load template", get_next_id()) then
+							wand_data_selected = template_preview;
+						end
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
 						end
 						if delete_template_confirmation == i then
-							if GuiButton(gui, 40, 0, "Press again to delete", get_next_id()) then
+							if GuiButton(gui, 0, 0, "Press again to delete", get_next_id()) then
 								delete_template_confirmation = 0;
 								delete_template(save_id, i);
 							end
 						else
-							if GuiButton(gui, 40, 0, "Delete template", get_next_id()) then
+							if GuiButton(gui, 0, 0, "Delete template", get_next_id()) then
 								delete_template_confirmation = i;
 							end
 						end
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
+						end
+						GuiLayoutEnd(gui);
+						GuiLayoutEnd(gui);
+					end
+					GuiLayoutEnd(gui);
+
+					if template_hover == i then
+						GuiLayoutBeginLayer(gui);
+						GuiLayoutBeginHorizontal(gui, 60, 60, false, gui_margin_x, gui_margin_y);
+						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+						GuiText(gui, 0, 0, "$inventory_shuffle");
+						GuiText(gui, 0, 0, "$inventory_actionspercast");
+						GuiText(gui, 0, 0, "$inventory_castdelay");
+						GuiText(gui, 0, 0, "$inventory_rechargetime");
+						GuiText(gui, 0, 0, "$inventory_manamax");
+						GuiText(gui, 0, 0, "$inventory_manachargespeed");
+						GuiText(gui, 0, 0, "$inventory_capacity");
+						GuiText(gui, 0, 0, "$inventory_spread");
+						GuiText(gui, 0, 0, "$inventory_alwayscasts");
+						GuiLayoutEnd(gui);
+						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+						GuiText(gui, 0, 0, template_preview["shuffle"] and "$menu_yes" or "$menu_no");
+						GuiText(gui, 0, 0, template_preview["spells_per_cast"] );
+						GuiText(gui, 0, 0, tostring(math.floor((template_preview["cast_delay"] / 60) * 100 + 0.5) / 100) );
+						GuiText(gui, 0, 0, tostring(math.floor((template_preview["recharge_time"] / 60) * 100 + 0.5) / 100) );
+						GuiText(gui, 0, 0, tostring(template_preview["mana_max"]) );
+						GuiText(gui, 0, 0, tostring(template_preview["mana_charge_speed"]) );
+						GuiText(gui, 0, 0, tostring(template_preview["capacity"]) );
+						GuiText(gui, 0, 0, tostring(math.floor(template_preview["spread"] * 10 + 0.5) / 10) );
+						GuiText(gui, 0, 0, tostring(#template_preview["always_cast_spells"]) .. " spells" );
+						GuiLayoutEndLayer(gui);
 					end
 				end
-				GuiLayoutEnd(gui);
-			elseif window_nr == 1 then
+			elseif window_nr == WINDOW_ID.id_pick_alwayscast then
 				if spell_columns[spells_page_number * 2 - 1] ~= nil then
 					GuiLayoutBeginHorizontal(gui, 30, 15);
 					GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
@@ -579,72 +637,58 @@ function show_buy_wands_gui()
 					end
 					GuiLayoutEnd(gui);
 				end
-			elseif window_nr == 2 then
+			elseif window_nr == WINDOW_ID.id_pick_icon then
 				if wand_type_columns[wand_types_page_number * 2 - 1] ~= nil then
 					for i, value in ipairs(wand_type_columns[wand_types_page_number * 2 - 1]) do
-						GuiLayoutBeginHorizontal(gui, 20, 16 + i * 10);
+						GuiLayoutBeginVertical(gui, 25, 6 + i * 14);
+						GuiImage(gui, get_next_id(), 3, 0, value.sprite_file, 1, 1, 1, math.rad(-45)); -- radians are annoying
 						if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 							wand_data_selected["wand_type"] = value.wand_type;
-							window_nr = 0;
+							window_nr = WINDOW_ID.id_base;
 							wand_types_page_number = 1;
 						end
 						GuiLayoutEnd(gui);
-					end
-					for i, value in ipairs(wand_type_columns[wand_types_page_number * 2 - 1]) do
-						gui_sprite(25, 15 + i * 10, value.sprite_file);
 					end
 				end
 				if wand_type_columns[wand_types_page_number * 2] ~= nil then
 					for i, value in ipairs(wand_type_columns[wand_types_page_number * 2]) do
-						GuiLayoutBeginHorizontal(gui, 60, 16 + i * 10);
+						GuiLayoutBeginVertical(gui, 60, 6 + i * 14);
+						GuiImage(gui, get_next_id(), 3, 0, value.sprite_file, 1, 1, 1, math.rad(-45)); -- radians are annoying
 						if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 							wand_data_selected["wand_type"] = value.wand_type;
-							window_nr = 0;
+							window_nr = WINDOW_ID.id_base;
 							wand_types_page_number = 1;
 						end
 						GuiLayoutEnd(gui);
 					end
-					for i, value in ipairs(wand_type_columns[wand_types_page_number * 2]) do
-						gui_sprite(65, 15 + i * 10, value.sprite_file);
-					end
 				end
 				if wand_types_page_number > 1 then
-					GuiLayoutBeginHorizontal(gui, 48, 95);
+					GuiLayoutBeginHorizontal(gui, 41, 95);
 					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
 						wand_types_page_number = wand_types_page_number - 1;
 					end
 					GuiLayoutEnd(gui);
 				end
-				GuiLayoutBeginHorizontal(gui, 50, 95);
+				GuiLayoutBeginHorizontal(gui, 45, 95);
 				GuiText(gui, 0, 0, tostring(wand_types_page_number));
 				GuiLayoutEnd(gui);
 				if wand_types_page_number < math.ceil(#wand_type_columns / 2) then
-					GuiLayoutBeginHorizontal(gui, 52, 95);
+					GuiLayoutBeginHorizontal(gui, 47, 95);
 					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
 						wand_types_page_number = wand_types_page_number + 1;
 					end
 					GuiLayoutEnd(gui);
 				end
 			end
-			if window_nr ~= 0 then
-				GuiLayoutBeginHorizontal(gui, 15, 15);
+			if window_nr ~= WINDOW_ID.id_base then
+				GuiLayoutBeginHorizontal(gui, 43, 91);
 				if GuiButton(gui, 0, 0, "$menu_return", get_next_id()) then
-					window_nr = 0;
+					window_nr = WINDOW_ID.id_base;
 					spells_page_number = 1;
 					wand_types_page_number = 1;
 				end
 				GuiLayoutEnd(gui);
 			end
-
-			GuiLayoutBeginHorizontal(gui, 20, 95);
-			if player_money < price then
-				GuiText(gui, 0, 0, " $ " .. tostring(price) .. " (Too expensive)");
-			else
-				if GuiButton(gui, 0, 0, " $ " .. tostring(price) .. " -- Buy", get_next_id()) then
-					create_wand(wand_data_selected);
-				end
-			end
-			GuiLayoutEnd(gui);
 		end };
 	else
 		active_windows["buy_wands"] = { true, function(get_next_id)
@@ -683,22 +727,22 @@ function show_buy_spells_gui()
 	active_windows["buy_spells"] = { true, function(get_next_id)
 		local player_money = get_player_money();
 		if columns[page_number * 2 - 1] ~= nil then
-			GuiLayoutBeginHorizontal(gui, 30, 15);
-			GuiLayoutBeginVertical(gui, 0, 0);
+			GuiLayoutBeginHorizontal(gui, 20, 15, false, gui_margin_x, gui_margin_y);
+			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 			for _, value in ipairs(columns[page_number * 2 - 1]) do
 				if player_money < value.price then
+					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
 					GuiText(gui, 0, 0, " $ " .. tostring(value.price));
 				else
+					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
 						create_spell(value.id);
 					end
 				end
 			end
 			GuiLayoutEnd(gui);
-			GuiLayoutAddHorizontalSpacing(gui);
-			GuiLayoutAddHorizontalSpacing(gui);
-			GuiLayoutAddHorizontalSpacing(gui);
-			GuiLayoutBeginVertical(gui, 0, 0);
+
+			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 			for _, value in ipairs(columns[page_number * 2 - 1]) do
 				GuiText(gui, 0, 0, value.name);
 			end
@@ -706,22 +750,22 @@ function show_buy_spells_gui()
 			GuiLayoutEnd(gui);
 		end
 		if columns[page_number * 2] ~= nil then
-			GuiLayoutBeginHorizontal(gui, 60, 15);
-			GuiLayoutBeginVertical(gui, 0, 0);
+			GuiLayoutBeginHorizontal(gui, 50, 15, false, gui_margin_x, gui_margin_y);
+			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 			for _, value in ipairs(columns[page_number * 2]) do
 				if player_money < value.price then
+					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
 					GuiText(gui, 0, 0, " $ " .. tostring(value.price));
 				else
+					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
 						create_spell(value.id);
 					end
 				end
 			end
 			GuiLayoutEnd(gui);
-			GuiLayoutAddHorizontalSpacing(gui);
-			GuiLayoutAddHorizontalSpacing(gui);
-			GuiLayoutAddHorizontalSpacing(gui);
-			GuiLayoutBeginVertical(gui, 0, 0);
+
+			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 			for _, value in ipairs(columns[page_number * 2]) do
 				GuiText(gui, 0, 0, value.name);
 			end
@@ -761,12 +805,28 @@ function show_menu_gui()
 	hide_buy_wands_gui();
 	hide_buy_spells_gui();
 	active_windows["menu"] = { false, function(get_next_id)
-		GuiLayoutBeginVertical(gui, 1, 45);
+		local any_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open;
+		if any_open then
+			GuiLayoutBeginHorizontal(gui, 84, 11);
+			GuiText(gui, 0, 0, "Player: $ " .. tostring(get_player_money()));
+			GuiLayoutEnd(gui);
+		end
+
+		GuiLayoutBeginVertical(gui, 2, 77);
+		if any_open then
+			GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
+			if GuiButton(gui, 10, 0, "Close All", get_next_id()) then
+				hide_money_gui();
+				hide_research_wands_gui();
+				hide_research_spells_gui();
+				hide_buy_wands_gui();
+				hide_buy_spells_gui();
+			end
+		else
+			GuiText(gui, 0, 0, " ");
+		end
+		GuiText(gui, 0, 0, " ");
 		if GuiButton(gui, money_open and 10 or 0, 0, "Money", get_next_id()) then
-			hide_research_spells_gui();
-			hide_buy_wands_gui();
-			hide_buy_spells_gui();
-			hide_research_wands_gui();
 			if money_open then
 				hide_money_gui();
 			else
@@ -774,7 +834,6 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, research_wands_open and 10 or 0, 0, "Research Wands", get_next_id()) then
-			hide_money_gui();
 			hide_research_spells_gui();
 			hide_buy_wands_gui();
 			hide_buy_spells_gui();
@@ -785,7 +844,6 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, research_spells_open and 10 or 0, 0, "Research Spells", get_next_id()) then
-			hide_money_gui();
 			hide_research_wands_gui();
 			hide_buy_wands_gui();
 			hide_buy_spells_gui();
@@ -796,7 +854,6 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, buy_wands_open and 10 or 0, 0, "Buy Wands", get_next_id()) then
-			hide_money_gui();
 			hide_research_wands_gui();
 			hide_research_spells_gui();
 			hide_buy_spells_gui();
@@ -807,7 +864,6 @@ function show_menu_gui()
 			end
 		end
 		if GuiButton(gui, buy_spells_open and 10 or 0, 0, "Buy Spells", get_next_id()) then
-			hide_money_gui();
 			hide_research_wands_gui();
 			hide_research_spells_gui();
 			hide_buy_wands_gui();
@@ -846,15 +902,9 @@ end
 
 function gui_update()
 	if money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open then
-		-- if is_enabled == true then
 		  disable_controls();
-			-- is_enabled = false;
-		-- end
 	else
-		-- if is_enabled == false then
 			enable_controls();
-			-- is_enabled = true;
-		-- end
 	end
 
 	if gui ~= nil and active_windows ~= nil then
@@ -865,11 +915,11 @@ function gui_update()
 				is_dark_background = true;
 			end
 		end
+		local start_gui_id = 14796823;
 		if is_dark_background then
 			local cx, cy = GameGetCameraPos();
-			GameCreateSpriteForXFrames("mods/persistence/files/gui_darken.png", cx, cy);
+			GuiImage(gui, start_gui_id - 1, 0, 0, "mods/persistence/files/gui_darken.png", 1, 1, 1, 0);
 		end
-		local start_gui_id = 14796823;
 		for name, window in pairs(active_windows) do
 			local gui_id = start_gui_id + simple_string_hash(name);
 			window[2](function()

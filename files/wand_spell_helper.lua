@@ -129,6 +129,10 @@ function create_wand(wand_data)
 	local ability_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent");
 	local wand = wand_type_to_wand(wand_data["wand_type"]);
 
+	if wand == nil then
+		return false;
+	end
+
 	ComponentSetValue2(ability_comp, "ui_name", wand.name);
 	ComponentObjectSetValue2(ability_comp, "gun_config", "shuffle_deck_when_empty", wand_data["shuffle"] and true or false);
 	ComponentObjectSetValue2(ability_comp, "gun_config", "actions_per_round", wand_data["spells_per_cast"]);

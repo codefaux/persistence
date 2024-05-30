@@ -217,36 +217,37 @@ function load(save_id)
 
 	data_store[save_id]["templates"] = {};
 	for i = 1, get_template_count() do
-		if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i)) then
-			data_store[save_id]["templates"][i] = {};
-			if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_shuffle") then
-				data_store[save_id]["templates"][i]["shuffle"] = true;
-			else
-				data_store[save_id]["templates"][i]["shuffle"] = false;
-			end
-			data_store[save_id]["templates"][i]["spells_per_cast"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_spells_per_cast"));
-			data_store[save_id]["templates"][i]["cast_delay"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_cast_delay"));
-			data_store[save_id]["templates"][i]["recharge_time"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_recharge_time"));
-			data_store[save_id]["templates"][i]["mana_max"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_mana_max"));
-			data_store[save_id]["templates"][i]["mana_charge_speed"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_mana_charge_speed"));
-			data_store[save_id]["templates"][i]["capacity"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_capacity"));
-			data_store[save_id]["templates"][i]["spread"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_spread")) / 10;
+    load_template(save_id, i);
+	-- 	if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i)) then
+	-- 		data_store[save_id]["templates"][i] = {};
+	-- 		if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_shuffle") then
+	-- 			data_store[save_id]["templates"][i]["shuffle"] = true;
+	-- 		else
+	-- 			data_store[save_id]["templates"][i]["shuffle"] = false;
+	-- 		end
+	-- 		data_store[save_id]["templates"][i]["spells_per_cast"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_spells_per_cast"));
+	-- 		data_store[save_id]["templates"][i]["cast_delay"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_cast_delay"));
+	-- 		data_store[save_id]["templates"][i]["recharge_time"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_recharge_time"));
+	-- 		data_store[save_id]["templates"][i]["mana_max"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_mana_max"));
+	-- 		data_store[save_id]["templates"][i]["mana_charge_speed"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_mana_charge_speed"));
+	-- 		data_store[save_id]["templates"][i]["capacity"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_capacity"));
+	-- 		data_store[save_id]["templates"][i]["spread"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_spread")) / 10;
 
-			data_store[save_id]["templates"][i]["always_cast_spells"] = {};
-			for key, _ in pairs(data_store[save_id]["always_cast_spells"]) do
-				if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_always_cast_spell_" .. string.lower(key)) then
-					table.insert(data_store[save_id]["templates"][i]["always_cast_spells"], key);
-					break;
-				end
-			end
+	-- 		data_store[save_id]["templates"][i]["always_cast_spells"] = {};
+	-- 		for key, _ in pairs(data_store[save_id]["always_cast_spells"]) do
+	-- 			if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_always_cast_spell_" .. string.lower(key)) then
+	-- 				table.insert(data_store[save_id]["templates"][i]["always_cast_spells"], key);
+	-- 				break;
+	-- 			end
+	-- 		end
 
-			for key, _ in pairs(data_store[save_id]["wand_types"]) do
-				if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_wand_type_" .. string.lower(key)) then
-					data_store[save_id]["templates"][i]["wand_type"] = key;
-					break;
-				end
-			end
-		end
+	-- 		for key, _ in pairs(data_store[save_id]["wand_types"]) do
+	-- 			if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_wand_type_" .. string.lower(key)) then
+	-- 				data_store[save_id]["templates"][i]["wand_type"] = key;
+	-- 				break;
+	-- 			end
+	-- 		end
+	-- 	end
 	end
 end
 
@@ -501,10 +502,49 @@ local function add_wand_types(save_id, wand_types)
 end
 
 -- templates
+function load_template(save_id, template_id)
+	local save_id_string = tostring(save_id);
+	local template_id_string = tostring(template_id);
+
+	local retval = {};
+
+	if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. template_id_string) then
+		data_store[save_id]["templates"][template_id] = {};
+		if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. template_id_string .. "_shuffle") then
+			data_store[save_id]["templates"][template_id]["shuffle"] = true;
+		else
+			data_store[save_id]["templates"][template_id]["shuffle"] = false;
+		end
+		data_store[save_id]["templates"][template_id]["spells_per_cast"] = hex_to_number(load_hex(save_id_string .. "_template_" .. template_id_string .. "_spells_per_cast"));
+		data_store[save_id]["templates"][template_id]["cast_delay"] = hex_to_number(load_hex(save_id_string .. "_template_" .. template_id_string .. "_cast_delay"));
+		data_store[save_id]["templates"][template_id]["recharge_time"] = hex_to_number(load_hex(save_id_string .. "_template_" .. template_id_string .. "_recharge_time"));
+		data_store[save_id]["templates"][template_id]["mana_max"] = hex_to_number(load_hex(save_id_string .. "_template_" .. template_id_string .. "_mana_max"));
+		data_store[save_id]["templates"][template_id]["mana_charge_speed"] = hex_to_number(load_hex(save_id_string .. "_template_" .. template_id_string .. "_mana_charge_speed"));
+		data_store[save_id]["templates"][template_id]["capacity"] = hex_to_number(load_hex(save_id_string .. "_template_" .. template_id_string .. "_capacity"));
+		data_store[save_id]["templates"][template_id]["spread"] = hex_to_number(load_hex(save_id_string .. "_template_" .. template_id_string .. "_spread")) / 10;
+
+		data_store[save_id]["templates"][template_id]["always_cast_spells"] = {};
+		for key, _ in pairs(data_store[save_id]["always_cast_spells"]) do
+			if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. template_id_string .. "_always_cast_spell_" .. string.lower(key)) then
+				table.insert(data_store[save_id]["templates"][template_id]["always_cast_spells"], key);
+				break;
+			end
+		end
+
+		for key, _ in pairs(data_store[save_id]["wand_types"]) do
+			if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. template_id_string .. "_wand_type_" .. string.lower(key)) then
+				data_store[save_id]["templates"][template_id]["wand_type"] = key;
+				break;
+			end
+		end
+	end
+end
+
 function get_template(save_id, template_id)
 	if data_store[save_id] == nil or data_store[save_id]["templates"] == nil then
 		return nil;
 	end
+	load_template(save_id, template_id);
 	return data_store[save_id]["templates"][template_id];
 end
 

@@ -276,7 +276,7 @@ function show_research_spells_gui()
 				end
 			end
 			GuiLayoutEnd(gui);
-			GuiLayoutBeginVertical(gui, 0, 0);
+			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 			for _, value in ipairs(spell_data) do
 				GuiText(gui, 0, 0, value.name);
 			end
@@ -411,8 +411,6 @@ function show_buy_wands_gui()
 				GuiText(gui, 0, 0, "$inventory_capacity");
 				GuiText(gui, 0, 0, "$inventory_spread");
 				GuiText(gui, 0, 0, "$inventory_alwayscasts");
-				GuiText(gui, 0, 0, " ");
-				GuiText(gui, 0, 0, "Purchase Price:");
 				GuiLayoutEnd(gui);
 
 				for scale=3, 1, -1 do
@@ -451,8 +449,6 @@ function show_buy_wands_gui()
 							GuiButton(gui, 0, 0, " ", get_next_id());
 						end
 					end -- ipairs(wand_stat_names)
-					GuiText(gui, 0, 0, " "); -- empty line filler
-					GuiText(gui, 0, 0, " "); -- "purchase price" filler
 					GuiLayoutEnd(gui);
 				end -- scale
 
@@ -472,17 +468,6 @@ function show_buy_wands_gui()
 				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 					window_nr = WINDOW_ID.id_pick_alwayscast;
 				end
-				GuiText(gui, 0, 0, " "); -- empty line filler
-				if player_money < price then
-					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
-					GuiText(gui, 0, 0, " $ " .. tostring(price));
-				else
-					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
-					if GuiButton(gui, 0, 0, " $ " .. tostring(price), get_next_id()) then
-						create_wand(wand_data_selected);
-					end
-				end
-
 				GuiLayoutEnd(gui);
 
 
@@ -521,9 +506,20 @@ function show_buy_wands_gui()
 							GuiButton(gui, 0, 0, " ", get_next_id());
 						end
 					end
-					GuiText(gui, 0, 0, " "); -- empty line filler
-					GuiText(gui, 0, 0, " "); -- "purchase price" filler
 					GuiLayoutEnd(gui);
+				end
+				GuiLayoutEnd(gui);
+
+				GuiLayoutBeginHorizontal(gui, 31, 60, false, gui_margin_x, gui_margin_y);
+				GuiText(gui, 0, 0, "Purchase Price:");
+				if player_money < price then
+					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
+					GuiText(gui, 0, 0, " $ " .. tostring(price));
+				else
+					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+					if GuiButton(gui, 0, 0, " $ " .. tostring(price), get_next_id()) then
+						create_wand(wand_data_selected);
+					end
 				end
 				GuiLayoutEnd(gui);
 
@@ -537,8 +533,16 @@ function show_buy_wands_gui()
 						end
 					else -- Template exists
 						GuiLayoutBeginHorizontal(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-						-- add icon
 						GuiImage(gui, get_next_id(), 0, 15, wand_type_to_sprite_file(template_preview["wand_type"]), 1, 1, 1, math.rad(-45)); -- radians are annoying
+						GuiTooltip(gui, "test2\ntest3", "");
+							-- GuiText(gui, 0, 0, wand_data_selected["shuffle"] and "$menu_yes" or "$menu_no");
+							-- GuiText(gui, 0, 0, tostring(wand_data_selected["spells_per_cast"]));
+							-- GuiText(gui, 0, 0, tostring(math.floor((wand_data_selected["cast_delay"] / 60) * 100 + 0.5) / 100));
+							-- GuiText(gui, 0, 0, tostring(math.floor((wand_data_selected["recharge_time"] / 60) * 100 + 0.5) / 100));
+							-- GuiText(gui, 0, 0, tostring(wand_data_selected["mana_max"]));
+							-- GuiText(gui, 0, 0, tostring(wand_data_selected["mana_charge_speed"]));
+							-- GuiText(gui, 0, 0, tostring(wand_data_selected["capacity"]));
+							-- GuiText(gui, 0, 0, tostring(math.floor(wand_data_selected["spread"] * 10 + 0.5) / 10));
 						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						if GuiButton(gui, 0, 0, "Load template", get_next_id()) then
 							wand_data_selected = template_preview;

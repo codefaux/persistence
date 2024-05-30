@@ -524,28 +524,30 @@ function show_buy_wands_gui()
 				GuiLayoutEnd(gui);
 
 				for i = 1, get_template_count() do
-					GuiLayoutBeginVertical(gui, 80, 44 + ((i-1) * 11));
 					local template_preview = get_template(save_id, i);
+					local template_hover = 0;
+					GuiLayoutBeginVertical(gui, 80, 44 + ((i-1) * 11));
 					GuiText(gui, 0, 0, "Template Slot " .. pad_number(i, #tostring(get_template_count())) .. ":");
 					if template_preview == nil then	-- Template empty
 						if GuiButton(gui, 16, 6, "Save template", get_next_id()) then
 							set_template(save_id, i, wand_data_selected);
 						end
 					else -- Template exists
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
+						end
 						GuiLayoutBeginHorizontal(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						GuiImage(gui, get_next_id(), 0, 15, wand_type_to_sprite_file(template_preview["wand_type"]), 1, 1, 1, math.rad(-45)); -- radians are annoying
-						GuiTooltip(gui, "test2\ntest3", "");
-							-- GuiText(gui, 0, 0, wand_data_selected["shuffle"] and "$menu_yes" or "$menu_no");
-							-- GuiText(gui, 0, 0, tostring(wand_data_selected["spells_per_cast"]));
-							-- GuiText(gui, 0, 0, tostring(math.floor((wand_data_selected["cast_delay"] / 60) * 100 + 0.5) / 100));
-							-- GuiText(gui, 0, 0, tostring(math.floor((wand_data_selected["recharge_time"] / 60) * 100 + 0.5) / 100));
-							-- GuiText(gui, 0, 0, tostring(wand_data_selected["mana_max"]));
-							-- GuiText(gui, 0, 0, tostring(wand_data_selected["mana_charge_speed"]));
-							-- GuiText(gui, 0, 0, tostring(wand_data_selected["capacity"]));
-							-- GuiText(gui, 0, 0, tostring(math.floor(wand_data_selected["spread"] * 10 + 0.5) / 10));
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
+						end
+
 						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						if GuiButton(gui, 0, 0, "Load template", get_next_id()) then
 							wand_data_selected = template_preview;
+						end
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
 						end
 						if delete_template_confirmation == i then
 							if GuiButton(gui, 0, 0, "Press again to delete", get_next_id()) then
@@ -557,10 +559,40 @@ function show_buy_wands_gui()
 								delete_template_confirmation = i;
 							end
 						end
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
+						end
 						GuiLayoutEnd(gui);
 						GuiLayoutEnd(gui);
 					end
 					GuiLayoutEnd(gui);
+
+					if template_hover == i then
+						GuiLayoutBeginLayer(gui);
+						GuiLayoutBeginHorizontal(gui, 60, 60, false, gui_margin_x, gui_margin_y);
+						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+						GuiText(gui, 0, 0, "$inventory_shuffle");
+						GuiText(gui, 0, 0, "$inventory_actionspercast");
+						GuiText(gui, 0, 0, "$inventory_castdelay");
+						GuiText(gui, 0, 0, "$inventory_rechargetime");
+						GuiText(gui, 0, 0, "$inventory_manamax");
+						GuiText(gui, 0, 0, "$inventory_manachargespeed");
+						GuiText(gui, 0, 0, "$inventory_capacity");
+						GuiText(gui, 0, 0, "$inventory_spread");
+						GuiText(gui, 0, 0, "$inventory_alwayscasts");
+						GuiLayoutEnd(gui);
+						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+						GuiText(gui, 0, 0, template_preview["shuffle"] and "$menu_yes" or "$menu_no");
+						GuiText(gui, 0, 0, template_preview["spells_per_cast"] );
+						GuiText(gui, 0, 0, tostring(math.floor((template_preview["cast_delay"] / 60) * 100 + 0.5) / 100) );
+						GuiText(gui, 0, 0, tostring(math.floor((template_preview["recharge_time"] / 60) * 100 + 0.5) / 100) );
+						GuiText(gui, 0, 0, tostring(template_preview["mana_max"]) );
+						GuiText(gui, 0, 0, tostring(template_preview["mana_charge_speed"]) );
+						GuiText(gui, 0, 0, tostring(template_preview["capacity"]) );
+						GuiText(gui, 0, 0, tostring(math.floor(template_preview["spread"] * 10 + 0.5) / 10) );
+						GuiText(gui, 0, 0, tostring(#template_preview["always_cast_spells"]) .. " spells" );
+						GuiLayoutEndLayer(gui);
+					end
 				end
 			elseif window_nr == WINDOW_ID.id_pick_alwayscast then
 				if spell_columns[spells_page_number * 2 - 1] ~= nil then
@@ -628,7 +660,7 @@ function show_buy_wands_gui()
 				if wand_type_columns[wand_types_page_number * 2] ~= nil then
 					for i, value in ipairs(wand_type_columns[wand_types_page_number * 2]) do
 						GuiLayoutBeginVertical(gui, 60, 6 + i * 14);
-						GuiImage(gui, get_next_id(), s, 0, value.sprite_file, 1, 1, 1, math.rad(-45)); -- radians are annoying
+						GuiImage(gui, get_next_id(), 3, 0, value.sprite_file, 1, 1, 1, math.rad(-45)); -- radians are annoying
 						if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 							wand_data_selected["wand_type"] = value.wand_type;
 							window_nr = WINDOW_ID.id_base;

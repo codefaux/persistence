@@ -151,65 +151,45 @@ function show_research_wands_gui()
 
 	active_windows["research_wands"] = { true, function(get_next_id)
 		local player_money = get_player_money();
-		GuiLayoutBeginHorizontal(gui, 30, 30);
-		GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-		for i = 1, 4 do
-			GuiText(gui, 0, 0, "Wand Slot " .. tostring(i) .. ":");
-		end
-		GuiLayoutEnd(gui);
-		GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+		GuiLayoutBeginVertical(gui, 30, 30, false, gui_margin_x, gui_margin_y);
 		for i = 0, 3 do
-			if wand_entity_ids[i] ~= nil then
-				local price = research_wand_price(get_selected_save_id(), wand_entity_ids[i]);
-				local is_new = research_wand_is_new(get_selected_save_id(), wand_entity_ids[i]);
-				if is_new then
-					if price > player_money then
-						GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
-						GuiText(gui, 0, 0, " $" .. tostring(price));
-					else
-						if #read_wand(wand_entity_ids[i])["spells"] > 0 then
-							GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
+			GuiLayoutBeginHorizontal(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+			GuiText(gui, 0, 0, "Wand Slot " .. tostring(i+1) .. ":");
+				if wand_entity_ids[i] ~= nil then
+					local price = research_wand_price(get_selected_save_id(), wand_entity_ids[i]);
+					local is_new = research_wand_is_new(get_selected_save_id(), wand_entity_ids[i]);
+					if is_new then
+						if price > player_money then
+							GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
+							GuiText(gui, 0, 0, " $" .. tostring(price));
+							GuiText(gui, 0, 0, "(Too expensive)");
 						else
-							GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+							local spell_count = #read_wand(wand_entity_ids[i])["spells"];
+							if spell_count > 0 then
+								GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
+							else
+								GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+							end
+							if GuiButton(gui, 0, 0, " $" .. tostring(price), get_next_id()) then
+								research_wand(get_selected_save_id(), wand_entity_ids[i]);
+								wand_entity_ids[i] = nil; -- Verify this works
+							end
+							if spell_count > 0 then
+								GuiText(gui, 0, 0, "(WARNING: Spells on this wand will be lost)");
+							else
+								GuiText(gui, 0, 0, " ");
+							end
 						end
-						if GuiButton(gui, 0, 0, " $" .. tostring(price), get_next_id()) then
-							research_wand(get_selected_save_id(), wand_entity_ids[i]);
-							wand_entity_ids[i] = nil; -- Verify this works
-						end
+					else
+						GuiColorSetForNextWidget(gui, 1, 0.75, 0.75, 0.75);
+						GuiText(gui, 0, 0, " $0");
 					end
 				else
 					GuiColorSetForNextWidget(gui, 1, 0.75, 0.75, 0.75);
-					GuiText(gui, 0, 0, " $0");
+					GuiText(gui, 0, 0, " x ");
 				end
-			else
-				GuiColorSetForNextWidget(gui, 1, 0.75, 0.75, 0.75);
-				GuiText(gui, 0, 0, " x ");
-			end
+			GuiLayoutEnd(gui);
 		end
-		GuiLayoutEnd(gui);
-		GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-		for i = 0, 3 do
-			if wand_entity_ids[i] ~= nil then
-				local price = research_wand_price(get_selected_save_id(), wand_entity_ids[i]);
-				local is_new = research_wand_is_new(get_selected_save_id(), wand_entity_ids[i]);
-				if is_new then
-					if price > player_money then
-						GuiText(gui, 0, 0, "(Too expensive)");
-					else
-						if #read_wand(wand_entity_ids[i])["spells"] > 0 then
-							GuiText(gui, 0, 0, "(WARNING: Spells on this wand will be lost)");
-						else
-							GuiText(gui, 0, 0, " ");
-						end
-					end
-				else
-					GuiText(gui, 0, 0, "(Wand has nothing new to research)");
-				end
-			else
-				GuiText(gui, 0, 0, " ");
-			end
-		end
-		GuiLayoutEnd(gui);
 		GuiLayoutEnd(gui);
 	end };
 end

@@ -1,7 +1,6 @@
 <Mod
 	name="Persistence"
-	description="# persistence
-Add some Lite to your Rogue
+	description="Add some Lite to your Rogue
 
 
 Better description to come.
@@ -58,6 +57,10 @@ My changes so far:
 
 - Datastore
 -- Fixed 'Wand Templates stick to each other' due to Lua always using by-ref assignment
+-- Optimized safety checks; consolidated instead of spamming
+
+- Research Wand GUI
+-- Optimised to avoid needless multiple duplication of largely unused data
 
 - Reworked Money GUI
 -- Added as sub-tab as other menus

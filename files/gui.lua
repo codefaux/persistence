@@ -141,16 +141,13 @@ end
 
 local research_wands_open = false;
 function show_research_wands_gui()
+	local save_id = get_selected_save_id();
+	if not data_store_safe(save_id) then
+		return;
+	end
+
 	research_wands_open = true;
 	local wand_entity_ids = get_all_wands();
-	local wands = {};
-
-	for pos, entity_id in pairs(wand_entity_ids) do
-		wands[pos] = {
-			["entity_id"] = entity_id,
-			["wand_data"] = read_wand(entity_id)
-		};
-	end
 
 	active_windows["research_wands"] = { true, function(get_next_id)
 		local player_money = get_player_money();
@@ -162,22 +159,22 @@ function show_research_wands_gui()
 		GuiLayoutEnd(gui);
 		GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 		for i = 0, 3 do
-			if wands[i] ~= nil then
-				local price = research_wand_price(get_selected_save_id(), wands[i].entity_id);
-				local is_new = research_wand_is_new(get_selected_save_id(), wands[i].entity_id);
+			if wand_entity_ids[i] ~= nil then
+				local price = research_wand_price(get_selected_save_id(), wand_entity_ids[i]);
+				local is_new = research_wand_is_new(get_selected_save_id(), wand_entity_ids[i]);
 				if is_new then
 					if price > player_money then
 						GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
 						GuiText(gui, 0, 0, " $" .. tostring(price));
 					else
-						if #wands[i].wand_data.spells > 0 then
+						if #read_wand(wand_entity_ids[i])["spells"] > 0 then
 							GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
 						else
 							GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 						end
 						if GuiButton(gui, 0, 0, " $" .. tostring(price), get_next_id()) then
-							research_wand(get_selected_save_id(), wands[i].entity_id);
-							wands[i] = nil;
+							research_wand(get_selected_save_id(), wand_entity_ids[i]);
+							wand_entity_ids[i] = nil; -- Verify this works
 						end
 					end
 				else
@@ -192,14 +189,14 @@ function show_research_wands_gui()
 		GuiLayoutEnd(gui);
 		GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 		for i = 0, 3 do
-			if wands[i] ~= nil then
-				local price = research_wand_price(get_selected_save_id(), wands[i].entity_id);
-				local is_new = research_wand_is_new(get_selected_save_id(), wands[i].entity_id);
+			if wand_entity_ids[i] ~= nil then
+				local price = research_wand_price(get_selected_save_id(), wand_entity_ids[i]);
+				local is_new = research_wand_is_new(get_selected_save_id(), wand_entity_ids[i]);
 				if is_new then
 					if price > player_money then
 						GuiText(gui, 0, 0, "(Too expensive)");
 					else
-						if #wands[i].wand_data.spells > 0 then
+						if #read_wand(wand_entity_ids[i])["spells"] > 0 then
 							GuiText(gui, 0, 0, "(WARNING: Spells on this wand will be lost)");
 						else
 							GuiText(gui, 0, 0, " ");
@@ -224,6 +221,11 @@ end
 
 local research_spells_open = false;
 function show_research_spells_gui()
+	local save_id = get_selected_save_id();
+	if not data_store_safe(save_id) or not spells_safe(save_id) then
+		return;
+	end
+
 	research_spells_open = true;
 	local spell_entity_ids = get_all_spells();
 	local researched_spells = get_spells(get_selected_save_id());
@@ -291,8 +293,13 @@ end
 
 local buy_wands_open = false;
 function show_buy_wands_gui()
-	buy_wands_open = true;
 	local save_id = get_selected_save_id();
+	if not data_store_safe(save_id) or not wand_types_safe(save_id) or not always_cast_safe(save_id) or not templates_safe(save_id) then
+		return;
+	end
+
+	buy_wands_open = true;
+
 	if can_create_wand(save_id) then
 		local WINDOW_ID = { id_base=0, id_pick_alwayscast=1, id_pick_icon=2};
 		local window_nr = WINDOW_ID.id_base;
@@ -706,9 +713,14 @@ end
 
 local buy_spells_open = false;
 function show_buy_spells_gui()
+	local save_id = get_selected_save_id();
+	if not data_store_safe(save_id) and not spells_safe(save_id) then
+		return;
+	end
+
 	buy_spells_open = true;
 	local page_number = 1;
-	local spells = get_spells(get_selected_save_id());
+	local spells = get_spells(save_id);
 	local spell_data = {};
 
 	for i = 1, #actions do

@@ -3,10 +3,10 @@ dofile_once("data/scripts/gun/gun_actions.lua");
 dofile_once("data/scripts/gun/procedural/wands.lua");
 dofile_once("mods/persistence/files/wand_spell_helper.lua");
 
-spells_per_cast_min = 0;
-mana_max_min = 0;
-mana_charge_speed_min = 0;
-capacity_min = 0;
+spells_per_cast_min = 1;
+mana_max_min = 1;
+mana_charge_speed_min = 1;
+capacity_min = 1;
 
 local data_store = {};
 local flag_prefix = "persistence";
@@ -218,232 +218,173 @@ function load(save_id)
 	data_store[save_id]["templates"] = {};
 	for i = 1, get_template_count() do
     load_template(save_id, i);
-	-- 	if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i)) then
-	-- 		data_store[save_id]["templates"][i] = {};
-	-- 		if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_shuffle") then
-	-- 			data_store[save_id]["templates"][i]["shuffle"] = true;
-	-- 		else
-	-- 			data_store[save_id]["templates"][i]["shuffle"] = false;
-	-- 		end
-	-- 		data_store[save_id]["templates"][i]["spells_per_cast"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_spells_per_cast"));
-	-- 		data_store[save_id]["templates"][i]["cast_delay"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_cast_delay"));
-	-- 		data_store[save_id]["templates"][i]["recharge_time"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_recharge_time"));
-	-- 		data_store[save_id]["templates"][i]["mana_max"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_mana_max"));
-	-- 		data_store[save_id]["templates"][i]["mana_charge_speed"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_mana_charge_speed"));
-	-- 		data_store[save_id]["templates"][i]["capacity"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_capacity"));
-	-- 		data_store[save_id]["templates"][i]["spread"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_spread")) / 10;
-
-	-- 		data_store[save_id]["templates"][i]["always_cast_spells"] = {};
-	-- 		for key, _ in pairs(data_store[save_id]["always_cast_spells"]) do
-	-- 			if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_always_cast_spell_" .. string.lower(key)) then
-	-- 				table.insert(data_store[save_id]["templates"][i]["always_cast_spells"], key);
-	-- 				break;
-	-- 			end
-	-- 		end
-
-	-- 		for key, _ in pairs(data_store[save_id]["wand_types"]) do
-	-- 			if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_wand_type_" .. string.lower(key)) then
-	-- 				data_store[save_id]["templates"][i]["wand_type"] = key;
-	-- 				break;
-	-- 			end
-	-- 		end
-	-- 	end
 	end
 end
 
+function data_store_safe(save_id)
+	if data_store[save_id] == nil then
+		return false;
+	end
+	return true;
+end
+
+function wand_types_safe(save_id)
+	if data_store[save_id]["wand_types"] == nil then
+		return false;
+	end
+	return true;
+end
+
+function always_cast_safe(save_id)
+	if data_store[save_id]["always_cast_spells"] == nil then
+		return false;
+	end
+	return true;
+end
+
+function spells_safe(save_id)
+	if data_store[save_id]["spells"] == nil then
+		return false;
+	end
+	return true;
+end
+
+function templates_safe(save_id)
+	if data_store[save_id]["templates"] == nil then
+		return false;
+	end
+	return true;
+end
+
+function data_store_section_safe(save_id, section)
+	if data_store[save_id] == nil then
+		return false;
+	end
+	if data_store[save_id][section] == nil then
+		return false;
+	end
+	return true;
+end
+
+
 -- spells per cast
 function get_spells_per_cast(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["spells_per_cast"] == nil and spells_per_cast_min or data_store[save_id]["spells_per_cast"];
 end
 
 local function set_spells_per_cast(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["spells_per_cast"] = value;
 	save_hex(tostring(save_id) .. "_spells_per_cast", number_to_hex(data_store[save_id]["spells_per_cast"]));
 end
 
 -- cast delay min
 function get_cast_delay_min(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["cast_delay_min"];
 end
 
 local function set_cast_delay_min(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["cast_delay_min"] = value;
 	save_hex(tostring(save_id) .. "_cast_delay_min", number_to_hex(data_store[save_id]["cast_delay_min"]));
 end
 
 -- cast delay max
 function get_cast_delay_max(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["cast_delay_max"];
 end
 
 local function set_cast_delay_max(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["cast_delay_max"] = value;
 	save_hex(tostring(save_id) .. "_cast_delay_max", number_to_hex(data_store[save_id]["cast_delay_max"]));
 end
 
 -- recharge time min
 function get_recharge_time_min(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["recharge_time_min"];
 end
 
 local function set_recharge_time_min(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["recharge_time_min"] = value;
 	save_hex(tostring(save_id) .. "_recharge_time_min", number_to_hex(data_store[save_id]["recharge_time_min"]));
 end
 
 -- recharge time max
 function get_recharge_time_max(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["recharge_time_max"];
 end
 
 local function set_recharge_time_max(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["recharge_time_max"] = value;
 	save_hex(tostring(save_id) .. "_recharge_time_max", number_to_hex(data_store[save_id]["recharge_time_max"]));
 end
 
 -- mana max
 function get_mana_max(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["mana_max"] == nil and mana_max_min or data_store[save_id]["mana_max"];
 end
 
 local function set_mana_max(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["mana_max"] = value;
 	save_hex(tostring(save_id) .. "_mana_max", number_to_hex(data_store[save_id]["mana_max"]));
 end
 
 -- mana charge speed
 function get_mana_charge_speed(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["mana_charge_speed"] == nil and mana_charge_speed_min or data_store[save_id]["mana_charge_speed"];
 end
 
 local function set_mana_charge_speed(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["mana_charge_speed"] = value;
 	save_hex(tostring(save_id) .. "_mana_charge_speed", number_to_hex(data_store[save_id]["mana_charge_speed"]));
 end
 
 -- capacity
 function get_capacity(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["capacity"] == nil and capacity_min or data_store[save_id]["capacity"];
 end
 
 local function set_capacity(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["capacity"] = value;
 	save_hex(tostring(save_id) .. "_capacity", number_to_hex(data_store[save_id]["capacity"]));
 end
 
 -- spread min
 function get_spread_min(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["spread_min"];
 end
 
 local function set_spread_min(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["spread_min"] = value;
 	save_hex(tostring(save_id) .. "_spread_min", number_to_hex(data_store[save_id]["spread_min"] == nil and nil or math.floor(data_store[save_id]["spread_min"] * 10)));
 end
 
 -- spread max
 function get_spread_max(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["spread_max"];
 end
 
 local function set_spread_max(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["spread_max"] = value;
 	save_hex(tostring(save_id) .. "_spread_max", number_to_hex(data_store[save_id]["spread_max"] == nil and nil or math.ceil(data_store[save_id]["spread_max"] * 10)));
 end
 
 -- money
 function get_safe_money(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
 	return data_store[save_id]["money"] == nil and 0 or data_store[save_id]["money"];
 end
 
 function set_safe_money(save_id, value)
-	if data_store[save_id] == nil then
-		return;
-	end
 	data_store[save_id]["money"] = value;
 	save_hex(tostring(save_id) .. "_money", number_to_hex(data_store[save_id]["money"]));
 end
 
 -- spells
 function get_spells(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
-	if data_store[save_id]["spells"] == nil then
-		return {};
-	end
 	return data_store[save_id]["spells"];
 end
 
 local function add_spells(save_id, spells)
-	if data_store[save_id] == nil or spells == nil or #spells == 0 then
+	if spells == nil or #spells == 0 then
 		return;
-	end
-	if data_store[save_id]["spells"] == nil then
-		data_store[save_id]["spells"] = {};
 	end
 	for i = 1, #spells do
 		data_store[save_id]["spells"][spells[i]] = true;
@@ -453,21 +394,12 @@ end
 
 -- always cast spells
 function get_always_cast_spells(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
-	if data_store[save_id]["always_cast_spells"] == nil then
-		return {};
-	end
 	return data_store[save_id]["always_cast_spells"];
 end
 
 local function add_always_cast_spells(save_id, spells)
-	if data_store[save_id] == nil or spells == nil or #spells == 0 then
+	if spells == nil or #spells == 0 then
 		return;
-	end
-	if data_store[save_id]["always_cast_spells"] == nil then
-		data_store[save_id]["always_cast_spells"] = {};
 	end
 	for i = 1, #spells do
 		data_store[save_id]["always_cast_spells"][spells[i]] = true;
@@ -477,22 +409,10 @@ end
 
 -- wand types
 function get_wand_types(save_id)
-	if data_store[save_id] == nil then
-		return nil;
-	end
-	if data_store[save_id]["wand_types"] == nil then
-		return {};
-	end
 	return data_store[save_id]["wand_types"];
 end
 
 local function add_wand_types(save_id, wand_types)
-	if data_store[save_id] == nil or wand_types == nil or #wand_types == 0 then
-		return;
-	end
-	if data_store[save_id]["wand_types"] == nil then
-		data_store[save_id]["wand_types"] = {};
-	end
 	for i = 1, #wand_types do
 		if string.sub(wand_types[i], 1, #"default") ~= "default" then
 			data_store[save_id]["wand_types"][wand_types[i]] = true;
@@ -541,17 +461,11 @@ function load_template(save_id, template_id)
 end
 
 function get_template(save_id, template_id)
-	if data_store[save_id] == nil or data_store[save_id]["templates"] == nil then
-		return nil;
-	end
 	load_template(save_id, template_id);
 	return data_store[save_id]["templates"][template_id];
 end
 
 function set_template(save_id, template_id, wand_data)
-	if data_store[save_id] == nil or data_store[save_id]["templates"] == nil then
-		return;
-	end
 	delete_template(save_id, template_id);
 	if wand_data == nil then
 		return;
@@ -580,9 +494,6 @@ function set_template(save_id, template_id, wand_data)
 end
 
 function delete_template(save_id, template_id)
-	if data_store[save_id] == nil then
-		return;
-	end
 	local template_prefix = tostring(save_id) .. "_template_" .. tostring(template_id);
 	local template_flag_prefix = flag_prefix .. "_" .. template_prefix;
 	RemoveFlagPersistent(template_flag_prefix .. "_shuffle");
@@ -612,10 +523,18 @@ function delete_template(save_id, template_id)
 end
 
 function can_create_wand(save_id)
+	if not data_store_safe(save_id) then
+		return false;
+	end
+
 	return get_cast_delay_min(save_id) ~= nil and get_cast_delay_max(save_id) ~= nil and get_recharge_time_min(save_id) ~= nil and get_recharge_time_max(save_id) ~= nil and get_spread_min(save_id) ~= nil and get_spread_max(save_id) ~= nil;
 end
 
 function research_wand_is_new(save_id, entity_id)
+	if not data_store_safe(save_id) or not wand_types_safe(save_id) or not always_cast_safe(save_id) then
+		return false;
+	end
+
 	local wand_data = read_wand(entity_id);
 	local spells_per_cast = get_spells_per_cast(save_id);
 	local cast_delay_min = get_cast_delay_min(save_id);
@@ -693,6 +612,10 @@ function research_wand_is_new(save_id, entity_id)
 end
 
 function research_wand_price(save_id, entity_id)
+	if not data_store_safe(save_id) or not wand_types_safe(save_id) or not always_cast_safe(save_id) then
+		return 0;
+	end
+
 	local wand_data = read_wand(entity_id);
 	local spells_per_cast = get_spells_per_cast(save_id);
 	local cast_delay_min = get_cast_delay_min(save_id);
@@ -772,6 +695,10 @@ function research_wand_price(save_id, entity_id)
 end
 
 function research_wand(save_id, entity_id)
+	if not data_store_safe(save_id) or not wand_types_safe(save_id) or not always_cast_safe(save_id) then
+		return false;
+	end
+
 	local wand_data = read_wand(entity_id);
 	local spells_per_cast = get_spells_per_cast(save_id);
 	local cast_delay_min = get_cast_delay_min(save_id);
@@ -863,6 +790,9 @@ function transfer_money_to_safe(save_id, amount)
 	if get_player_money() < amount then
 		return false;
 	end
+	if not data_store_safe(save_id) then
+		return false;
+	end
 
 	set_safe_money(save_id, get_safe_money(save_id) + amount);
 	set_player_money(get_player_money() - amount);
@@ -871,6 +801,9 @@ end
 
 function transfer_money_to_player(save_id, amount)
 	if get_safe_money(save_id) < amount then
+		return false;
+	end
+	if not data_store_safe(save_id) then
 		return false;
 	end
 

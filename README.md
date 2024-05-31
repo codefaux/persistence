@@ -59,6 +59,7 @@ My changes so far:
 -- Optimized safety checks; consolidated instead of spamming
 
 - Research Wand GUI
+-- Optimised for single data pass, sacrificing 'perfect' alignment
 -- Optimised to avoid needless multiple duplication of largely unused data
 
 - Reworked Money GUI

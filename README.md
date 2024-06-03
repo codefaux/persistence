@@ -17,7 +17,7 @@ I don't use Discord or other information sources which are ephemeral in nature, 
 
 
 
-This mod allows you to bank money for future uses including wand crafting and spell purchase. You can bank automatically on death (amount configurable, 10%~100%, default 25%) or manually mid-run at the Lobby area.
+This mod allows you to save money into a stash for future uses including wand crafting and spell purchase. You will save automatically on death (amount configurable, 10%~100%, default 25%) or you can manually access the stash mid-run at the Lobby area.
 
 The 'Lobby' area is, by default, the area between the stones with key bindings on them where you spawn, just outside the cave.
 
@@ -29,7 +29,9 @@ While in the 'Lobby area':
 
 The Persistence GUI will appear. Click a left-edge tab label to open it, and click it again to close it. (I'm working on improving this.)
 
-With your on-person money, you can Research both wands and spells, unlocking the ability to buy them for a single a future run.
+The 'Money' tab is for recovering your stashed money, or stashing more.
+
+With your on-person money, you can Research both wands and spells, unlocking the ability to buy a copy or copies for a single future run.
 
 Wand research costs vary depending on what each wand has to offer you. IE, a wand which can only improve one stat when researched will be the same cost regardless of its other stats.
 
@@ -84,7 +86,7 @@ My changes so far:
 -- Shifted positions
 -- Colorized
 
-- Stash/Take GUI
+- Stash GUI
 -- Rewording of Take/Stash instead of ^/V buttons
 --- (English only -- options for translations are on TODO, prefer ingame strings)
 -- Colorized unavailable options

@@ -1,4 +1,4 @@
-dofile("data/scripts/lib/mod_settings.lua") -- see this file for documentation on some of the features.
+dofile_once("data/scripts/lib/mod_settings.lua");
 dofile_once("mods/persistence/files/helper.lua");
 
 -- This file can't access other files from this or other mods in all circumstances.

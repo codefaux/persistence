@@ -3,12 +3,16 @@ dofile_once("mods/persistence/files/data_store.lua");
 dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/gun/procedural/wands.lua");
 dofile_once("mods/persistence/files/wand_spell_helper.lua");
+dofile_once("data/scripts/gun/gun_actions.lua")
 
 local gui = GuiCreate();
 local active_windows = {};
 
 local gui_margin_x = 8;
 local gui_margin_y = 1;
+
+
+-- SAVE SELECTOR
 
 function show_save_selector_gui()
 	local delete_save_confirmation = 0;
@@ -56,6 +60,9 @@ end
 function hide_save_selector_gui()
 	active_windows["save_selector"] = nil;
 end
+
+
+-- MONEY
 
 local money_open = false;
 function show_money_gui()
@@ -118,6 +125,9 @@ function hide_money_gui()
 	active_windows["money"] = nil;
 end
 
+
+-- TELEPORT
+
 function show_teleport_gui()
 	local teleport_confirmation = false;
 	active_windows["teleport"] = { false, function(get_next_id)
@@ -138,6 +148,9 @@ end
 function hide_teleport_gui()
 	active_windows["teleport"] = nil;
 end
+
+
+-- RESEARCH WANDS
 
 local research_wands_open = false;
 function show_research_wands_gui()
@@ -199,6 +212,9 @@ function hide_research_wands_gui()
 	active_windows["research_wands"] = nil;
 end
 
+
+-- RESEARCH SPELLS
+
 local research_spells_open = false;
 function show_research_spells_gui()
 	local save_id = get_selected_save_id();
@@ -207,30 +223,40 @@ function show_research_spells_gui()
 	end
 
 	research_spells_open = true;
-	local spell_entity_ids = get_all_spells();
+	local inv_spell_entity_ids = get_all_inv_spells();
 	local researched_spells = get_spells(get_selected_save_id());
-	local spell_data_temp = {};
+	local inv_spell_data_temp = {};
 	local spell_data = {};
 
-	for i = 1, #spell_entity_ids do
-		local action_id = read_spell(spell_entity_ids[i]);
+	for i, spell_entity_id in ipairs(inv_spell_entity_ids) do
+		local action_id = get_spell_entity_action_id(spell_entity_id);
 		if action_id ~= nil then
 			if researched_spells == nil or researched_spells[action_id] == nil then
-				spell_data_temp[action_id] = spell_entity_ids[i];
+				table.insert(spell_data, {
+					["entity_id"] = spell_entity_id,
+					["id"] = action_id,
+					["name"] = GameTextGetTranslatedOrNot(actions_by_id[action_id].name),
+					["price"] = research_spell_entity_price(spell_entity_id)
+				});
+				-- inv_spell_data_temp[action_id] = inv_spell_entity_ids[i];
 			end
 		end
 	end
-	for i = 1, #actions do
-		local entity_id = spell_data_temp[actions[i].id];
-		if entity_id ~= nil then
-			table.insert(spell_data, {
-				["entity_id"] = entity_id,
-				["id"] = actions[i].id,
-				["name"] = GameTextGetTranslatedOrNot(actions[i].name),
-				["price"] = research_spell_price(entity_id)
-			});
-		end
-	end
+
+	-- for i = 1, #actions do -- build spell_data table w/ entity_id, id, name, price for get_all_inv_spells()
+	-- 	local entity_id = inv_spell_data_temp[actions[i].id];
+	-- 	if entity_id ~= nil then
+	-- 		table.insert(spell_data, {
+	-- 			["entity_id"] = entity_id,
+	-- 			["id"] = actions[i].id,
+	-- 			["name"] = GameTextGetTranslatedOrNot(actions[i].name),
+	-- 			["price"] = research_spell_price(entity_id)
+	-- 		});
+	-- 	end
+	-- end
+
+
+
 	table.sort(spell_data, function(a, b) return a.name < b.name end);
 
 	active_windows["research_spells"] = { true, function(get_next_id)
@@ -245,7 +271,7 @@ function show_research_spells_gui()
 				else
 					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
-						research_spell(get_selected_save_id(), value.entity_id);
+						research_spell_entity(get_selected_save_id(), value.entity_id);
 						hide_research_spells_gui();
 						show_research_spells_gui();
 					end
@@ -270,6 +296,9 @@ function hide_research_spells_gui()
 	research_spells_open = false;
 	active_windows["research_spells"] = nil;
 end
+
+
+-- BUY WANDS
 
 local buy_wands_open = false;
 function show_buy_wands_gui()
@@ -324,15 +353,22 @@ function show_buy_wands_gui()
 		wand_stat_limits.min = {spells_per_cast_min, cast_delay_min, recharge_time_min, mana_min, mana_charge_speed_min, capacity_min, spread_min };
 		wand_stat_limits.max = {spells_per_cast_max, cast_delay_max, recharge_time_max, mana_max, mana_charge_speed_max, capacity_max, spread_max };
 
-		for i = 1, #actions do
-			if always_cast_spells ~= nil and always_cast_spells[actions[i].id] ~= nil then
-				table.insert(spell_data, {
-					["id"] = actions[i].id,
-					["name"] = GameTextGetTranslatedOrNot(actions[i].name),
-					["selected"] = false
-				});
-			end
+		for _, always_cast_id in ipairs(always_cast_spells) do -- -- load spell_data with id, name, selected from always_cast_spells[] by action_id
+			table.insert(spell_data, {
+				["id"] = always_cast_id,
+				["name"] = GameTextGetTranslatedOrNot(actions_by_id[always_cast_id].name),
+				["selected"] = false
+			});
 		end
+		-- for i = 1, #actions do -- -- load spell_data with id, name, selected from always_cast_spells[] by action_id
+		-- 	if always_cast_spells ~= nil and always_cast_spells[actions[i].id] ~= nil then
+		-- 		table.insert(spell_data, {
+		-- 			["id"] = actions[i].id,
+		-- 			["name"] = GameTextGetTranslatedOrNot(actions[i].name),
+		-- 			["selected"] = false
+		-- 		});
+		-- 	end
+		-- end
 
 		local function toggle_select_spell(action_id)
 			local selected = false;
@@ -691,6 +727,9 @@ function hide_buy_wands_gui()
 	active_windows["buy_wands"] = nil;
 end
 
+
+-- BUY SPELLS
+
 local buy_spells_open = false;
 function show_buy_spells_gui()
 	local save_id = get_selected_save_id();
@@ -703,15 +742,22 @@ function show_buy_spells_gui()
 	local spells = get_spells(save_id);
 	local spell_data = {};
 
-	for i = 1, #actions do
-		if spells ~= nil and spells[actions[i].id] ~= nil then
-			table.insert(spell_data, {
-				["id"] = actions[i].id,
-				["name"] = GameTextGetTranslatedOrNot(actions[i].name),
-				["price"] = create_spell_price(actions[i].id)
-			});
-		end
+	for spell_id, _ in pairs(spells) do
+		table.insert(spell_data, {
+			["id"] = spell_id,
+			["name"] = GameTextGetTranslatedOrNot(actions_by_id[spell_id].name),
+			["price"] = create_spell_price(spell_id)
+		});
 	end
+	-- for i = 1, #actions do
+	-- 	if spells ~= nil and spells[actions[i].id] ~= nil then
+	-- 		table.insert(spell_data, {
+	-- 			["id"] = actions[i].id,
+	-- 			["name"] = GameTextGetTranslatedOrNot(actions[i].name),
+	-- 			["price"] = create_spell_price(actions[i].id)
+	-- 		});
+	-- 	end
+	-- end
 
 	table.sort(spell_data, function(a, b) return a.name < b.name end);
 	local columns = split_array(spell_data, 20);
@@ -789,7 +835,13 @@ function hide_buy_spells_gui()
 	active_windows["buy_spells"] = nil;
 end
 
-function show_menu_gui()
+
+-- LOBBY MENU
+
+local menu_open = false;
+function show_lobby_gui()
+	menu_open = true;
+
 	local is_enabled = true;
 	hide_money_gui();
 	hide_research_wands_gui();
@@ -869,23 +921,14 @@ function show_menu_gui()
 	end };
 end
 
-function hide_menu_gui()
+function hide_lobby_gui()
+	menu_open = false;
 	hide_money_gui();
 	hide_research_wands_gui();
 	hide_research_spells_gui();
 	hide_buy_wands_gui();
 	hide_buy_spells_gui();
 	active_windows["menu"] = nil;
-end
-
-function show_lobby_gui()
-	menu_open = true;
-	show_menu_gui();
-end
-
-function hide_lobby_gui()
-	menu_open = false;
-	hide_menu_gui();
 end
 
 function hide_all_gui()

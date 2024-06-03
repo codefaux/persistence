@@ -3,10 +3,10 @@ dofile_once("data/scripts/gun/gun_actions.lua");
 dofile_once("data/scripts/gun/procedural/wands.lua");
 dofile_once("mods/persistence/files/wand_spell_helper.lua");
 
-spells_per_cast_min = 1;
-mana_max_min = 1;
-mana_charge_speed_min = 1;
-capacity_min = 1;
+local spells_per_cast_min = 1;
+local mana_max_min = 1;
+local mana_charge_speed_min = 1;
+local capacity_min = 1;
 
 local data_store = {};
 local flag_prefix = "persistence";
@@ -592,15 +592,24 @@ function research_wand_is_new(save_id, entity_id)
 		end
 	end
 	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
-		for i = 1, #wand_data["always_cast_spells"] do
-			if always_cast_spells[wand_data["always_cast_spells"][i]] == nil then
-				for j = 1, #actions do
-					if actions[j].id == wand_data["always_cast_spells"][i] then
-						return true;
-					end
+		for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
+			if always_cast_spells[always_cast_id] == nil then
+				if actions_by_id[always_cast_id] ~= nil then
+					return true;
 				end
 			end
 		end
+		-- if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
+		-- 	for i = 1, #wand_data["always_cast_spells"] do
+		-- 		if always_cast_spells[wand_data["always_cast_spells"][i]] == nil then
+		-- 			for j = 1, #actions do
+		-- 				if actions[j].id == wand_data["always_cast_spells"][i] then
+		-- 					return true;
+		-- 				end
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 	end
 	if wand_types == nil or wand_types[wand_data["wand_type"]] == nil then
 		if wand_type_to_wand(wand_data["wand_type"]) ~= nil then
@@ -674,16 +683,21 @@ function research_wand_price(save_id, entity_id)
 		end
 	end
 	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
-		for i = 1, #wand_data["always_cast_spells"] do
-			if always_cast_spells[wand_data["always_cast_spells"][i]] == nil then
-				for j = 1, #actions do
-					if actions[j].id == wand_data["always_cast_spells"][i] then
-						price = price + actions[j].price * 20;
-						break;
-					end
-				end
+		for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
+			if always_cast_spells[always_cast_id] == nil then
+				price = price + actions_by_id[always_cast_id].price * 20;
 			end
 		end
+		-- for i = 1, #wand_data["always_cast_spells"] do
+		-- 	if always_cast_spells[wand_data["always_cast_spells"][i]] == nil then
+		-- 		for j = 1, #actions do
+		-- 			if actions[j].id == wand_data["always_cast_spells"][i] then
+		-- 				price = price + actions[j].price * 20;
+		-- 				break;
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 	end
 	if wand_types == nil or wand_types[wand_data["wand_type"]] == nil then
 		if wand_type_to_wand(wand_data["wand_type"]) ~= nil then
@@ -753,25 +767,26 @@ function research_wand(save_id, entity_id)
 		add_wand_types(save_id, { wand_data["wand_type"] });
 	end
 
-	delete_wand(entity_id);
+	delete_wand_entity(entity_id);
 	set_player_money(get_player_money() - price);
 	return true;
 end
 
-function research_spell_price(entity_id)
-	local action_id = read_spell(entity_id);
+function research_spell_entity_price(entity_id)
+	local action_id = get_spell_entity_action_id(entity_id);
 	if action_id == nil then
 		return nil
 	end
-	for i = 1, #actions do
-		if actions[i].id == action_id then
-			return math.ceil(actions[i].price * ModSettingGet("persistence.research_spell_price_multiplier"));
-		end
-	end
+	return math.ceil(actions_by_id[action_id].price * ModSettingGet("persistence.research_spell_price_multiplier"))
+	-- for i = 1, #actions do
+	-- 	if actions[i].id == action_id then
+	-- 		return math.ceil(actions[i].price * ModSettingGet("persistence.research_spell_price_multiplier"));
+	-- 	end
+	-- end
 end
 
-function research_spell(save_id, entity_id)
-	local price = research_spell_price(entity_id);
+function research_spell_entity(save_id, entity_id)
+	local price = research_spell_entity_price(entity_id);
 	if price == nil then
 		return false;
 	end
@@ -779,9 +794,9 @@ function research_spell(save_id, entity_id)
 		return false;
 	end
 
-	add_spells(save_id, { read_spell(entity_id) });
+	add_spells(save_id, { get_spell_entity_action_id(entity_id) });
 
-	delete_spell(entity_id);
+	delete_spell_entity(entity_id);
 	set_player_money(get_player_money() - price);
 	return true;
 end

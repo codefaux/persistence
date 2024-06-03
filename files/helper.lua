@@ -1,4 +1,28 @@
-dofile("data/scripts/lib/mod_settings.lua") -- see this file for documentation on some of the features.
+dofile("data/scripts/lib/mod_settings.lua");
+dofile_once("data/scripts/gun/gun_actions.lua");
+
+actions_by_id = {};
+
+function load_actions_by_id()
+	for i = 1, #actions do
+		actions_by_id[actions[i].id] = {
+			actions_index = i,
+			name = actions[i].name,
+			description = actions[i].description,
+			sprite = actions[i].sprite,
+			sprite_unidentified = actions[i].sprite_unidentified,
+			related_projectiles = actions[i].related_projectiles,
+			type = actions[i].type,
+			spawn_level = actions[i].spawn_level,
+			spawn_probability = actions[i].spawn_probability,
+			price = actions[i].price,
+			mana = actions[i].mana,
+			max_uses = actions[i].max_uses,
+			custom_xml_file = actions[i].custom_xml_file,
+			action = actions[i].action
+		};
+	end
+end
 
 function pad_number(number, length)
 	local output = tostring(number);

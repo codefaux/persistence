@@ -37,8 +37,10 @@ end
 
 function read_wand(entity_id)
 	local wand_data = {};
-	for _, comp in ipairs(EntityGetAllComponents(entity_id)) do
-		if ComponentGetTypeName(comp) == "AbilityComponent" then
+
+	local comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent");
+	-- for _, comp in ipairs(EntityGetAllComponents(entity_id)) do
+	-- 	if ComponentGetTypeName(comp) == "AbilityComponent" then
 			wand_data["shuffle"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "shuffle_deck_when_empty")) == 1 and true or false;
 			wand_data["spells_per_cast"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "actions_per_round"));
 			wand_data["cast_delay"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "fire_rate_wait"));
@@ -48,9 +50,10 @@ function read_wand(entity_id)
 			wand_data["capacity"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "deck_capacity"));
 			wand_data["spread"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "spread_degrees"));
 			wand_data["wand_type"] = sprite_file_to_wand_type(ComponentGetValue2(comp, "sprite_file"));
-			break;
-		end
-	end
+			-- break;
+		-- end
+	-- end
+
 	wand_data["spells"] = {};
 	wand_data["always_cast_spells"] = {};
 	local childs = EntityGetAllChildren(entity_id);
@@ -71,22 +74,23 @@ function read_wand(entity_id)
 	return wand_data;
 end
 
-function read_spell(entity_id)
-	for _, comp_id in ipairs(EntityGetAllComponents(entity_id)) do
-		if ComponentGetTypeName(comp_id) == "ItemActionComponent" then
-			return ComponentGetValue2(comp_id, "action_id");
-		end
-	end
+function get_spell_entity_action_id(entity_id)
+	-- for _, comp_id in ipairs(EntityGetAllComponents(entity_id)) do
+	-- 	if ComponentGetTypeName(comp_id) == "ItemActionComponent" then
+	-- 		return ComponentGetValue2(comp_id, "action_id");
+	-- 	end
+	-- end
+	return ComponentGetValue2( EntityGetFirstComponentIncludingDisabled(entity_id, "ItemActionComponent"), "action_id");
 end
 
-function delete_wand(entity_id)
+function delete_wand_entity(entity_id)
 	if not EntityHasTag(entity_id, "wand") then
 		return;
 	end
 	EntityKill(entity_id);
 end
 
-function delete_spell(entity_id)
+function delete_spell_entity(entity_id)
 	if not EntityHasTag(entity_id, "card_action") then
 		return;
 	end
@@ -106,14 +110,17 @@ function create_wand_price(wand_data)
 	price = price + math.max(wand_data["capacity"] - 1, 0) * 50;
 	price = price + math.abs(5 - wand_data["spread"]) * 5;
 	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 then
-		for i = 1, #wand_data["always_cast_spells"] do
-			for j = 1, #actions do
-				if actions[j].id == wand_data["always_cast_spells"][i] then
-					price = price + actions[j].price * 5;
-					break;
-				end
-			end
+		for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
+				price = price + actions_by_id[always_cast_id].price * 5;
 		end
+		-- for j = 1, #actions do
+		-- 	for i = 1, #wand_data["always_cast_spells"] do
+		-- 		if actions[j].id == wand_data["always_cast_spells"][i] then
+		-- 			price = price + actions[j].price * 5;
+		-- 			break;
+		-- 		end
+		-- 	end
+		-- end
 	end
 	return math.ceil(price * ModSettingGet("persistence.buy_wand_price_multiplier"));
 end
@@ -157,11 +164,12 @@ function create_wand(wand_data)
 end
 
 function create_spell_price(action_id)
-	for i = 1, #actions do
-		if actions[i].id == action_id then
-			return math.ceil(actions[i].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
-		end
-	end
+	return math.ceil(actions_by_id[action_id].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
+	-- for i = 1, #actions do
+	-- 	if actions[i].id == action_id then
+	-- 		return math.ceil(actions[i].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
+	-- 	end
+	-- end
 end
 
 function create_spell(action_id)
@@ -195,7 +203,7 @@ function get_all_wands()
 	return wands;
 end
 
-function get_all_spells()
+function get_all_inv_spells()
 	local spells = {};
 	if get_inventory_full() == nil then
 		return spells;

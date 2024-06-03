@@ -55,7 +55,15 @@ end
 
 local is_post_player_spawned = false;
 local is_in_workshop = false;
+
+
+-- GAME ENGINE EVENTS
+
 function OnWorldPostUpdate()
+	if #actions_by_id < 1 then
+		load_actions_by_id();
+	end
+
 	if lobby_collider == nil or lobby_collider == 0 then
 		local controls_mouse = EntityGetWithTag("controls_mouse")[1];
 		if controls_mouse ~= nil and controls_mouse ~= 0 then
@@ -110,7 +118,7 @@ function OnWorldPostUpdate()
 			is_in_lobby = true;
 			enter_lobby();
 			if inventory_open then
-				hide_menu_gui();
+				hide_lobby_gui();
 			end
 		end
 		GlobalsSetValue("lobby_collider_triggered", "0");
@@ -152,7 +160,7 @@ function OnWorldPostUpdate()
 					if ModSettingGet("persistence.enable_menu_in_holy_mountain") then
 						enter_lobby();
 						if inventory_open then
-							hide_menu_gui();
+							hide_lobby_gui();
 						end
 					end
 				end
@@ -258,4 +266,8 @@ function OnPlayerDied(player_entity)
 	local money_to_save = math.floor(money * ModSettingGet("persistence.money_saved_on_death") );
 	GamePrintImportant("You died", " $ " .. tostring(money_to_save) .. " was saved.");
 	set_safe_money(get_selected_save_id(), math.abs(get_safe_money(get_selected_save_id()) + money_to_save));
+end
+
+function GameOnCompleted()
+
 end

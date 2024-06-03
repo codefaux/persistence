@@ -228,7 +228,7 @@ function show_research_spells_gui()
 	local inv_spell_data_temp = {};
 	local spell_data = {};
 
-	for i, spell_entity_id in ipairs(inv_spell_entity_ids) do
+	for _, spell_entity_id in ipairs(inv_spell_entity_ids) do
 		local action_id = get_spell_entity_action_id(spell_entity_id);
 		if action_id ~= nil then
 			if researched_spells == nil or researched_spells[action_id] == nil then
@@ -741,96 +741,45 @@ function show_buy_spells_gui()
 	if not data_store_safe(save_id) and not spells_safe(save_id) then
 		return;
 	end
-
 	buy_spells_open = true;
-	local page_number = 1;
-	local spells = get_spells(save_id);
-	local spell_data = {};
 
-	for spell_id, _ in pairs(spells) do
-		table.insert(spell_data, {
-			["id"] = spell_id,
-			["name"] = GameTextGetTranslatedOrNot(actions_by_id[spell_id].name),
-			["price"] = create_spell_price(spell_id)
-		});
+	local player_money = get_player_money();
+	local idx = 0;
+	local tmp_spells = get_spells(save_id);
+	local spells = {};
+	for spell_id, _ in pairs(tmp_spells) do
+	  spells[idx] = actions_by_id[spell_id];
+		spells[idx].id = spell_id;
+		idx = idx + 1;
 	end
-	-- for i = 1, #actions do
-	-- 	if spells ~= nil and spells[actions[i].id] ~= nil then
-	-- 		table.insert(spell_data, {
-	-- 			["id"] = actions[i].id,
-	-- 			["name"] = GameTextGetTranslatedOrNot(actions[i].name),
-	-- 			["price"] = create_spell_price(actions[i].id)
-	-- 		});
-	-- 	end
-	-- end
-
-	table.sort(spell_data, function(a, b) return a.name < b.name end);
-	local columns = split_array(spell_data, 20);
+	table.sort(spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
 
 	active_windows["buy_spells"] = { true, function(get_next_id)
-		local player_money = get_player_money();
-		if columns[page_number * 2 - 1] ~= nil then
-			GuiLayoutBeginHorizontal(gui, 20, 15, false, gui_margin_x, gui_margin_y);
-			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-			for _, value in ipairs(columns[page_number * 2 - 1]) do
-				if player_money < value.price then
-					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
-					GuiText(gui, 0, 0, " $ " .. tostring(value.price));
-				else
-					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
-					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
-						create_spell(value.id);
-					end
-				end
-			end
-			GuiLayoutEnd(gui);
+		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
+		idx = 0;
+		local line_height = 28;
+		local purchase = "";
+		for _, curr_spell in ipairs(spells) do
+			local line_pos = idx * line_height;
+			if player_money < curr_spell.price then
+				GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
+				GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell.price)
+			else
+				GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+				if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell.price, get_next_id()) then
+					create_spell(curr_spell.id);
+					purchase = curr_spell.id;
+				end	-- Button (Cost)
+			end -- Colorize Button
+			GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
+			GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
+			GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
+			idx = idx + 1;
+		end
+		GuiEndScrollContainer(gui);
 
-			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-			for _, value in ipairs(columns[page_number * 2 - 1]) do
-				GuiText(gui, 0, 0, value.name);
-			end
-			GuiLayoutEnd(gui);
-			GuiLayoutEnd(gui);
-		end
-		if columns[page_number * 2] ~= nil then
-			GuiLayoutBeginHorizontal(gui, 50, 15, false, gui_margin_x, gui_margin_y);
-			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-			for _, value in ipairs(columns[page_number * 2]) do
-				if player_money < value.price then
-					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
-					GuiText(gui, 0, 0, " $ " .. tostring(value.price));
-				else
-					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
-					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
-						create_spell(value.id);
-					end
-				end
-			end
-			GuiLayoutEnd(gui);
-
-			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-			for _, value in ipairs(columns[page_number * 2]) do
-				GuiText(gui, 0, 0, value.name);
-			end
-			GuiLayoutEnd(gui);
-			GuiLayoutEnd(gui);
-		end
-		if page_number > 1 then
-			GuiLayoutBeginHorizontal(gui, 48, 95);
-			if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-				page_number = page_number - 1;
-			end
-			GuiLayoutEnd(gui);
-		end
-		GuiLayoutBeginHorizontal(gui, 50, 95);
-		GuiText(gui, 0, 0, tostring(page_number));
-		GuiLayoutEnd(gui);
-		if page_number < math.ceil(#columns / 2) then
-			GuiLayoutBeginHorizontal(gui, 52, 95);
-			if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-				page_number = page_number + 1;
-			end
-			GuiLayoutEnd(gui);
+		if purchase ~= "" then
+			GamePrint(" Purchased " .. GameTextGetTranslatedOrNot(actions_by_id[purchase]));
 		end
 	end };
 end
@@ -958,6 +907,7 @@ function gui_update()
 		local start_gui_id = 14796823;
 		if is_dark_background then
 			local cx, cy = GameGetCameraPos();
+			GuiZSetForNextWidget(gui, 1000);
 			GuiImage(gui, start_gui_id - 1, 0, 0, "mods/persistence/files/gui_darken.png", 1, 1, 1, 0);
 		end
 		for name, window in pairs(active_windows) do

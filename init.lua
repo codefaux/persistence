@@ -114,26 +114,39 @@ function OnWorldPostUpdate()
 		return;
 	end
 
-	for _, workshop in ipairs(EntityGetWithTag("workshop")) do
-		local shop_x, shop_y = EntityGetTransform(workshop);
-		local custom_workshop = EntityGetClosestWithTag(shop_x, shop_y, "persistence_workshop");
-		local custom_x, custom_y = EntityGetTransform(custom_workshop);
-		if custom_workshop == nil or custom_workshop == 0 or (shop_x - custom_x) * (shop_y - custom_y) > 10 then
-			custom_workshop = EntityLoad("mods/persistence/files/workshop_collider.xml", shop_x, shop_y);
-			local workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent"); 
-			local custom_workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(custom_workshop, "HitboxComponent");
-			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_x"));
-			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_y"));
-			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_x"));
-			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_y"));
+	local workshop_list = EntityGetWithTag("workshop");
+
+	-- for _, workshop in ipairs(EntityGetWithTag("workshop")) do
+	-- if #workshop_list > #persistence_list then
+		for _, workshop in ipairs(workshop_list) do
+			local shop_x, shop_y = EntityGetTransform(workshop);
+			local custom_workshop = EntityGetClosestWithTag(shop_x, shop_y, "persistence_workshop");
+			local custom_x, custom_y = EntityGetTransform(custom_workshop);
+			if custom_workshop == nil or custom_workshop == 0 or (shop_x - custom_x) * (shop_y - custom_y) > 10 then
+				GamePrint("Updating workshop " .. custom_workshop .. " for " .. workshop )
+				custom_workshop = EntityLoad("mods/persistence/files/workshop_collider.xml", shop_x, shop_y);
+				local workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent"); 
+				local custom_workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(custom_workshop, "HitboxComponent");
+				ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_x"));
+				ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_y"));
+				ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_x"));
+				ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_y"));
+			end
 		end
-	end
+	-- end
 
 	local plr_x, plr_y = EntityGetTransform(get_player_id());
 	local is_in_workshop_before = is_in_workshop;
 	is_in_workshop = false;
 	-- for _, qualified_workshop in ipairs(EntityGetWithTag(ModSettingGet("persistence.reusable_holy_mountain") and "persistence_workshop" or "workshop")) do
-	for _, qualified_workshop in ipairs(EntityGetWithTag("workshop")) do
+	if ModSettingGet("persistence_reusable_holy_mountain") then
+		local persistence_list = EntityGetWithTag("persistence_workshop");
+    for _, persistence_item in ipairs(persistence_list) do
+			workshop_list[#workshop_list+1] = persistence_item;
+		end
+	end
+
+	for _, qualified_workshop in ipairs(workshop_list) do
 		local qshop_x, qshop_y = EntityGetTransform(qualified_workshop);
 		local qshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(qualified_workshop, "HitboxComponent");
 		local qshop_hit_min_x = tonumber(ComponentGetValue2(qshop_hitbox_comp, "aabb_min_x")) + qshop_x;

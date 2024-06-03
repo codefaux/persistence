@@ -575,16 +575,18 @@ function show_buy_wands_gui()
 								delete_template_confirmation = i;
 							end
 						end
-						if select(3, GuiGetPreviousWidgetInfo(gui)) then
-							template_hover = i;
-						end
+						-- if select(3, GuiGetPreviousWidgetInfo(gui)) then
+						-- 	template_hover = i;
+						-- end
+					  template_hover = select(3, GuiGetPreviousWidgetInfo(gui));
 						GuiLayoutEnd(gui);
 						GuiLayoutEnd(gui);
 					end
 					GuiLayoutEnd(gui);
 
-					if template_hover == i then
-						GuiLayoutBeginLayer(gui);
+					if template_hover == true then
+						-- GuiBeginAutoBox(gui);
+						-- GuiLayoutBeginLayer(gui);
 						GuiLayoutBeginHorizontal(gui, 60, 60, false, gui_margin_x, gui_margin_y);
 						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						GuiText(gui, 0, 0, "$inventory_shuffle");
@@ -607,7 +609,10 @@ function show_buy_wands_gui()
 						GuiText(gui, 0, 0, tostring(template_preview["capacity"]) );
 						GuiText(gui, 0, 0, tostring(math.floor(template_preview["spread"] * 10 + 0.5) / 10) );
 						GuiText(gui, 0, 0, tostring(#template_preview["always_cast_spells"]) .. " spells" );
-						GuiLayoutEndLayer(gui);
+						GuiLayoutEnd(gui);
+						GuiLayoutEnd(gui);
+						-- GuiLayoutEndLayer(gui);
+						-- GuiEndAutoBoxNinePiece(gui);
 					end
 				end
 			elseif window_nr == WINDOW_ID.id_pick_alwayscast then

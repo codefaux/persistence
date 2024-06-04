@@ -313,7 +313,7 @@ function show_buy_wands_gui()
 	if can_create_wand(save_id) then
 		local WINDOW_ID = { id_base=0, id_pick_alwayscast=1, id_pick_icon=2};
 		local window_nr = WINDOW_ID.id_base;
-		local gui_margin_y = 2; -- Override
+		local gui_margin_y = 3; -- Override
 		local gui_margin_short_x = 5;
 		local spells_per_cast_min = 1;
 		local spells_per_cast_max = get_spells_per_cast(save_id);
@@ -457,6 +457,7 @@ function show_buy_wands_gui()
 				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 					window_nr = WINDOW_ID.id_pick_icon;
 				end
+
 				GuiText(gui, 0, 0, wand_data_selected["shuffle"] and "$menu_yes" or "$menu_no");
 				GuiText(gui, 0, 0, tostring(wand_data_selected["spells_per_cast"]));
 				GuiText(gui, 0, 0, tostring(math.floor((wand_data_selected["cast_delay"] / 60) * 100 + 0.5) / 100));
@@ -559,19 +560,18 @@ function show_buy_wands_gui()
 								delete_template_confirmation = i;
 							end
 						end
-						-- if select(3, GuiGetPreviousWidgetInfo(gui)) then
-						-- 	template_hover = i;
-						-- end
-					  template_hover = select(3, GuiGetPreviousWidgetInfo(gui));
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
+						end
 						GuiLayoutEnd(gui);
 						GuiLayoutEnd(gui);
 					end
 					GuiLayoutEnd(gui);
 
-					if template_hover == true then
-						-- GuiBeginAutoBox(gui);
-						-- GuiLayoutBeginLayer(gui);
-						GuiLayoutBeginHorizontal(gui, 60, 60, false, gui_margin_x, gui_margin_y);
+					if template_hover ~= 0 then
+						local template_preview = get_template(save_id, i);
+						GuiBeginScrollContainer(gui, get_next_id(), 400, 200, 90, 125);
+						GuiLayoutBeginHorizontal(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						GuiText(gui, 0, 0, "$inventory_shuffle");
 						GuiText(gui, 0, 0, "$inventory_actionspercast");
@@ -595,8 +595,7 @@ function show_buy_wands_gui()
 						GuiText(gui, 0, 0, tostring(#template_preview["always_cast_spells"]) .. " spells" );
 						GuiLayoutEnd(gui);
 						GuiLayoutEnd(gui);
-						-- GuiLayoutEndLayer(gui);
-						-- GuiEndAutoBoxNinePiece(gui);
+						GuiEndScrollContainer(gui);
 					end
 				end
 			elseif window_nr == WINDOW_ID.id_pick_alwayscast then

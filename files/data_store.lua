@@ -517,7 +517,7 @@ function delete_template(save_id, template_id)
 	end
 
 	RemoveFlagPersistent(template_flag_prefix);
-	if data_store[save_id]["templates"] ~= nil then
+	if data_store[save_id] ~= nil and data_store[save_id]["templates"] ~= nil then
 		data_store[save_id]["templates"][template_id] = nil;
 	end
 end

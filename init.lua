@@ -251,7 +251,6 @@ function OnPostPlayerSpawned()
 					end
 				end
 			else
-				disable_controls();
 				show_save_selector_gui();
 			end
 		end

@@ -12,49 +12,65 @@ local active_windows = {};
 local gui_margin_x = 8;
 local gui_margin_y = 1;
 
-
 -- SAVE SELECTOR
-
+local save_open = false;
 function show_save_selector_gui()
+	save_open = true;
+	disable_controls();
+
 	local delete_save_confirmation = 0;
 	active_windows["save_selector"] = { true, function (get_next_id)
-		GuiLayoutBeginVertical(gui, 1, 20);
+		GuiBeginScrollContainer(gui, get_next_id(), 30, 30, 250, 250);
+		GuiLayoutBeginVertical(gui, 3, 3);
+		GuiText(gui, 0, 0, "Select a save slot to proceed:");
+		GuiColorSetForNextWidget(gui, 0.5, 0.5, 0.75, 1);
+		GuiText(gui, 0, 0, "(Auto-load can be configured in the Mod Options menu)");
 		for i = 1, get_save_count() do
-			GuiText(gui, 0, 0, "Save slot " .. pad_number(i, #tostring(get_save_count())) .. ":");
+			GuiText(gui, 0, 4, "Save slot " .. pad_number(i, #tostring(get_save_count())) .. ":");
 			if get_save_ids()[i] == nil then
-				if GuiButton(gui, 20, 0, "Create new save", get_next_id()) then
+				GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+				if GuiButton(gui, 20, 0, "- Create new save", get_next_id()) then
 					set_selected_save_id(i);
 					create_new_save(i);
 					hide_save_selector_gui();
 					OnSaveAvailable(i);
 					enable_controls();
+					save_open = false;
 				end
 			else
-				if GuiButton(gui, 20, 0, "Load save", get_next_id()) then
+				GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+				if GuiButton(gui, 20, 0, "- Load save", get_next_id()) then
 					set_selected_save_id(i);
 					load(i);
 					hide_save_selector_gui();
 					OnSaveAvailable(i);
 					enable_controls();
+					save_open = false;
 				end
 				if delete_save_confirmation == i then
-					if GuiButton(gui, 20, 0, "Press again to delete", get_next_id()) then
+					GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
+					if GuiButton(gui, 20, 0, "- Press again to delete", get_next_id()) then
 						delete_save_confirmation = 0;
 						delete_save(i);
 					end
 				else
-					if GuiButton(gui, 20, 0, "Delete save", get_next_id()) then
+					GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
+					if GuiButton(gui, 20, 0, "- Delete save", get_next_id()) then
 						delete_save_confirmation = i;
 					end
 				end
 			end
 		end
-		if GuiButton(gui, 0, 20, "Play without this mod", get_next_id()) then
+		GuiText(gui, 0, 8, "Alternatively:");
+		GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+		if GuiButton(gui, 20, 0, "- Play without this mod", get_next_id()) then
 			set_selected_save_id(0);
 			hide_save_selector_gui();
 			enable_controls();
+			save_open = false;
 		end
 		GuiLayoutEnd(gui);
+		GuiEndScrollContainer(gui);
 	end };
 end
 
@@ -222,74 +238,52 @@ function show_research_spells_gui()
 	if not data_store_safe(save_id) or not spells_safe(save_id) then
 		return;
 	end
-
 	research_spells_open = true;
-	local inv_spell_entity_ids = get_all_inv_spells();
-	local researched_spells = get_spells(get_selected_save_id());
-	local inv_spell_data_temp = {};
-	local spell_data = {};
 
-	for _, spell_entity_id in ipairs(inv_spell_entity_ids) do
-		local action_id = get_spell_entity_action_id(spell_entity_id);
-		if action_id ~= nil then
-			if researched_spells == nil or researched_spells[action_id] == nil then
-				table.insert(spell_data, {
-					["entity_id"] = spell_entity_id,
-					["id"] = action_id,
-					["name"] = GameTextGetTranslatedOrNot(actions_by_id[action_id].name),
-					["price"] = research_spell_entity_price(spell_entity_id)
-				});
-				-- inv_spell_data_temp[action_id] = inv_spell_entity_ids[i];
-			end
+	local inv_spell_entity_ids = get_all_inv_spells();
+	local already_researched_spells = get_spells(get_selected_save_id());
+
+	local idx = 1;
+	local researchable_spell_entities = {};
+
+	for _, inv_spell_entity_id in ipairs(inv_spell_entity_ids) do
+		local spell_action_id = get_spell_entity_action_id(inv_spell_entity_id);
+		if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
+			researchable_spell_entities[idx] = inv_spell_entity_id;
+			idx = idx + 1;
 		end
 	end
-
-	-- for i = 1, #actions do -- build spell_data table w/ entity_id, id, name, price for get_all_inv_spells()
-	-- 	local entity_id = inv_spell_data_temp[actions[i].id];
-	-- 	if entity_id ~= nil then
-	-- 		table.insert(spell_data, {
-	-- 			["entity_id"] = entity_id,
-	-- 			["id"] = actions[i].id,
-	-- 			["name"] = GameTextGetTranslatedOrNot(actions[i].name),
-	-- 			["price"] = research_spell_price(entity_id)
-	-- 		});
-	-- 	end
-	-- end
-
-
-
-	table.sort(spell_data, function(a, b) return a.name < b.name end);
+	table.sort(researchable_spell_entities, function(a, b) return GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(a)].name) < GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(b)].name) end );
 
 	active_windows["research_spells"] = { true, function(get_next_id)
-		if #spell_data > 0 then
+		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
+		if #researchable_spell_entities > 0 then
 			local player_money = get_player_money();
-			GuiLayoutBeginHorizontal(gui, 30, 10);
-			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-			for _, value in ipairs(spell_data) do
-				if player_money < value.price then
+
+			local line_height = 28;
+			local purchase = "";
+			for r_s_e_idx = 1, #researchable_spell_entities do
+				curr_spell = actions_by_id[get_spell_entity_action_id(researchable_spell_entities[r_s_e_idx])];
+				local line_pos = (r_s_e_idx - 1) * line_height;
+				if player_money < curr_spell.price then
 					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
-					GuiText(gui, 0, 0, " $ " .. tostring(value.price));
+					GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell.price)
 				else
 					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
-					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
-						research_spell_entity(get_selected_save_id(), value.entity_id);
+					if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell.price, get_next_id()) then
+						research_spell_entity(get_selected_save_id(), researchable_spell_entities[r_s_e_idx]);
 						hide_research_spells_gui();
 						show_research_spells_gui();
 					end
-				end
+				end -- Colorize Button
+				GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
+				GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
+				GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
 			end
-			GuiLayoutEnd(gui);
-			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-			for _, value in ipairs(spell_data) do
-				GuiText(gui, 0, 0, value.name);
-			end
-			GuiLayoutEnd(gui);
-			GuiLayoutEnd(gui);
 		else
-			GuiLayoutBeginHorizontal(gui, 40, 30);
-			GuiText(gui, 0, 0, "No new spells to research");
-			GuiLayoutEnd(gui);
+			GuiText(gui, 40, 40, "No new spells to research");
 		end
+		GuiEndScrollContainer(gui);
 	end };
 end
 
@@ -313,7 +307,7 @@ function show_buy_wands_gui()
 	if can_create_wand(save_id) then
 		local WINDOW_ID = { id_base=0, id_pick_alwayscast=1, id_pick_icon=2};
 		local window_nr = WINDOW_ID.id_base;
-		local gui_margin_y = 2; -- Override
+		local gui_margin_y = 3; -- Override
 		local gui_margin_short_x = 5;
 		local spells_per_cast_min = 1;
 		local spells_per_cast_max = get_spells_per_cast(save_id);
@@ -330,7 +324,9 @@ function show_buy_wands_gui()
 		local spread_min = get_spread_min(save_id);
 		local spread_max = get_spread_max(save_id);
 		local wand_types = get_wand_types(save_id);
-		local always_cast_spells = get_always_cast_spells(save_id);
+		-- local always_cast_spells = get_always_cast_spells(save_id);
+		local always_cast_spells = {};
+
 		local wand_data_selected = {
 			["shuffle"] = true,
 			["spells_per_cast"] = math.floor((spells_per_cast_min + spells_per_cast_max)/2),
@@ -345,67 +341,48 @@ function show_buy_wands_gui()
 		};
 		local delete_template_confirmation = 0;
 
-		local spells_page_number = 1;
-		local spell_data = {};
-
 		local wand_stat_names = {"spells_per_cast", "cast_delay",  "recharge_time",        "mana_max",  "mana_charge_speed",  "capacity",     "spread" };
 		local wand_stat_scales = {      {1, 5, 10},   {1, 6, 60},      {1, 6, 60},       {1, 10, 100},         {1, 10, 100},  {1, 5, 10},  {.1, 1, 10},  };
 		local wand_stat_limits = {};
 		wand_stat_limits.min = {spells_per_cast_min, cast_delay_min, recharge_time_min, mana_min, mana_charge_speed_min, capacity_min, spread_min };
 		wand_stat_limits.max = {spells_per_cast_max, cast_delay_max, recharge_time_max, mana_max, mana_charge_speed_max, capacity_max, spread_max };
 
-		for _, always_cast_id in ipairs(always_cast_spells) do -- -- load spell_data with id, name, selected from always_cast_spells[] by action_id
-			table.insert(spell_data, {
-				["id"] = always_cast_id,
-				["name"] = GameTextGetTranslatedOrNot(actions_by_id[always_cast_id].name),
-				["selected"] = false
-			});
+		local idx = 0;
+		for spell_id, _ in pairs(get_always_cast_spells(save_id)) do
+			always_cast_spells[idx] = actions_by_id[spell_id];
+			always_cast_spells[idx].id = spell_id;
+			idx = idx + 1;
 		end
-		-- for i = 1, #actions do -- -- load spell_data with id, name, selected from always_cast_spells[] by action_id
-		-- 	if always_cast_spells ~= nil and always_cast_spells[actions[i].id] ~= nil then
-		-- 		table.insert(spell_data, {
-		-- 			["id"] = actions[i].id,
-		-- 			["name"] = GameTextGetTranslatedOrNot(actions[i].name),
-		-- 			["selected"] = false
-		-- 		});
-		-- 	end
-		-- end
+		table.sort(always_cast_spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
+
+
 
 		local function toggle_select_spell(action_id)
 			local selected = false;
-			for i = 1, #spell_data do
-				if spell_data[i].id == action_id then
-					selected = not spell_data[i].selected;
-					spell_data[i].selected = selected;
+			local found = false;
+
+			for i = 1, #always_cast_spells do
+				if always_cast_spells[i].id == action_id then
+					selected = not always_cast_spells[i].selected;
+					always_cast_spells[i].selected = selected;
 					break;
 				end
 			end
+
 			for i = 1, #wand_data_selected["always_cast_spells"] do
 				if wand_data_selected["always_cast_spells"][i] == action_id then
-					table.remove(wand_data_selected["always_cast_spells"], i);
+					found = true;
+					if not selected then
+						table.remove(wand_data_selected["always_cast_spells"], i);
+					end
 					break;
 				end
 			end
-			if selected then
+
+			if selected and not found then
 				table.insert(wand_data_selected["always_cast_spells"], action_id);
 			end
 		end
-
-		table.sort(spell_data, function(a, b) return a.name < b.name end);
-		local spell_columns = split_array(spell_data, 20);
-
-		local wand_types_page_number = 1;
-		local wand_type_list = {};
-
-		for wand_type, _ in pairs(wand_types) do
-			table.insert(wand_type_list, {
-				["wand_type"] = wand_type,
-				["sprite_file"] = wand_type_to_sprite_file(wand_type)
-			});
-		end
-
-		table.sort(wand_type_list, function(a, b) return a.wand_type < b.wand_type end);
-		local wand_type_columns = split_array(wand_type_list, 5);
 
 		active_windows["buy_wands"] = { true, function(get_next_id)
 			local player_money = get_player_money();
@@ -474,6 +451,7 @@ function show_buy_wands_gui()
 				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 					window_nr = WINDOW_ID.id_pick_icon;
 				end
+
 				GuiText(gui, 0, 0, wand_data_selected["shuffle"] and "$menu_yes" or "$menu_no");
 				GuiText(gui, 0, 0, tostring(wand_data_selected["spells_per_cast"]));
 				GuiText(gui, 0, 0, tostring(math.floor((wand_data_selected["cast_delay"] / 60) * 100 + 0.5) / 100));
@@ -576,19 +554,18 @@ function show_buy_wands_gui()
 								delete_template_confirmation = i;
 							end
 						end
-						-- if select(3, GuiGetPreviousWidgetInfo(gui)) then
-						-- 	template_hover = i;
-						-- end
-					  template_hover = select(3, GuiGetPreviousWidgetInfo(gui));
+						if select(3, GuiGetPreviousWidgetInfo(gui)) then
+							template_hover = i;
+						end
 						GuiLayoutEnd(gui);
 						GuiLayoutEnd(gui);
 					end
 					GuiLayoutEnd(gui);
 
-					if template_hover == true then
-						-- GuiBeginAutoBox(gui);
-						-- GuiLayoutBeginLayer(gui);
-						GuiLayoutBeginHorizontal(gui, 60, 60, false, gui_margin_x, gui_margin_y);
+					if template_hover ~= 0 then
+						local template_preview = get_template(save_id, i);
+						GuiBeginScrollContainer(gui, get_next_id(), 400, 200, 90, 125);
+						GuiLayoutBeginHorizontal(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						GuiText(gui, 0, 0, "$inventory_shuffle");
 						GuiText(gui, 0, 0, "$inventory_actionspercast");
@@ -612,102 +589,55 @@ function show_buy_wands_gui()
 						GuiText(gui, 0, 0, tostring(#template_preview["always_cast_spells"]) .. " spells" );
 						GuiLayoutEnd(gui);
 						GuiLayoutEnd(gui);
-						-- GuiLayoutEndLayer(gui);
-						-- GuiEndAutoBoxNinePiece(gui);
+						GuiEndScrollContainer(gui);
 					end
 				end
 			elseif window_nr == WINDOW_ID.id_pick_alwayscast then
-				if spell_columns[spells_page_number * 2 - 1] ~= nil then
-					GuiLayoutBeginHorizontal(gui, 30, 15);
-					GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-					for _, value in ipairs(spell_columns[spells_page_number * 2 - 1]) do
-						if GuiButton(gui, 0, 0, "[" .. (value.selected and "x" or " ") .. "]", get_next_id()) then
-							toggle_select_spell(value.id);
-						end
-					end
-					GuiLayoutEnd(gui);
-					GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-					for _, value in ipairs(spell_columns[spells_page_number * 2 - 1]) do
-						GuiText(gui, 0, 0, value.name);
-					end
-					GuiLayoutEnd(gui);
-					GuiLayoutEnd(gui);
+
+				GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
+				idx = 0;
+				local line_height = 28;
+				local purchase = "";
+				for curr_spell, _ in pairs(always_cast_spells) do
+					local line_pos = idx * line_height;
+					if player_money < curr_spell.price then
+						GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
+						GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell.price)
+					else
+						GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+						if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell.price, get_next_id()) then
+							toggle_select_spell(curr_spell.id);
+							purchase = curr_spell.id;
+						end	-- Button (Cost)
+					end -- Colorize Button
+					GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
+					GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
+					GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
+					idx = idx + 1;
 				end
-				if spell_columns[spells_page_number * 2] ~= nil then
-					GuiLayoutBeginHorizontal(gui, 60, 15);
-					GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-					for _, value in ipairs(spell_columns[spells_page_number * 2]) do
-						if GuiButton(gui, 0, 0, "[" .. (value.selected and "x" or " ") .. "]", get_next_id()) then
-							toggle_select_spell(value.id);
-						end
-					end
-					GuiLayoutEnd(gui);
-					GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-					for _, value in ipairs(spell_columns[spells_page_number * 2]) do
-						GuiText(gui, 0, 0, value.name);
-					end
-					GuiLayoutEnd(gui);
-					GuiLayoutEnd(gui);
+				GuiEndScrollContainer(gui);
+
+				if purchase ~= "" then
+					GamePrint(" Purchased " .. GameTextGetTranslatedOrNot(actions_by_id[purchase]));
 				end
-				if spells_page_number > 1 then
-					GuiLayoutBeginHorizontal(gui, 48, 95);
-					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						spells_page_number = spells_page_number - 1;
-					end
-					GuiLayoutEnd(gui);
-				end
-				GuiLayoutBeginHorizontal(gui, 50, 95);
-				GuiText(gui, 0, 0, tostring(spells_page_number));
-				GuiLayoutEnd(gui);
-				if spells_page_number < math.ceil(#spell_columns / 2) then
-					GuiLayoutBeginHorizontal(gui, 52, 95);
-					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						spells_page_number = spells_page_number + 1;
-					end
-					GuiLayoutEnd(gui);
-				end
+
 			elseif window_nr == WINDOW_ID.id_pick_icon then
-				if wand_type_columns[wand_types_page_number * 2 - 1] ~= nil then
-					for i, value in ipairs(wand_type_columns[wand_types_page_number * 2 - 1]) do
-						GuiLayoutBeginVertical(gui, 25, 6 + i * 14);
-						GuiImage(gui, get_next_id(), 3, 0, value.sprite_file, 1, 1, 1, math.rad(-45)); -- radians are annoying
-						if GuiButton(gui, 0, 0, "Select", get_next_id()) then
-							wand_data_selected["wand_type"] = value.wand_type;
-							window_nr = WINDOW_ID.id_base;
-							wand_types_page_number = 1;
-						end
-						GuiLayoutEnd(gui);
+				idx = 0;
+				local line_gap = 60;
+				GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
+				for wand_type, _ in pairs(wand_types) do
+					x_offset = 20 + ((idx % 3) * 180);
+					y_offset = math.floor(idx / 3) * (line_gap);
+					GuiImage(gui, get_next_id(), x_offset + 3, 12 + y_offset, wand_type_to_sprite_file(wand_type), 1, 1, 1, math.rad(-45)); -- radians are annoying
+					if GuiButton(gui, x_offset, 20 + y_offset, "Select", get_next_id()) then
+						wand_data_selected["wand_type"] = wand_type;
+						window_nr = WINDOW_ID.id_base;
+						wand_types_page_number = 1;
 					end
+					GuiText(gui, x_offset, 35 + y_offset, " ");
+					idx = idx + 1;
 				end
-				if wand_type_columns[wand_types_page_number * 2] ~= nil then
-					for i, value in ipairs(wand_type_columns[wand_types_page_number * 2]) do
-						GuiLayoutBeginVertical(gui, 60, 6 + i * 14);
-						GuiImage(gui, get_next_id(), 3, 0, value.sprite_file, 1, 1, 1, math.rad(-45)); -- radians are annoying
-						if GuiButton(gui, 0, 0, "Select", get_next_id()) then
-							wand_data_selected["wand_type"] = value.wand_type;
-							window_nr = WINDOW_ID.id_base;
-							wand_types_page_number = 1;
-						end
-						GuiLayoutEnd(gui);
-					end
-				end
-				if wand_types_page_number > 1 then
-					GuiLayoutBeginHorizontal(gui, 41, 95);
-					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						wand_types_page_number = wand_types_page_number - 1;
-					end
-					GuiLayoutEnd(gui);
-				end
-				GuiLayoutBeginHorizontal(gui, 45, 95);
-				GuiText(gui, 0, 0, tostring(wand_types_page_number));
-				GuiLayoutEnd(gui);
-				if wand_types_page_number < math.ceil(#wand_type_columns / 2) then
-					GuiLayoutBeginHorizontal(gui, 47, 95);
-					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						wand_types_page_number = wand_types_page_number + 1;
-					end
-					GuiLayoutEnd(gui);
-				end
+				GuiEndScrollContainer(gui);
 			end
 			if window_nr ~= WINDOW_ID.id_base then
 				GuiLayoutBeginHorizontal(gui, 43, 91);
@@ -744,18 +674,17 @@ function show_buy_spells_gui()
 	end
 	buy_spells_open = true;
 
-	local player_money = get_player_money();
 	local idx = 0;
-	local tmp_spells = get_spells(save_id);
 	local spells = {};
-	for spell_id, _ in pairs(tmp_spells) do
-	  spells[idx] = actions_by_id[spell_id];
+	for spell_id, _ in pairs(get_spells(save_id)) do
+		spells[idx] = actions_by_id[spell_id];
 		spells[idx].id = spell_id;
 		idx = idx + 1;
 	end
 	table.sort(spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
 
 	active_windows["buy_spells"] = { true, function(get_next_id)
+		local player_money = get_player_money();
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
 		idx = 0;
 		local line_height = 28;
@@ -900,7 +829,7 @@ function gui_update()
 		hide_buy_spells_gui();
 	end
 
-	local submenu_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open;
+	local submenu_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open or save_open;
 	if submenu_open then
 		if not menu_switched then
 			menu_switched = true;

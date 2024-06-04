@@ -56,16 +56,16 @@ Documentation in flux, check back for updates. I'm still figuring all this out.
 My changes so far:
 - In-game Mod Options menu support instead of manually finding/editing lua files
 
+- Tab, I, and Space all close the Persistence menus if they are open.
+-- Custom keybinds are going to take some work but they are coming.
+
 - Datastore
 -- Fixed 'Wand Templates stick to each other' due to Lua always using by-ref assignment
-<<<<<<< HEAD
 -- Optimized safety checks; consolidated instead of spamming
 
 - Research Wand GUI
 -- Optimised for single data pass, sacrificing 'perfect' alignment
 -- Optimised to avoid needless multiple duplication of largely unused data
-=======
->>>>>>> c181d1d977031e27cf48b8a1b8d2de9da381403c
 
 - Reworked Money GUI
 -- Added as sub-tab as other menus
@@ -96,13 +96,13 @@ My changes so far:
 -- Tabs lock controls while open. Click tab again to close. Pending fix. (Anyone know how to read user keybindings? I want my mod to match system keybinds to eg. close menus in case user rebinds tab/i for example.)
 -- Background fixed so wands/text no longer appears 'on top of' darkness
 
+- Optimizations
+-- actions[] cloned to actions_by_id[] since near all lookups were by id
+-- reworked most lookups to take advantage of actions_by_id[]
+
 TODO: (Help wanted -- If you have experience and are willing to help, please comment at Github or here.)
 - Translations for strings
 -- Prefer in-game strings to avoid need for mod translation mods, mostly just need to find which ones are best
 - Rework GUI/tab behavior
 -- Easier close function than 'click the label again'
-<<<<<<< HEAD
 - Confirm 'Reuse Holy Mountain' / 'Edit Wands at Lobby' bug squashed
-=======
-- Confirm 'Reuse Holy Mountain' / 'Edit Wands at Lobby' bug squashed
->>>>>>> c181d1d977031e27cf48b8a1b8d2de9da381403c

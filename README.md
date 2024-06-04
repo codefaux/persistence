@@ -62,6 +62,10 @@ My changes so far:
 - Datastore
 -- Fixed 'Wand Templates stick to each other' due to Lua always using by-ref assignment
 -- Optimized safety checks; consolidated instead of spamming
+-- Fixed New Save issue
+
+- Select Save GUI
+-- Basic rework
 
 - Research Spell GUI
 -- Complete rework with icons, names, descriptions, and cost
@@ -107,5 +111,4 @@ TODO: (Help wanted -- If you have experience and are willing to help, please com
 - Translations for strings
 -- Prefer in-game strings to avoid need for mod translation mods, mostly just need to find which ones are best
 - Rework GUI/tab behavior
--- Easier close function than 'click the label again'
 - Confirm 'Reuse Holy Mountain' / 'Edit Wands at Lobby' bug squashed

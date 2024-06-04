@@ -658,7 +658,6 @@ function show_buy_spells_gui()
 	end
 	buy_spells_open = true;
 
-	local player_money = get_player_money();
 	local idx = 0;
 	local spells = {};
 	for spell_id, _ in pairs(get_spells(save_id)) do
@@ -669,6 +668,7 @@ function show_buy_spells_gui()
 	table.sort(spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
 
 	active_windows["buy_spells"] = { true, function(get_next_id)
+		local player_money = get_player_money();
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
 		idx = 0;
 		local line_height = 28;

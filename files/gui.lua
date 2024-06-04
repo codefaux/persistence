@@ -222,74 +222,52 @@ function show_research_spells_gui()
 	if not data_store_safe(save_id) or not spells_safe(save_id) then
 		return;
 	end
-
 	research_spells_open = true;
-	local inv_spell_entity_ids = get_all_inv_spells();
-	local researched_spells = get_spells(get_selected_save_id());
-	local inv_spell_data_temp = {};
-	local spell_data = {};
 
-	for _, spell_entity_id in ipairs(inv_spell_entity_ids) do
-		local action_id = get_spell_entity_action_id(spell_entity_id);
-		if action_id ~= nil then
-			if researched_spells == nil or researched_spells[action_id] == nil then
-				table.insert(spell_data, {
-					["entity_id"] = spell_entity_id,
-					["id"] = action_id,
-					["name"] = GameTextGetTranslatedOrNot(actions_by_id[action_id].name),
-					["price"] = research_spell_entity_price(spell_entity_id)
-				});
-				-- inv_spell_data_temp[action_id] = inv_spell_entity_ids[i];
-			end
+	local inv_spell_entity_ids = get_all_inv_spells();
+	local already_researched_spells = get_spells(get_selected_save_id());
+
+	local idx = 1;
+	local researchable_spell_entities = {};
+
+	for _, inv_spell_entity_id in ipairs(inv_spell_entity_ids) do
+		local spell_action_id = get_spell_entity_action_id(inv_spell_entity_id);
+		if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
+			researchable_spell_entities[idx] = inv_spell_entity_id;
+			idx = idx + 1;
 		end
 	end
-
-	-- for i = 1, #actions do -- build spell_data table w/ entity_id, id, name, price for get_all_inv_spells()
-	-- 	local entity_id = inv_spell_data_temp[actions[i].id];
-	-- 	if entity_id ~= nil then
-	-- 		table.insert(spell_data, {
-	-- 			["entity_id"] = entity_id,
-	-- 			["id"] = actions[i].id,
-	-- 			["name"] = GameTextGetTranslatedOrNot(actions[i].name),
-	-- 			["price"] = research_spell_price(entity_id)
-	-- 		});
-	-- 	end
-	-- end
-
-
-
-	table.sort(spell_data, function(a, b) return a.name < b.name end);
+	table.sort(researchable_spell_entities, function(a, b) return GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(a)].name) < GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(b)].name) end );
 
 	active_windows["research_spells"] = { true, function(get_next_id)
-		if #spell_data > 0 then
+		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
+		if #researchable_spell_entities > 0 then
 			local player_money = get_player_money();
-			GuiLayoutBeginHorizontal(gui, 30, 10);
-			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-			for _, value in ipairs(spell_data) do
-				if player_money < value.price then
+
+			local line_height = 28;
+			local purchase = "";
+			for r_s_e_idx = 1, #researchable_spell_entities do
+				curr_spell = actions_by_id[get_spell_entity_action_id(researchable_spell_entities[r_s_e_idx])];
+				local line_pos = (r_s_e_idx - 1) * line_height;
+				if player_money < curr_spell.price then
 					GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
-					GuiText(gui, 0, 0, " $ " .. tostring(value.price));
+					GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell.price)
 				else
 					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
-					if GuiButton(gui, 0, 0, " $ " .. tostring(value.price), get_next_id()) then
-						research_spell_entity(get_selected_save_id(), value.entity_id);
+					if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell.price, get_next_id()) then
+						research_spell_entity(get_selected_save_id(), researchable_spell_entities[r_s_e_idx]);
 						hide_research_spells_gui();
 						show_research_spells_gui();
 					end
-				end
+				end -- Colorize Button
+				GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
+				GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
+				GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
 			end
-			GuiLayoutEnd(gui);
-			GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
-			for _, value in ipairs(spell_data) do
-				GuiText(gui, 0, 0, value.name);
-			end
-			GuiLayoutEnd(gui);
-			GuiLayoutEnd(gui);
 		else
-			GuiLayoutBeginHorizontal(gui, 40, 30);
-			GuiText(gui, 0, 0, "No new spells to research");
-			GuiLayoutEnd(gui);
+			GuiText(gui, 40, 40, "No new spells to research");
 		end
+		GuiEndScrollContainer(gui);
 	end };
 end
 

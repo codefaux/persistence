@@ -3,7 +3,8 @@ dofile_once("mods/persistence/files/data_store.lua");
 dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/gun/procedural/wands.lua");
 dofile_once("mods/persistence/files/wand_spell_helper.lua");
-dofile_once("data/scripts/gun/gun_actions.lua")
+dofile_once("data/scripts/gun/gun_actions.lua");
+dofile_once("data/scripts/debug/keycodes.lua");
 
 local gui = GuiCreate();
 local active_windows = {};
@@ -889,27 +890,37 @@ function hide_all_gui()
 	active_windows = {};
 end
 
+local menu_switched = false;
 function gui_update()
-	if money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open then
-		  disable_controls();
+	if InputIsKeyJustDown(Key_TAB) or InputIsKeyJustDown(Key_SPACE) or InputIsKeyJustDown(Key_i) or InputIsKeyJustDown(Key_ESCAPE) then
+		hide_money_gui();
+		hide_research_wands_gui();
+		hide_research_spells_gui();
+		hide_buy_wands_gui();
+		hide_buy_spells_gui();
+	end
+
+	local submenu_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open;
+	if submenu_open then
+		if not menu_switched then
+			menu_switched = true;
+			disable_controls();
+		end
 	else
+		if menu_switched then
+			menu_switched = false;
 			enable_controls();
+		end
 	end
 
 	if gui ~= nil and active_windows ~= nil then
-		local is_dark_background = false;
 		GuiStartFrame(gui);
-		for _, window in pairs(active_windows) do
-			if window[1] then
-				is_dark_background = true;
-			end
-		end
 		local start_gui_id = 14796823;
-		if is_dark_background then
-			local cx, cy = GameGetCameraPos();
+		if submenu_open then 
 			GuiZSetForNextWidget(gui, 1000);
 			GuiImage(gui, start_gui_id - 1, 0, 0, "mods/persistence/files/gui_darken.png", 1, 1, 1, 0);
 		end
+
 		for name, window in pairs(active_windows) do
 			local gui_id = start_gui_id + simple_string_hash(name);
 			window[2](function()

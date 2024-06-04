@@ -1,5 +1,6 @@
 dofile_once("data/scripts/lib/mod_settings.lua");
 dofile_once("mods/persistence/files/helper.lua");
+dofile_once("data/scripts/debug/keycodes.lua");
 
 -- This file can't access other files from this or other mods in all circumstances.
 -- Settings will be automatically saved.
@@ -19,7 +20,7 @@ end
 
 mod_id = "persistence" -- This should match the name of your mod's folder.
 
-mod_settings_version = 1 -- This is a magic global that can be used to migrate settings to new mod versions. call mod_settings_get_version() before mod_settings_update() to get the old value. 
+mod_settings_version = 1; -- This is a magic global that can be used to migrate settings to new mod versions. call mod_settings_get_version() before mod_settings_update() to get the old value. 
 mod_settings =
 {
   {
@@ -56,7 +57,7 @@ mod_settings =
         ui_description = "Manually or automatically load a save (or not)",
         value_default = "-1",
         values = { {"-1","Manual"}, {"0","Disable mod"}, {"1","Use Slot 1"}, {"2","Use Slot 2"}, {"3","Use Slot 3"}, {"4","Use Slot 4"}, {"5","Use Slot 5"} },
-        scope = MOD_SETTING_SCOPE_RUNTIME,
+        scope = MOD_SETTING_SCOPE_RUNTIME_RESTART,
       }
     },
   },
@@ -128,28 +129,28 @@ mod_settings =
 				ui_name = "Allow editing Wands in Lobby",
 				ui_description = "Only allowed in Holy Mountain / with perk normally",
 				value_default = false,
-				scope = MOD_SETTING_SCOPE_RUNTIME,
+				scope = MOD_SETTING_SCOPE_NEW_GAME,
 			},
       {
 				id = "enable_teleport_back_up",
 				ui_name = "Allow Teleport to Lobby in Holy Mountain",
 				ui_description = "Note: There is no return teleport!",
 				value_default = true,
-				scope = MOD_SETTING_SCOPE_RUNTIME,
+				scope = MOD_SETTING_SCOPE_NEW_GAME,
 			},
       {
 				id = "enable_menu_in_holy_mountain",
 				ui_name = "Allow Persistence menu in Holy Mountain",
 				ui_description = "Allow access to menu for gold deposit/withdraw, research, buy, etc in Holy Mountain",
 				value_default = false,
-				scope = MOD_SETTING_SCOPE_RUNTIME,
+				scope = MOD_SETTING_SCOPE_NEW_GAME,
 			},
       {
 				id = "reusable_holy_mountain",
 				ui_name = "Allow Holy Mountain to be reused",
 				ui_description = "Definitely a cheat.",
 				value_default = false,
-				scope = MOD_SETTING_SCOPE_RUNTIME,
+				scope = MOD_SETTING_SCOPE_NEW_GAME,
 			},
     },
   },

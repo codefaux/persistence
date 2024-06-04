@@ -99,12 +99,14 @@ function show_money_gui()
 				GuiColorSetForNextWidget(gui, 0.33, 0.33, 0.33, 1);
 				GuiText(gui, 0, 0, "Take $ " .. money_amt);
 			else
+				GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 				if GuiButton(gui, 0, 0, "Take $ " .. money_amt, get_next_id()) then
 					transfer_money_to_player(save_id, money_amt);
 				end
 			end
 		end
 
+		GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 		if GuiButton(gui, 0, 0, "Take ALL", get_next_id()) then
 			transfer_money_to_player(save_id, safe_money);
 		end
@@ -118,12 +120,14 @@ function show_money_gui()
 				GuiColorSetForNextWidget(gui, 0.33, 0.33, 0.33, 1);
 				GuiText(gui, 0, 0, "Stash $ " .. money_amt);
 			else
+				GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 				if GuiButton(gui, 0, 0, "Stash $ " .. money_amt, get_next_id()) then
 					transfer_money_to_safe(save_id, money_amt);
 				end
 			end
 		end
 
+		GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 		if GuiButton(gui, 0, 0, "Stash ALL", get_next_id()) then
 			transfer_money_to_safe(save_id, player_money);
 		end
@@ -413,6 +417,7 @@ function show_buy_wands_gui()
 					GuiText(gui, 0, 0, " "); -- filler for select
 
 					if (scale == 1 and wand_data_selected["shuffle"] == true) then
+						GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 						if GuiButton(gui, 0, 0, "<", get_next_id()) then
 							wand_data_selected["shuffle"] = false;
 						end
@@ -431,10 +436,12 @@ function show_buy_wands_gui()
 
 						if stat_data - stat_smstep >= stat_min  then
 							if stat_data - stat_step <= stat_min then
+								GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 								if GuiButton(gui, 0, 0, "|" .. string.rep("<", scale-1), get_next_id()) then
 									wand_data_selected[wand_stat_name] = stat_min;
 								end
 							else
+								GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 								if GuiButton(gui, 0, 0, string.rep("<", scale), get_next_id()) then
 									wand_data_selected[wand_stat_name] = stat_data - stat_step;
 								end
@@ -448,6 +455,7 @@ function show_buy_wands_gui()
 				end -- scale
 
 				GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+				GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 					window_nr = WINDOW_ID.id_pick_icon;
 				end
@@ -460,6 +468,7 @@ function show_buy_wands_gui()
 				GuiText(gui, 0, 0, tostring(wand_data_selected["mana_charge_speed"]));
 				GuiText(gui, 0, 0, tostring(wand_data_selected["capacity"]));
 				GuiText(gui, 0, 0, tostring(math.floor(wand_data_selected["spread"] * 10 + 0.5) / 10));
+				GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 					window_nr = WINDOW_ID.id_pick_alwayscast;
 				end
@@ -471,6 +480,7 @@ function show_buy_wands_gui()
 					GuiText(gui, 0, 0, " "); -- filler for img select
 
 					if (scale == 1 and wand_data_selected["shuffle"] == false) then
+						GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 						if GuiButton(gui, 0, 0, ">", get_next_id()) then
 							wand_data_selected["shuffle"] = true;
 						end
@@ -487,11 +497,13 @@ function show_buy_wands_gui()
 						local stat_max = wand_stat_limits.max[arr_idx];
 
 						if stat_data + stat_smstep <= stat_max then
-						 if stat_data + stat_step >= stat_max  then
-							if GuiButton(gui, 0, 0, string.rep(">", scale-1) .. "|", get_next_id()) then
-								wand_data_selected[wand_stat_name] = stat_max;
-							end
-						else
+							if stat_data + stat_step >= stat_max  then
+								GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+								if GuiButton(gui, 0, 0, string.rep(">", scale-1) .. "|", get_next_id()) then
+									wand_data_selected[wand_stat_name] = stat_max;
+								end
+							else
+								GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 								if GuiButton(gui, 0, 0, string.rep(">", scale), get_next_id()) then
 									wand_data_selected[wand_stat_name] = stat_data + stat_step;
 								end
@@ -524,6 +536,7 @@ function show_buy_wands_gui()
 					GuiLayoutBeginVertical(gui, 80, 44 + ((i-1) * 11));
 					GuiText(gui, 0, 0, "Template Slot " .. pad_number(i, #tostring(get_template_count())) .. ":");
 					if template_preview == nil then	-- Template empty
+						GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 						if GuiButton(gui, 16, 6, "Save template", get_next_id()) then
 							set_template(save_id, i, wand_data_selected);
 						end
@@ -538,6 +551,7 @@ function show_buy_wands_gui()
 						end
 
 						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+						GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 						if GuiButton(gui, 0, 0, "Load template", get_next_id()) then
 							wand_data_selected = template_preview;
 						end
@@ -545,11 +559,13 @@ function show_buy_wands_gui()
 							template_hover = i;
 						end
 						if delete_template_confirmation == i then
+							GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
 							if GuiButton(gui, 0, 0, "Press again to delete", get_next_id()) then
 								delete_template_confirmation = 0;
 								delete_template(save_id, i);
 							end
 						else
+							GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
 							if GuiButton(gui, 0, 0, "Delete template", get_next_id()) then
 								delete_template_confirmation = i;
 							end
@@ -629,6 +645,7 @@ function show_buy_wands_gui()
 					x_offset = 20 + ((idx % 3) * 180);
 					y_offset = math.floor(idx / 3) * (line_gap);
 					GuiImage(gui, get_next_id(), x_offset + 3, 12 + y_offset, wand_type_to_sprite_file(wand_type), 1, 1, 1, math.rad(-45)); -- radians are annoying
+					GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 					if GuiButton(gui, x_offset, 20 + y_offset, "Select", get_next_id()) then
 						wand_data_selected["wand_type"] = wand_type;
 						window_nr = WINDOW_ID.id_base;
@@ -641,6 +658,7 @@ function show_buy_wands_gui()
 			end
 			if window_nr ~= WINDOW_ID.id_base then
 				GuiLayoutBeginHorizontal(gui, 43, 91);
+				GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
 				if GuiButton(gui, 0, 0, "$menu_return", get_next_id()) then
 					window_nr = WINDOW_ID.id_base;
 					spells_page_number = 1;

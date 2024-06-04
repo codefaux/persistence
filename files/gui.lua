@@ -12,49 +12,65 @@ local active_windows = {};
 local gui_margin_x = 8;
 local gui_margin_y = 1;
 
-
 -- SAVE SELECTOR
-
+local save_open = false;
 function show_save_selector_gui()
+	save_open = true;
+	disable_controls();
+
 	local delete_save_confirmation = 0;
 	active_windows["save_selector"] = { true, function (get_next_id)
-		GuiLayoutBeginVertical(gui, 1, 20);
+		GuiBeginScrollContainer(gui, get_next_id(), 30, 30, 250, 250);
+		GuiLayoutBeginVertical(gui, 3, 3);
+		GuiText(gui, 0, 0, "Select a save slot to proceed:");
+		GuiColorSetForNextWidget(gui, 0.5, 0.5, 0.75, 1);
+		GuiText(gui, 0, 0, "(Auto-load can be configured in the Mod Options menu)");
 		for i = 1, get_save_count() do
-			GuiText(gui, 0, 0, "Save slot " .. pad_number(i, #tostring(get_save_count())) .. ":");
+			GuiText(gui, 0, 4, "Save slot " .. pad_number(i, #tostring(get_save_count())) .. ":");
 			if get_save_ids()[i] == nil then
-				if GuiButton(gui, 20, 0, "Create new save", get_next_id()) then
+				GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+				if GuiButton(gui, 20, 0, "- Create new save", get_next_id()) then
 					set_selected_save_id(i);
 					create_new_save(i);
 					hide_save_selector_gui();
 					OnSaveAvailable(i);
 					enable_controls();
+					save_open = false;
 				end
 			else
-				if GuiButton(gui, 20, 0, "Load save", get_next_id()) then
+				GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+				if GuiButton(gui, 20, 0, "- Load save", get_next_id()) then
 					set_selected_save_id(i);
 					load(i);
 					hide_save_selector_gui();
 					OnSaveAvailable(i);
 					enable_controls();
+					save_open = false;
 				end
 				if delete_save_confirmation == i then
-					if GuiButton(gui, 20, 0, "Press again to delete", get_next_id()) then
+					GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
+					if GuiButton(gui, 20, 0, "- Press again to delete", get_next_id()) then
 						delete_save_confirmation = 0;
 						delete_save(i);
 					end
 				else
-					if GuiButton(gui, 20, 0, "Delete save", get_next_id()) then
+					GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
+					if GuiButton(gui, 20, 0, "- Delete save", get_next_id()) then
 						delete_save_confirmation = i;
 					end
 				end
 			end
 		end
-		if GuiButton(gui, 0, 20, "Play without this mod", get_next_id()) then
+		GuiText(gui, 0, 8, "Alternatively:");
+		GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
+		if GuiButton(gui, 20, 0, "- Play without this mod", get_next_id()) then
 			set_selected_save_id(0);
 			hide_save_selector_gui();
 			enable_controls();
+			save_open = false;
 		end
 		GuiLayoutEnd(gui);
+		GuiEndScrollContainer(gui);
 	end };
 end
 
@@ -813,7 +829,7 @@ function gui_update()
 		hide_buy_spells_gui();
 	end
 
-	local submenu_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open;
+	local submenu_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open or save_open;
 	if submenu_open then
 		if not menu_switched then
 			menu_switched = true;

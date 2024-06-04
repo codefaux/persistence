@@ -64,6 +64,9 @@ My changes so far:
 -- Fixed 'Wand Templates stick to each other' due to Lua always using by-ref assignment
 -- Optimized safety checks; consolidated instead of spamming
 
+- Research Spell GUI
+-- Complete rework with icons, names, descriptions, and cost
+
 - Research Wand GUI
 -- Optimised for single data pass, sacrificing 'perfect' alignment
 -- Optimised to avoid needless multiple duplication of largely unused data
@@ -78,14 +81,14 @@ My changes so far:
 -- Added 'To Limit' buttons aka '|<<' to jump a value to its minimum/maximum. Display is still not ideal.
 -- Move to loop-driven iteration instead of verbose static generation of GUI elements
 -- New wand generation is no longer 0 spells per cast, 0 mana etc by default. Defaults are SANE, and start as an average of your available stats.
+-- Complete rework of Select Icon UI, Always Cast UI with icons, names, descriptions, costs
 -- Added icon as GUI element instead of sprite (showed as faded/beneath GUI before)
 -- Moved icon to top, added tilt angle for style
 -- Added icon to Saved Template list
--- Added on-hover stats for saved templates
+-- Added framed on-hover stats for saved templates
 
 - Buy Spells GUI
--- Shifted positions
--- Colorized
+-- Complete rework with icons, names, descriptions, and costs
 
 - Stash GUI
 -- Rewording of Take/Stash instead of ^/V buttons

@@ -530,94 +530,135 @@ function can_create_wand(save_id)
 	return get_cast_delay_min(save_id) ~= nil and get_cast_delay_max(save_id) ~= nil and get_recharge_time_min(save_id) ~= nil and get_recharge_time_max(save_id) ~= nil and get_spread_min(save_id) ~= nil and get_spread_max(save_id) ~= nil;
 end
 
+--- Check if and how a wand entity is new research for save
+---@param save_id number
+---@param entity_id entity_id
+---@return boolean is_new
+---@return boolean improves_spells_per_cast
+---@return boolean improves_cast_delay_min
+---@return boolean improves_cast_delay_max
+---@return boolean improves_recharge_time_min
+---@return boolean improves_recharge_time_max
+---@return boolean improves_mana_max
+---@return boolean improves_mana_charge_speed
+---@return boolean improves_capacity
+---@return boolean improves_spread_min
+---@return boolean improves_spread_max
+---@return boolean improves_always_cast_spells
+---@return boolean improves_wand_types
+---@return number count_new_always_cast_spells
 function research_wand_is_new(save_id, entity_id)
-	if not data_store_safe(save_id) or not wand_types_safe(save_id) or not always_cast_safe(save_id) then
-		return false;
-	end
+	local is_new = false;
+	local b_spells_per_cast = false;
+	local b_cast_delay_min = false;
+	local b_cast_delay_max = false;
+	local b_recharge_time_min = false;
+	local b_recharge_time_max = false;
+	local b_mana_max = false;
+	local b_mana_charge_speed = false;
+	local b_capacity = false;
+	local b_spread_min = false;
+	local b_spread_max = false;
+	local b_always_cast_spells = false;
+	local b_wand_types = false;
+	local i_always_cast_spells = 0;
 
-	local wand_data = read_wand(entity_id);
-	local spells_per_cast = get_spells_per_cast(save_id);
-	local cast_delay_min = get_cast_delay_min(save_id);
-	local cast_delay_max = get_cast_delay_max(save_id);
-	local recharge_time_min = get_recharge_time_min(save_id);
-	local recharge_time_max = get_recharge_time_max(save_id);
-	local mana_max = get_mana_max(save_id);
-	local mana_charge_speed = get_mana_charge_speed(save_id);
-	local capacity = get_capacity(save_id);
-	local spread_min = get_spread_min(save_id);
-	local spread_max = get_spread_max(save_id);
-	local always_cast_spells = get_always_cast_spells(save_id);
-	local wand_types = get_wand_types(save_id);
+	if data_store_safe(save_id) and entity_id ~= nil then -- (inverted and) removed `or not wand_types_safe(save_id) or not always_cast_safe(save_id)` - causing bug?
 
-	if wand_data["spells_per_cast"] > spells_per_cast then
-		return true;
-	end
-	if cast_delay_min == nil or cast_delay_max == nil then
-		return true;
-	else
-		if wand_data["cast_delay"] < cast_delay_min then
-			return true;
+		local wand_data = read_wand(entity_id);
+		local spells_per_cast = get_spells_per_cast(save_id);
+		local cast_delay_min = get_cast_delay_min(save_id);
+		local cast_delay_max = get_cast_delay_max(save_id);
+		local recharge_time_min = get_recharge_time_min(save_id);
+		local recharge_time_max = get_recharge_time_max(save_id);
+		local mana_max = get_mana_max(save_id);
+		local mana_charge_speed = get_mana_charge_speed(save_id);
+		local capacity = get_capacity(save_id);
+		local spread_min = get_spread_min(save_id);
+		local spread_max = get_spread_max(save_id);
+		local always_cast_spells = get_always_cast_spells(save_id);
+		local wand_types = get_wand_types(save_id);
+
+		if wand_data["spells_per_cast"] > spells_per_cast then
+			b_spells_per_cast = true;
+			is_new = true;
 		end
-		if wand_data["cast_delay"] > cast_delay_max then
-			return true;
+		if cast_delay_min == nil or cast_delay_max == nil then
+			b_cast_delay_min = cast_delay_min == nil;
+			b_cast_delay_max = cast_delay_max == nil;
+			is_new = true;
+		else
+			if wand_data["cast_delay"] < cast_delay_min then
+				b_cast_delay_min = true;
+				is_new = true;
+			end
+			if wand_data["cast_delay"] > cast_delay_max then
+				b_cast_delay_max = true;
+				is_new = true;
+			end
 		end
-	end
-	if recharge_time_min == nil or recharge_time_max == nil then
-		return true;
-	else
-		if wand_data["recharge_time"] < recharge_time_min then
-			return true;
+		if recharge_time_min == nil or recharge_time_max == nil then
+			b_recharge_time_min = recharge_time_min == nil;
+			b_recharge_time_max = recharge_time_max == nil;
+			is_new = true;
+		else
+			if wand_data["recharge_time"] < recharge_time_min then
+				b_recharge_time_min = true;
+				is_new = true;
+			end
+			if wand_data["recharge_time"] > recharge_time_max then
+				b_recharge_time_max = true;
+				is_new = true;
+			end
 		end
-		if wand_data["recharge_time"] > recharge_time_max then
-			return true;
+		if wand_data["mana_max"] > mana_max then
+			b_mana_max = true;
+			is_new = true;
 		end
-	end
-	if wand_data["mana_max"] > mana_max then
-		return true;
-	end
-	if wand_data["mana_charge_speed"] > mana_charge_speed then
-		return true;
-	end
-	if wand_data["capacity"] > capacity then
-		return true;
-	end
-	if spread_min == nil or spread_max == nil then
-		return true;
-	else
-		if wand_data["spread"] < spread_min then
-			return true;
+		if wand_data["mana_charge_speed"] > mana_charge_speed then
+			b_mana_charge_speed = true;
+			is_new = true;
 		end
-		if wand_data["spread"] > spread_max then
-			return true;
+		if wand_data["capacity"] > capacity then
+			b_capacity = true;
+			is_new = true;
 		end
-	end
-	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
-		for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
-			if always_cast_spells[always_cast_id] == nil then
-				if actions_by_id[always_cast_id] ~= nil then
-					return true;
+		if spread_min == nil or spread_max == nil then
+			b_spread_min = spread_min == nil;
+			b_spread_max = spread_max == nil;
+			is_new = true;
+		else
+			if wand_data["spread"] < spread_min then
+				b_spread_min = true;
+				is_new = true;
+			end
+			if wand_data["spread"] > spread_max then
+				b_spread_max = true;
+				is_new = true;
+			end
+		end
+
+		if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
+			for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
+				if always_cast_spells[always_cast_id] == nil then
+					if actions_by_id[always_cast_id] ~= nil then
+						i_always_cast_spells = i_always_cast_spells + 1;
+						b_always_cast_spells = true;
+						is_new = true;
+					end
 				end
 			end
 		end
-		-- if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
-		-- 	for i = 1, #wand_data["always_cast_spells"] do
-		-- 		if always_cast_spells[wand_data["always_cast_spells"][i]] == nil then
-		-- 			for j = 1, #actions do
-		-- 				if actions[j].id == wand_data["always_cast_spells"][i] then
-		-- 					return true;
-		-- 				end
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
-	end
-	if wand_types == nil or wand_types[wand_data["wand_type"]] == nil then
-		if wand_type_to_wand(wand_data["wand_type"]) ~= nil then
-			return true;
+
+		if wand_types == nil or wand_types[wand_data["wand_type"]] == nil then
+			if wand_type_to_base_wand(wand_data["wand_type"]) ~= nil then
+				is_new = true;
+				b_wand_type = true;
+			end
 		end
 	end
 
-	return false;
+	return is_new, b_spells_per_cast, b_cast_delay_min, b_cast_delay_max, b_recharge_time_min, b_recharge_time_max, b_mana_max, b_mana_charge_speed, b_capacity, b_spread_min, b_spread_max, b_always_cast_spells, b_wand_types, i_always_cast_spells;
 end
 
 function research_wand_price(save_id, entity_id)
@@ -682,25 +723,17 @@ function research_wand_price(save_id, entity_id)
 			price = price + (wand_data["spread"] - spread_max) * 10;
 		end
 	end
+
 	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
 		for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
 			if always_cast_spells[always_cast_id] == nil then
 				price = price + actions_by_id[always_cast_id].price * 20;
 			end
 		end
-		-- for i = 1, #wand_data["always_cast_spells"] do
-		-- 	if always_cast_spells[wand_data["always_cast_spells"][i]] == nil then
-		-- 		for j = 1, #actions do
-		-- 			if actions[j].id == wand_data["always_cast_spells"][i] then
-		-- 				price = price + actions[j].price * 20;
-		-- 				break;
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
 	end
+
 	if wand_types == nil or wand_types[wand_data["wand_type"]] == nil then
-		if wand_type_to_wand(wand_data["wand_type"]) ~= nil then
+		if wand_type_to_base_wand(wand_data["wand_type"]) ~= nil then
 			price = math.max(100, price);
 		end
 	end
@@ -763,7 +796,7 @@ function research_wand(save_id, entity_id)
 	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 then
 		add_always_cast_spells(save_id, wand_data["always_cast_spells"]);
 	end
-	if wand_type_to_wand(wand_data["wand_type"]) ~= nil then
+	if wand_type_to_base_wand(wand_data["wand_type"]) ~= nil then
 		add_wand_types(save_id, { wand_data["wand_type"] });
 	end
 
@@ -778,11 +811,6 @@ function research_spell_entity_price(entity_id)
 		return nil
 	end
 	return math.ceil(actions_by_id[action_id].price * ModSettingGet("persistence.research_spell_price_multiplier"))
-	-- for i = 1, #actions do
-	-- 	if actions[i].id == action_id then
-	-- 		return math.ceil(actions[i].price * ModSettingGet("persistence.research_spell_price_multiplier"));
-	-- 	end
-	-- end
 end
 
 function research_spell_entity(save_id, entity_id)

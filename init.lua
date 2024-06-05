@@ -1,5 +1,6 @@
 dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/lib/mod_settings.lua");
+dofile_once("mods/persistence/files/wand_spell_helper.lua")
 
 local is_in_lobby = false;
 local inventory_open = false;
@@ -62,6 +63,10 @@ local is_in_workshop = false;
 function OnWorldPostUpdate()
 	if #actions_by_id < 1 then
 		load_actions_by_id();
+	end
+
+	if #wands_by_type < 1 then
+		load_wands_by_type();
 	end
 
 	if lobby_collider == nil or lobby_collider == 0 then
@@ -274,7 +279,7 @@ function OnPlayerDied(player_entity)
 
 	local money = get_player_money();
 	local money_to_save = math.floor(money * ModSettingGet("persistence.money_saved_on_death") );
-	GamePrintImportant("You died", " $ " .. tostring(money_to_save) .. " was saved.");
+	GamePrintImportant("You died", " $ " .. money_to_save .. " was saved.");
 	set_safe_money(get_selected_save_id(), math.abs(get_safe_money(get_selected_save_id()) + money_to_save));
 end
 

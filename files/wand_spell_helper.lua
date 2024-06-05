@@ -3,33 +3,55 @@ dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/gun/gun_actions.lua");
 dofile_once("data/scripts/gun/procedural/gun_procedural.lua");
 
+wands_by_type = {};
+
+function load_wands_by_type()
+	for _, wand_entry in pairs(wands) do
+		wands_by_type[sprite_file_to_wand_type(wand_entry.file)] = wand_entry;
+	end
+end
+
+
 function wand_type_to_sprite_file(wand_type)
 	if string.sub(wand_type, 1, #"default") == "default" then
 		local nr = tonumber(string.sub(wand_type, #"default" + 2));
 		return mod_config.default_wands[nr].file;
 	else
-		return "data/items_gfx/wands/" .. wand_type .. ".png";
+		if string.match(wand_type, "wand_%d%d%d%d") then
+			return "data/items_gfx/wands/" .. wand_type .. ".png";
+		else
+			return "data/items_gfx/" .. wand_type .. ".png";
+		end
 	end
 end
 
-function wand_type_to_wand(wand_type)
+function wand_type_to_base_wand(wand_type)
 	if string.sub(wand_type, 1, #"default") == "default" then
 		local nr = tonumber(string.sub(wand_type, #"default" + 2));
 		return mod_config.default_wands[nr];
 	else
-		for i = 1, #wands do
-			if wands[i].file == "data/items_gfx/wands/" .. wand_type .. ".png" then
-				return wands[i];
-			end
-		end
-		return nil;
+		return wands_by_type[wand_type];
 	end
 end
+
+function get_wand_grip_offset(wand_type)
+	local base_wand = wand_type_to_base_wand(wand_type);
+	if base_wand ~= nil then
+		return base_wand.grip_x, base_wand.grip_y;
+	end
+	return 0, 0;
+end
+
+function get_wand_rotated_offset(grip_x, grip_y, rot_degrees)
+	return (grip_x)*math.cos(-rot_degrees) - (grip_y)*math.sin(-rot_degrees),
+				 (grip_x)*math.sin(-rot_degrees) + (grip_y)*math.cos(-rot_degrees);
+end
+
 
 function sprite_file_to_wand_type(sprite_file)
 	for i = 1, #mod_config.default_wands do
 		if mod_config.default_wands[i].file == sprite_file then
-			return "default_" .. tostring(i);
+			return "default_" .. i;
 		end
 	end
 	return string.sub(sprite_file, string.find(sprite_file, "/[^/]*$") + 1, -5);
@@ -39,20 +61,20 @@ function read_wand(entity_id)
 	local wand_data = {};
 
 	local comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent");
-	-- for _, comp in ipairs(EntityGetAllComponents(entity_id)) do
-	-- 	if ComponentGetTypeName(comp) == "AbilityComponent" then
-			wand_data["shuffle"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "shuffle_deck_when_empty")) == 1 and true or false;
-			wand_data["spells_per_cast"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "actions_per_round"));
-			wand_data["cast_delay"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "fire_rate_wait"));
-			wand_data["recharge_time"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "reload_time"));
-			wand_data["mana_max"] = tonumber(ComponentGetValue2(comp, "mana_max"));
-			wand_data["mana_charge_speed"] = tonumber(ComponentGetValue2(comp, "mana_charge_speed"));
-			wand_data["capacity"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "deck_capacity"));
-			wand_data["spread"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "spread_degrees"));
-			wand_data["wand_type"] = sprite_file_to_wand_type(ComponentGetValue2(comp, "sprite_file"));
-			-- break;
-		-- end
-	-- end
+
+	if comp == nil then
+		return wand_data;
+	end
+
+	wand_data["shuffle"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "shuffle_deck_when_empty")) == 1 and true or false;
+	wand_data["spells_per_cast"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "actions_per_round"));
+	wand_data["cast_delay"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "fire_rate_wait"));
+	wand_data["recharge_time"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "reload_time"));
+	wand_data["mana_max"] = tonumber(ComponentGetValue2(comp, "mana_max"));
+	wand_data["mana_charge_speed"] = tonumber(ComponentGetValue2(comp, "mana_charge_speed"));
+	wand_data["capacity"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "deck_capacity"));
+	wand_data["spread"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "spread_degrees"));
+	wand_data["wand_type"] = sprite_file_to_wand_type(ComponentGetValue2(comp, "sprite_file"));
 
 	wand_data["spells"] = {};
 	wand_data["always_cast_spells"] = {};
@@ -75,11 +97,6 @@ function read_wand(entity_id)
 end
 
 function get_spell_entity_action_id(entity_id)
-	-- for _, comp_id in ipairs(EntityGetAllComponents(entity_id)) do
-	-- 	if ComponentGetTypeName(comp_id) == "ItemActionComponent" then
-	-- 		return ComponentGetValue2(comp_id, "action_id");
-	-- 	end
-	-- end
 	return ComponentGetValue2( EntityGetFirstComponentIncludingDisabled(entity_id, "ItemActionComponent"), "action_id");
 end
 
@@ -113,14 +130,6 @@ function create_wand_price(wand_data)
 		for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
 				price = price + actions_by_id[always_cast_id].price * 5;
 		end
-		-- for j = 1, #actions do
-		-- 	for i = 1, #wand_data["always_cast_spells"] do
-		-- 		if actions[j].id == wand_data["always_cast_spells"][i] then
-		-- 			price = price + actions[j].price * 5;
-		-- 			break;
-		-- 		end
-		-- 	end
-		-- end
 	end
 	return math.ceil(price * ModSettingGet("persistence.buy_wand_price_multiplier"));
 end
@@ -134,7 +143,7 @@ function create_wand(wand_data)
 	local x, y = EntityGetTransform(get_player_id());
 	local entity_id = EntityLoad("mods/persistence/files/wand_empty.xml", x, y);
 	local ability_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent");
-	local wand = wand_type_to_wand(wand_data["wand_type"]);
+	local wand = wand_type_to_base_wand(wand_data["wand_type"]);
 
 	if wand == nil then
 		return false;
@@ -165,11 +174,6 @@ end
 
 function create_spell_price(action_id)
 	return math.ceil(actions_by_id[action_id].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
-	-- for i = 1, #actions do
-	-- 	if actions[i].id == action_id then
-	-- 		return math.ceil(actions[i].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
-	-- 	end
-	-- end
 end
 
 function create_spell(action_id)
@@ -187,10 +191,10 @@ end
 
 function get_all_wands()
 	local wands = {};
-	if get_inventory_quick() == nil then
+	if EntityGetWithName("inventory_quick") == nil then
 		return wands;
 	end
-	local inventory_quick_childs = EntityGetAllChildren(get_inventory_quick());
+	local inventory_quick_childs = EntityGetAllChildren(EntityGetWithName("inventory_quick"));
 	if inventory_quick_childs ~=nil then
 		for _, item in ipairs(inventory_quick_childs) do
 			if EntityHasTag(item, "wand") then
@@ -205,10 +209,10 @@ end
 
 function get_all_inv_spells()
 	local spells = {};
-	if get_inventory_full() == nil then
+	if EntityGetWithName("inventory_full") == nil then
 		return spells;
 	end
-	local inventory_full_childs = EntityGetAllChildren(get_inventory_full());
+	local inventory_full_childs = EntityGetAllChildren(EntityGetWithName("inventory_full"));
 	if inventory_full_childs ~=nil then
 		for _, item in ipairs(inventory_full_childs) do
 			table.insert(spells, item);

@@ -41,14 +41,6 @@ function get_wallet()
 	return EntityGetFirstComponentIncludingDisabled(get_player_id(), "WalletComponent");
 end
 
-function get_inventory_quick()
-	return EntityGetWithName("inventory_quick");
-end
-
-function get_inventory_full()
-	return EntityGetWithName("inventory_full");
-end
-
 function get_inventory_gui()
 	return EntityGetFirstComponentIncludingDisabled(get_player_id(), "InventoryGuiComponent");
 end

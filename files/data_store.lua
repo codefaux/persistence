@@ -563,7 +563,7 @@ function research_wand_is_new(save_id, entity_id)
 	local b_wand_types = false;
 	local i_always_cast_spells = 0;
 
-	if data_store_safe(save_id) and entity_id ~= nil then -- (inverted and) removed `or not wand_types_safe(save_id) or not always_cast_safe(save_id)` - causing bug?
+	if data_store_safe(save_id) and entity_id ~= nil then
 
 		local wand_data = read_wand(entity_id);
 		local spells_per_cast = get_spells_per_cast(save_id);
@@ -638,14 +638,12 @@ function research_wand_is_new(save_id, entity_id)
 			end
 		end
 
-		if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
+		if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 then
 			for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
-				if always_cast_spells[always_cast_id] == nil then
-					if actions_by_id[always_cast_id] ~= nil then
-						i_always_cast_spells = i_always_cast_spells + 1;
-						b_always_cast_spells = true;
-						is_new = true;
-					end
+				if actions_by_id[always_cast_id] ~= nil and (always_cast_spells == nil or always_cast_spells[always_cast_id] == nil) then
+					i_always_cast_spells = i_always_cast_spells + 1;
+					b_always_cast_spells = true;
+					is_new = true;
 				end
 			end
 		end
@@ -653,7 +651,7 @@ function research_wand_is_new(save_id, entity_id)
 		if wand_types == nil or wand_types[wand_data["wand_type"]] == nil then
 			if wand_type_to_base_wand(wand_data["wand_type"]) ~= nil then
 				is_new = true;
-				b_wand_type = true;
+				b_wand_types = true;
 			end
 		end
 	end

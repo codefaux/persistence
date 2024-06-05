@@ -237,25 +237,46 @@ function show_research_wands_gui()
 			GuiText(gui, x_offset + 20, 32, "Wand Slot " .. tostring(i+1) .. ":");
 			local gui_icon = (is_new) and "data/ui_gfx/inventory/full_inventory_box_highlight.png" or "data/ui_gfx/inventory/full_inventory_box.png";
 			local frame_y = 75;
-			local frame_x = 26;
-			local frame_offset_y = 10;
-			local frame_offset_x = 5;
-			GuiImage(gui, get_next_id(), x_offset + frame_x, frame_y, gui_icon, 1, 1.5, 1.5, math.rad(-90)); -- radians are annoying
+			local frame_x = 2;
+			local frame_offset_y = -14;
+			local frame_offset_x = 6;
+			GuiImage(gui, get_next_id(), x_offset + frame_x, frame_y, gui_icon, 1, 1.75, 1.75, math.rad(-90)); -- radians are annoying
 
 			if wand_entity_ids[i] ~= nil then
 
 				local price = research_wand_price(get_selected_save_id(), wand_entity_ids[i]);
 				local wand_preview = read_wand(wand_entity_ids[i]);
 
-				if is_new then
-					if #wand_preview["spells"] then
-						GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-						GuiText(gui, 0 + x_offset, 15, "Wand contains spells which", small_text_scale);
-						GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-						GuiText(gui, 2 + x_offset, 22, "will be lost on research", small_text_scale);
+				local new_spells = false;
+				if #wand_preview["spells"] then
+					local new_spell_count = 0;
+					local already_researched_spells = get_spells(get_selected_save_id());
+
+					for _, spell_action_id in ipairs(wand_preview["spells"]) do
+						if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
+							new_spells = true;
+							new_spell_count = new_spell_count + 1;
+						end
 					end
 
-					GuiColorNextWidgetBool(gui, price <= player_money)
+					if new_spells then
+						GuiColorNextWidgetEnum(gui, COLORS.Red);
+						GuiText(gui, 4 + x_offset, 16, "Wand contains spells which", small_text_scale);
+						GuiColorNextWidgetEnum(gui, COLORS.Red);
+						GuiText(gui, 6 + x_offset, 22, "have not been researched", small_text_scale);
+					end
+				end
+
+				if is_new then
+
+					if not new_spells then
+						GuiColorNextWidgetEnum(gui, COLORS.Yellow);
+						GuiText(gui, 4 + x_offset, 15, "Wand contains spells which", small_text_scale);
+						GuiColorNextWidgetEnum(gui, COLORS.Yellow);
+						GuiText(gui, 6 + x_offset, 22, "will be lost on research", small_text_scale);
+					end
+
+					GuiColorNextWidgetBool(gui, price <= player_money);
 					if GuiButton(gui, 6 + x_offset, 5, " Research for $" .. tostring(price), get_next_id()) then
 						research_wand(get_selected_save_id(), wand_entity_ids[i]);
 						wand_entity_ids[i] = nil; -- Verify this works
@@ -270,8 +291,25 @@ function show_research_wands_gui()
 				-- wand_offset_x, wand_offset_y = get_wand_rotated_offset(wand_offset_x, wand_offset_y, -45)
 
 				-- GuiImage(gui, get_next_id(), x_offset + frame_x + frame_offset_x - wand_offset_x, frame_y - frame_offset_y + wand_offset_y, wand_type_to_sprite_file(wand_preview["wand_type"]), 1, 1.333, 1, math.rad(-45)); -- radians are annoying
-				GuiImage(gui, get_next_id(), x_offset + frame_x + frame_offset_x, frame_y - frame_offset_y, wand_type_to_sprite_file(wand_preview["wand_type"]), 1, 1.333, 1, math.rad(-45)); -- radians are annoying
-				-- GuiColorNextWidgetBool(gui, b_wand_types);
+				GuiImage(gui, get_next_id(), x_offset + frame_x + frame_offset_x, frame_y + frame_offset_y, wand_type_to_sprite_file(wand_preview["wand_type"]), 1, 1.333, 1.333, math.rad(-45)); -- radians are annoying
+				if b_wand_types then
+					local new_icon = "data/ui_gfx/damage_indicators/explosion.png";
+					local new_offset_x = 23;
+					local new_offset_y = -30;
+					GuiImage(gui, get_next_id(), x_offset + frame_x + new_offset_x, frame_y + new_offset_y, new_icon, 0.75, 2, 2, math.rad(30)); -- radians are annoying
+					GuiTooltip(gui, "This wand provides a new design.", "");
+				end
+
+				for idx = 0, wand_preview["capacity"] - 1 do
+					local grid_x = ((idx%6) * 12) + 33;
+					local grid_y = (math.floor(idx/6) * 12) - 34;
+					GuiImage(gui, get_next_id(), x_offset + frame_x + grid_x, frame_y + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.75, 0.75, 0);
+					if wand_preview["spells"][idx+1] ~= nil then
+						GuiImage(gui, get_next_id(), x_offset + frame_x + grid_x, frame_y + grid_y, actions_by_id[wand_preview["spells"][idx+1]].sprite, 1, 0.75, 0.75, 0);
+						GuiTooltip(gui, actions_by_id[wand_preview["spells"][idx+1]].name, actions_by_id[wand_preview["spells"][idx+1]].description );
+					end
+				end
+
 				GuiLayoutBeginHorizontal(gui, x_offset + 8, 77, true, gui_margin_x, gui_margin_y);
 				GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 				GuiText(gui, 0, 0, "$inventory_shuffle", small_text_scale);
@@ -309,7 +347,7 @@ function show_research_wands_gui()
 				GuiLayoutEnd(gui);
 			else
 				GuiColorNextWidgetEnum(gui, COLORS.Dim);
-				GuiText(gui, 20 + x_offset, 170, "(Not New)");
+				GuiText(gui, 6 + x_offset, 5, "(Not New)");
 			end
 		end
 		GuiEndScrollContainer(gui);
@@ -425,7 +463,6 @@ function show_buy_wands_gui()
 		local spread_min = get_spread_min(save_id);
 		local spread_max = get_spread_max(save_id);
 		local wand_types = get_wand_types(save_id);
-		-- local always_cast_spells = get_always_cast_spells(save_id);
 		local always_cast_spells = {};
 
 		local wand_data_selected = {
@@ -525,7 +562,6 @@ function show_buy_wands_gui()
 						if GuiButton(gui, 0, 0, "<", get_next_id()) then
 							wand_data_selected["shuffle"] = false;
 						end
-						-- GuiTooltip(gui, "$menu_no",);
 					else
 						GuiButton(gui, 0, 0, " ", get_next_id());
 					end
@@ -550,7 +586,6 @@ function show_buy_wands_gui()
 									wand_data_selected[wand_stat_name] = stat_data - stat_step;
 								end
 							end
-							-- GuiTooltip(gui, "-" .. stat_lgstep, "");
 						else
 							GuiButton(gui, 0, 0, " ", get_next_id());
 						end
@@ -588,7 +623,6 @@ function show_buy_wands_gui()
 						if GuiButton(gui, 0, 0, ">", get_next_id()) then
 							wand_data_selected["shuffle"] = true;
 						end
-						-- GuiTooltip(gui, "$menu_yes",);
 					else
 						GuiButton(gui, 0, 0, " ", get_next_id());
 					end
@@ -612,7 +646,6 @@ function show_buy_wands_gui()
 									wand_data_selected[wand_stat_name] = stat_data + stat_step;
 								end
 							end
-							-- GuiTooltip(gui, "+" .. stat_step, "");
 						else
 							GuiButton(gui, 0, 0, " ", get_next_id());
 						end
@@ -668,16 +701,19 @@ function show_buy_wands_gui()
 							if GuiButton(gui, 0, 0, "Press again to delete", get_next_id()) then
 								delete_template_confirmation = 0;
 								delete_template(save_id, i);
+								template_hover = 0;
+							elseif select(3, GuiGetPreviousWidgetInfo(gui)) then
+								template_hover = i;
 							end
-						else
+							else
 							GuiColorNextWidgetEnum(gui, COLORS.Yellow);
 							if GuiButton(gui, 0, 0, "Delete template", get_next_id()) then
 								delete_template_confirmation = i;
 							end
-						end
-						if select(3, GuiGetPreviousWidgetInfo(gui)) then
-							template_hover = i;
-						end
+							if select(3, GuiGetPreviousWidgetInfo(gui)) then
+								template_hover = i;
+							end
+							end
 						GuiLayoutEnd(gui);
 						GuiLayoutEnd(gui);
 					end
@@ -817,7 +853,6 @@ function show_buy_spells_gui()
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
 		idx = 0;
 		local line_height = 28;
-		local purchase = "";
 		for _, curr_spell in ipairs(spells) do
 			local line_pos = idx * line_height;
 			if player_money < curr_spell.price then
@@ -828,7 +863,6 @@ function show_buy_spells_gui()
 				if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell.price, get_next_id()) then
 					create_spell(curr_spell.id);
 					GamePrintImportant("Spell Purchased", curr_spell.name);
-					-- purchase = curr_spell.id;
 				end	-- Button (Cost)
 			end -- Colorize Button
 			GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
@@ -837,10 +871,6 @@ function show_buy_spells_gui()
 			idx = idx + 1;
 		end
 		GuiEndScrollContainer(gui);
-
-		-- if purchase ~= "" then
-		-- 	GamePrint(" Purchased " .. GameTextGetTranslatedOrNot(actions_by_id[purchase].name));
-		-- end
 	end };
 end
 

@@ -75,12 +75,16 @@ My changes so far:
 - Research Wand GUI
 -- Optimised for single data pass, sacrificing 'perfect' alignment
 -- Optimised to avoid needless multiple duplication of largely unused data
+-- Complete rework with icons, names, stats, colored for improvement
 
 - Reworked Money GUI
 -- Added as sub-tab as other menus
 -- Can stay open with other menus
 -- Colorized to indicate item availability
 -- Added Player money display
+-- Rewording of Take/Stash instead of ^/V buttons
+--- (English only -- options for translations are on TODO, prefer ingame strings)
+-- Move to loop-driven iteration instead of verbose static generation of GUI elements
 
 - Buy Wand GUI
 -- Added 'To Limit' buttons aka '|<<' to jump a value to its minimum/maximum. Display is still not ideal.
@@ -89,17 +93,12 @@ My changes so far:
 -- Complete rework of Select Icon UI, Always Cast UI with icons, names, descriptions, costs
 -- Added icon as GUI element instead of sprite (showed as faded/beneath GUI before)
 -- Moved icon to top, added tilt angle for style
+-- Added frame for wand icon
 -- Added icon to Saved Template list
 -- Added framed on-hover stats for saved templates
 
 - Buy Spells GUI
 -- Complete rework with icons, names, descriptions, and costs
-
-- Stash GUI
--- Rewording of Take/Stash instead of ^/V buttons
---- (English only -- options for translations are on TODO, prefer ingame strings)
--- Colorized unavailable options
--- Move to loop-driven iteration instead of verbose static generation of GUI elements
 
 - ALL GUIs
 -- Tabs lock controls while open. Click tab again to close. Pending fix. (Anyone know how to read user keybindings? I want my mod to match system keybinds to eg. close menus in case user rebinds tab/i for example.)
@@ -108,6 +107,7 @@ My changes so far:
 - Optimizations
 -- actions[] cloned to actions_by_id[] since near all lookups were by id
 -- reworked most lookups to take advantage of actions_by_id[]
+-- wands[] cloned to wands_by_type[] and reworked lookups to use
 
 TODO: (Help wanted -- If you have experience and are willing to help, please comment at Github or here.)
 - Translations for strings

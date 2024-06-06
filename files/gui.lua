@@ -236,7 +236,7 @@ function show_research_wands_gui()
 			end
 			GuiText(gui, x_offset + 20, 32, "Wand Slot " .. tostring(i+1) .. ":");
 			local gui_icon = (is_new) and "data/ui_gfx/inventory/full_inventory_box_highlight.png" or "data/ui_gfx/inventory/full_inventory_box.png";
-			local frame_y = 75;
+			local frame_y = 77;
 			local frame_x = 2;
 			local frame_offset_y = -14;
 			local frame_offset_x = 6;
@@ -299,17 +299,19 @@ function show_research_wands_gui()
 					GuiImage(gui, get_next_id(), x_offset + frame_x + new_offset_x, frame_y + new_offset_y, new_icon, 0.75, 2, 2, math.rad(30)); -- radians are annoying
 					GuiTooltip(gui, "This wand provides a new design.", "");
 				end
-
+				GuiBeginScrollContainer(gui, get_next_id(), x_offset + frame_x + 37, frame_y - 30, 64, 24, true, 0, 0);
 				for idx = 0, wand_preview["capacity"] - 1 do
-					local grid_x = ((idx%6) * 12) + 33;
-					local grid_y = (math.floor(idx/6) * 12) - 34;
-					GuiImage(gui, get_next_id(), x_offset + frame_x + grid_x, frame_y + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.75, 0.75, 0);
+					local grid_x = ((idx%5) * 12); -- + 33;
+					local grid_y = (math.floor(idx/5) * 12); -- - 34;
+					GuiImage(gui, get_next_id(), grid_x, grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
+					-- GuiImage(gui, get_next_id(), x_offset + frame_x + grid_x, frame_y + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.75, 0.75, 0);
 					if wand_preview["spells"][idx+1] ~= nil then
-						GuiImage(gui, get_next_id(), x_offset + frame_x + grid_x, frame_y + grid_y, actions_by_id[wand_preview["spells"][idx+1]].sprite, 1, 0.75, 0.75, 0);
+						-- GuiImage(gui, get_next_id(), x_offset + frame_x + grid_x, frame_y + grid_y, actions_by_id[wand_preview["spells"][idx+1]].sprite, 1, 0.75, 0.75, 0);
+						GuiImage(gui, get_next_id(), grid_x, grid_y, actions_by_id[wand_preview["spells"][idx+1]].sprite, 1, 0.8, 0.8, 0);
 						GuiTooltip(gui, actions_by_id[wand_preview["spells"][idx+1]].name, actions_by_id[wand_preview["spells"][idx+1]].description );
 					end
 				end
-
+				GuiEndScrollContainer(gui);
 				GuiLayoutBeginHorizontal(gui, x_offset + 8, 77, true, gui_margin_x, gui_margin_y);
 				GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 				GuiText(gui, 0, 0, "$inventory_shuffle", small_text_scale);

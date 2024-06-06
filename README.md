@@ -74,6 +74,7 @@ My changes so far:
 -- Optimised for single data pass, sacrificing 'perfect' alignment
 -- Optimised to avoid needless multiple duplication of largely unused data
 -- Complete rework with icons, names, stats, colored for improvement
+-- Scrollable list w/ capacity and spells on each wand
 
 - Reworked Money GUI
 -- Added as sub-tab as other menus

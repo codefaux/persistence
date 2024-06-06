@@ -11,6 +11,7 @@ local active_windows = {};
 
 local gui_margin_x = 8;
 local gui_margin_y = 1;
+local small_text_scale = 0.9;
 
 ---@enum colors
 local COLORS = {
@@ -223,7 +224,6 @@ function show_research_wands_gui()
 		local player_money = get_player_money();
 		local x_offset = 0;
 		local block_width = 115;
-		local small_text_scale = 0.9;
 
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
 		for i = 0, 3 do
@@ -358,9 +358,9 @@ function show_research_wands_gui()
 		GuiText(gui, 30, 225, "Green stats improve your research", small_text_scale);
 		GuiColorNextWidgetEnum(gui, COLORS.Red);
 		GuiText(gui, 380, 225, "Red stats do not improve research", small_text_scale);
-		GuiColorNextWidgetEnum(gui, COLORS.Tip);
-		GuiText(gui, 165, 225, "WANDS ARE DESTROYED WHEN RESEARCHED");
-	end };
+			GuiColorNextWidgetEnum(gui, COLORS.Tip);
+			GuiText(gui, 165, 225, "WANDS ARE DESTROYED WHEN RESEARCHED");
+		end };
 end
 
 function hide_research_wands_gui()
@@ -855,7 +855,7 @@ function show_buy_spells_gui()
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
 		idx = 0;
 		local line_height = 28;
-		for _, curr_spell in ipairs(spells) do
+		for _, curr_spell in pairs(spells) do
 			local line_pos = idx * line_height;
 			if player_money < curr_spell.price then
 				GuiColorNextWidgetEnum(gui, COLORS.Red);
@@ -873,6 +873,10 @@ function show_buy_spells_gui()
 			idx = idx + 1;
 		end
 		GuiEndScrollContainer(gui);
+		GuiColorNextWidgetEnum(gui, COLORS.Tip);
+		GuiText(gui, 165, 225, "PURCHASED SPELLS DROP AT YOUR FEET");
+		GuiColorNextWidgetEnum(gui, COLORS.Green);
+		GuiText(gui, 30, 225, "You know " .. #spells .. " spells.", small_text_scale);
 	end };
 end
 

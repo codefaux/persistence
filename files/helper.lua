@@ -5,23 +5,8 @@ actions_by_id = {};
 
 function load_actions_by_id()
 	for i = 1, #actions do
-		actions_by_id[actions[i].id] = {
-			actions_index = i,
-      id = actions[i].id,
-			name = actions[i].name,
-			description = actions[i].description,
-			sprite = actions[i].sprite,
-			sprite_unidentified = actions[i].sprite_unidentified,
-			related_projectiles = actions[i].related_projectiles,
-			type = actions[i].type,
-			spawn_level = actions[i].spawn_level,
-			spawn_probability = actions[i].spawn_probability,
-			price = actions[i].price,
-			mana = actions[i].mana,
-			max_uses = actions[i].max_uses,
-			custom_xml_file = actions[i].custom_xml_file,
-			action = actions[i].action
-		};
+		actions_by_id[actions[i].id] = actions[i];
+		actions_by_id[actions[i].id].actions_index = i;
 	end
 end
 
@@ -62,24 +47,6 @@ function disable_edit_wands_in_lobby()
 	if entity_id ~= nil and entity_id ~= 0 then
 		EntityKill(entity_id);
 	end
-end
-
-function split_array(array, chunk_size)
-	local chunks = {};
-	local current_chunk = 1;
-	local count = 0;
-	for i = 1, #array do
-		if count >= chunk_size then
-			current_chunk = current_chunk + 1;
-			count = 0;
-		end
-		if chunks[current_chunk] == nil then
-			chunks[current_chunk] = {};
-		end
-		table.insert(chunks[current_chunk], array[i]);
-		count = count + 1;
-	end
-	return chunks;
 end
 
 function simple_string_hash(text) --don't use it for storing passwords...

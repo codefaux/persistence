@@ -20,7 +20,8 @@ local COLORS = {
 	Yellow = "YELLOW",
 	Dim = "DIM",
 	Dark = "DARK",
-	Tip = "TIP"
+	Tip = "TIP",
+	Bright = "BRIGHT"
 }
 
 ---@param value colors
@@ -37,6 +38,8 @@ local function GuiColorNextWidgetEnum(gui, value)
 		GuiColorSetForNextWidget(gui, 0.333, 0.333, 0.333, 1);
 	elseif value == "TIP" then
 		GuiColorSetForNextWidget(gui, 0.666, 0.666, 0.80, 1);
+	elseif value == "BRIGHT" then
+		GuiColorSetForNextWidget(gui, 0.85, 0.9, 1, 1);
 	end
 end
 
@@ -269,7 +272,7 @@ function show_research_wands_gui()
 
 				if is_new then
 
-					if not new_spells then
+					if #wand_preview["spells"] > 0 and not new_spells then
 						GuiColorNextWidgetEnum(gui, COLORS.Yellow);
 						GuiText(gui, 4 + x_offset, 15, "Wand contains spells which", small_text_scale);
 						GuiColorNextWidgetEnum(gui, COLORS.Yellow);
@@ -294,12 +297,12 @@ function show_research_wands_gui()
 				GuiImage(gui, get_next_id(), x_offset + frame_x + frame_offset_x, frame_y + frame_offset_y, wand_type_to_sprite_file(wand_preview["wand_type"]), 1, 1.333, 1.333, math.rad(-45)); -- radians are annoying
 				if b_wand_types then
 					local new_icon = "data/ui_gfx/damage_indicators/explosion.png";
-					local new_offset_x = 23;
-					local new_offset_y = -30;
-					GuiImage(gui, get_next_id(), x_offset + frame_x + new_offset_x, frame_y + new_offset_y, new_icon, 0.75, 2, 2, math.rad(30)); -- radians are annoying
+					local new_offset_x = 6;
+					local new_offset_y = -34;
+					GuiImage(gui, get_next_id(), x_offset + frame_x + new_offset_x, frame_y + new_offset_y, new_icon, 1, 2, 2, math.rad(30)); -- radians are annoying
 					GuiTooltip(gui, "This wand provides a new design.", "");
 				end
-				GuiBeginScrollContainer(gui, get_next_id(), x_offset + frame_x + 37, frame_y - 30, 64, 24, true, 0, 0);
+				GuiBeginScrollContainer(gui, get_next_id(), x_offset + frame_x + 37, frame_y - 31, 64, 26, true, 0, 0);
 				for idx = 0, wand_preview["capacity"] - 1 do
 					local grid_x = ((idx%5) * 12); -- + 33;
 					local grid_y = (math.floor(idx/5) * 12); -- - 34;
@@ -386,6 +389,7 @@ function show_research_spells_gui()
 	local researchable_spell_entities = {};
 
 	for _, inv_spell_entity_id in ipairs(inv_spell_entity_ids) do
+		-- TODO: Don't accept partially used spells
 		local spell_action_id = get_spell_entity_action_id(inv_spell_entity_id);
 		if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
 			researchable_spell_entities[idx] = inv_spell_entity_id;
@@ -868,7 +872,14 @@ function show_buy_spells_gui()
 				end	-- Button (Cost)
 			end -- Colorize Button
 			GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
-			GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
+			GuiLayoutBeginHorizontal(gui, 60, 0 + line_pos, true, 4, 0);
+			GuiColorNextWidgetEnum(gui, COLORS.Tip);
+			GuiText(gui, 0, 0, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
+			if curr_spell.max_uses ~= nil then
+				GuiColorNextWidgetEnum(gui, COLORS.Bright);
+				GuiText(gui, 0, 0, "(" .. curr_spell.max_uses .. ")");
+			end
+			GuiLayoutEnd(gui);
 			GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
 			idx = idx + 1;
 		end

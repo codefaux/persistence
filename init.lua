@@ -50,10 +50,6 @@ function update_screen_size()
 	end
 end
 
--- function get_screen_size()
--- 	return screen_size_x, screen_size_y;
--- end
-
 local is_post_player_spawned = false;
 local is_in_workshop = false;
 
@@ -128,7 +124,7 @@ function OnWorldPostUpdate()
 			local custom_workshop = EntityGetClosestWithTag(shop_x, shop_y, "persistence_workshop");
 			local custom_x, custom_y = EntityGetTransform(custom_workshop);
 			if custom_workshop == nil or custom_workshop == 0 or (shop_x - custom_x) * (shop_y - custom_y) > 10 then
-				GamePrint("Updating workshop " .. custom_workshop .. " for " .. workshop )
+				-- GamePrint("Updating workshop " .. custom_workshop .. " for " .. workshop )
 				custom_workshop = EntityLoad("mods/persistence/files/workshop_collider.xml", shop_x, shop_y);
 				local workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent"); 
 				local custom_workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(custom_workshop, "HitboxComponent");
@@ -147,6 +143,7 @@ function OnWorldPostUpdate()
 	if ModSettingGet("persistence_reusable_holy_mountain") then
 		local persistence_list = EntityGetWithTag("persistence_workshop");
     for _, persistence_item in ipairs(persistence_list) do
+			-- GamePrint("Adding workshop " .. persistence_item .. " at " .. #workshop_list + 1 );
 			workshop_list[#workshop_list+1] = persistence_item;
 		end
 	end

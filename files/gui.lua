@@ -841,7 +841,7 @@ function show_buy_spells_gui()
 	end
 	buy_spells_open = true;
 
-	local idx = 0;
+	local idx = 1;
 	local spells = {};
 	for spell_id, _ in pairs(get_spells(save_id)) do
 		spells[idx] = actions_by_id[spell_id];

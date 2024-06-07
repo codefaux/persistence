@@ -221,9 +221,8 @@ function show_research_wands_gui()
 	end
 
 	research_wands_open = true;
-	local wand_entity_ids = get_all_wands();
-
 	active_windows["research_wands"] = { true, function(get_next_id)
+		local wand_entity_ids = get_all_wands();
 		local player_money = get_player_money();
 		local x_offset = 0;
 		local block_width = 115;
@@ -350,6 +349,19 @@ function show_research_wands_gui()
 				GuiText(gui, 0, 0, tostring(#wand_preview["always_cast_spells"]) .. " spells", small_text_scale);
 				GuiLayoutEnd(gui);
 				GuiLayoutEnd(gui);
+				if #wand_preview["always_cast_spells"] > 0 then
+					local idx = 0;
+					for i = 0, #wand_preview["always_cast_spells"] - 1 do
+						local grid_x = ((idx%5) * 12); -- + 33;
+						local grid_y = (math.floor(idx/5) * 12); -- - 34;
+						GuiImage(gui, get_next_id(), x_offset + 8 + grid_x, 177 + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
+						if wand_preview["always_cast_spells"][idx+1] ~= nil then
+							GuiImage(gui, get_next_id(), x_offset + 8 + grid_x, 177 + grid_y, actions_by_id[wand_preview["always_cast_spells"][idx+1]].sprite, 1, 0.8, 0.8, 0);
+							GuiTooltip(gui, actions_by_id[wand_preview["always_cast_spells"][idx+1]].name, actions_by_id[wand_preview["always_cast_spells"][idx+1]].description );
+						end
+					end
+				end
+
 			else
 				GuiColorNextWidgetEnum(gui, COLORS.Dim);
 				GuiText(gui, 6 + x_offset, 5, "(Not New)");
@@ -387,13 +399,17 @@ function show_research_spells_gui()
 
 	local idx = 1;
 	local researchable_spell_entities = {};
+	local hash = {};
 
 	for _, inv_spell_entity_id in ipairs(inv_spell_entity_ids) do
 		-- TODO: Don't accept partially used spells
 		local spell_action_id = get_spell_entity_action_id(inv_spell_entity_id);
 		if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
-			researchable_spell_entities[idx] = inv_spell_entity_id;
-			idx = idx + 1;
+			if not hash[spell_action_id] then
+				researchable_spell_entities[idx] = inv_spell_entity_id;
+				hash[spell_action_id] = true;
+				idx = idx + 1;
+			end
 		end
 	end
 	table.sort(researchable_spell_entities, function(a, b) return GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(a)].name) < GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(b)].name) end );

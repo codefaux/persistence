@@ -84,7 +84,7 @@ function read_wand(entity_id)
 			local item_action_comp = EntityGetFirstComponentIncludingDisabled(child_id, "ItemActionComponent");
 			if item_action_comp ~= nil and item_action_comp ~= 0 then
 				local action_id = ComponentGetValue2(item_action_comp, "action_id");
-				if tonumber(ComponentGetValue2(EntityGetFirstComponentIncludingDisabled(child_id, "ItemComponent"), "permanently_attached")) == 1 then
+				if ComponentGetValue2(EntityGetFirstComponentIncludingDisabled(child_id, "ItemComponent"), "permanently_attached") == true then
 					table.insert(wand_data["always_cast_spells"], action_id);
 				else
 					table.insert(wand_data["spells"], action_id);

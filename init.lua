@@ -82,8 +82,6 @@ function OnWorldPostUpdate()
 	if teleport_component ~= nil and teleport_component ~= 0 then
 		local a, b, c, d = ComponentGetValue2(teleport_component, "source_location_camera_aabb");
 		if a ~= 0 or b ~= 0 or c ~= 0 or d ~= 0 then
-			-- screen_size_x = math.floor(c - a + 0.5);
-			-- screen_size_y = math.floor(d - b + 0.5);
 			EntitySetComponentIsEnabled(get_player_id(), teleport_component, false);
 			ComponentSetValue2(teleport_component, "source_location_camera_aabb", 0, 0, 0, 0);
 		end
@@ -116,34 +114,35 @@ function OnWorldPostUpdate()
 	end
 
 	local workshop_list = EntityGetWithTag("workshop");
+	local workshop_count = #workshop_list;
 
-	-- for _, workshop in ipairs(EntityGetWithTag("workshop")) do
-	-- if #workshop_list > #persistence_list then
-		for _, workshop in ipairs(workshop_list) do
-			local shop_x, shop_y = EntityGetTransform(workshop);
-			local custom_workshop = EntityGetClosestWithTag(shop_x, shop_y, "persistence_workshop");
-			local custom_x, custom_y = EntityGetTransform(custom_workshop);
-			if custom_workshop == nil or custom_workshop == 0 or (shop_x - custom_x) * (shop_y - custom_y) > 10 then
-				-- GamePrint("Updating workshop " .. custom_workshop .. " for " .. workshop )
-				custom_workshop = EntityLoad("mods/persistence/files/workshop_collider.xml", shop_x, shop_y);
-				local workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent"); 
-				local custom_workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(custom_workshop, "HitboxComponent");
-				ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_x"));
-				ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_y"));
-				ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_x"));
-				ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_y"));
-			end
+	-- for idx, workshop in ipairs(workshop_list) do
+	for idx = 0, workshop_count do
+		local workshop = workshop_list[idx];
+		local shop_x, shop_y = EntityGetTransform(workshop);
+		local custom_workshop = EntityGetClosestWithTag(shop_x, shop_y, "persistence_workshop");
+		local custom_x, custom_y = EntityGetTransform(custom_workshop);
+		if custom_workshop == nil or custom_workshop == 0 or (shop_x - custom_x) * (shop_y - custom_y) > 10 then
+			GamePrint("Updating workshop " .. custom_workshop .. " for " .. workshop .. " from idx " .. idx .. " to " .. workshop_count + idx );
+			custom_workshop = EntityLoad("mods/persistence/files/workshop_collider.xml", shop_x, shop_y);
+			local workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent"); 
+			local custom_workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(custom_workshop, "HitboxComponent");
+			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_x"));
+			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_y"));
+			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_x"));
+			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_y"));
+			workshop_list[workshop_count + idx + 1] = custom_workshop;
 		end
-	-- end
+	end
 
 	local plr_x, plr_y = EntityGetTransform(get_player_id());
 	local is_in_workshop_before = is_in_workshop;
 	is_in_workshop = false;
 	-- for _, qualified_workshop in ipairs(EntityGetWithTag(ModSettingGet("persistence.reusable_holy_mountain") and "persistence_workshop" or "workshop")) do
-	if ModSettingGet("persistence_reusable_holy_mountain") then
+	if ModSettingGet("persistence.reusable_holy_mountain") == true then
 		local persistence_list = EntityGetWithTag("persistence_workshop");
     for _, persistence_item in ipairs(persistence_list) do
-			-- GamePrint("Adding workshop " .. persistence_item .. " at " .. #workshop_list + 1 );
+			GamePrint("Adding workshop " .. persistence_item .. " at " .. #workshop_list + 1 );
 			workshop_list[#workshop_list+1] = persistence_item;
 		end
 	end

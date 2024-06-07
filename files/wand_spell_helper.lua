@@ -66,14 +66,14 @@ function read_wand(entity_id)
 		return wand_data;
 	end
 
-	wand_data["shuffle"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "shuffle_deck_when_empty")) == 1 and true or false;
-	wand_data["spells_per_cast"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "actions_per_round"));
-	wand_data["cast_delay"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "fire_rate_wait"));
-	wand_data["recharge_time"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "reload_time"));
-	wand_data["mana_max"] = tonumber(ComponentGetValue2(comp, "mana_max"));
-	wand_data["mana_charge_speed"] = tonumber(ComponentGetValue2(comp, "mana_charge_speed"));
-	wand_data["capacity"] = tonumber(ComponentObjectGetValue2(comp, "gun_config", "deck_capacity"));
-	wand_data["spread"] = tonumber(ComponentObjectGetValue2(comp, "gunaction_config", "spread_degrees"));
+	wand_data["shuffle"] = ComponentObjectGetValue2(comp, "gun_config", "shuffle_deck_when_empty") == 1 and true or false;
+	wand_data["spells_per_cast"] = ComponentObjectGetValue2(comp, "gun_config", "actions_per_round");
+	wand_data["cast_delay"] = ComponentObjectGetValue2(comp, "gunaction_config", "fire_rate_wait");
+	wand_data["recharge_time"] = ComponentObjectGetValue2(comp, "gun_config", "reload_time");
+	wand_data["mana_max"] = ComponentGetValue2(comp, "mana_max");
+	wand_data["mana_charge_speed"] = ComponentGetValue2(comp, "mana_charge_speed");
+	wand_data["capacity"] = ComponentObjectGetValue2(comp, "gun_config", "deck_capacity");
+	wand_data["spread"] = ComponentObjectGetValue2(comp, "gunaction_config", "spread_degrees");
 	wand_data["wand_type"] = sprite_file_to_wand_type(ComponentGetValue2(comp, "sprite_file"));
 
 	wand_data["spells"] = {};

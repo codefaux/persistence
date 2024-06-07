@@ -219,10 +219,10 @@ function show_research_wands_gui()
 	if not data_store_safe(save_id) then
 		return;
 	end
+	local wand_entity_ids = get_all_wands();
 
 	research_wands_open = true;
 	active_windows["research_wands"] = { true, function(get_next_id)
-		local wand_entity_ids = get_all_wands();
 		local player_money = get_player_money();
 		local x_offset = 0;
 		local block_width = 115;
@@ -334,19 +334,19 @@ function show_research_wands_gui()
 				GuiColorNextWidgetBool(gui, b_spells_per_cast);
 				GuiText(gui, 0, 0, wand_preview["spells_per_cast"], small_text_scale);
 				GuiColorNextWidgetBool(gui, b_cast_delay_min or b_cast_delay_max);
-				GuiText(gui, 0, 0, tostring(math.floor((wand_preview["cast_delay"] / 60) * 100 + 0.5) / 100), small_text_scale);
+				GuiText(gui, 0, 0, math.floor((wand_preview["cast_delay"] / 60) * 100 + 0.5) / 100, small_text_scale);
 				GuiColorNextWidgetBool(gui, b_recharge_time_min or b_recharge_time_max);
-				GuiText(gui, 0, 0, tostring(math.floor((wand_preview["recharge_time"] / 60) * 100 + 0.5) / 100), small_text_scale);
+				GuiText(gui, 0, 0, math.floor((wand_preview["recharge_time"] / 60) * 100 + 0.5) / 100, small_text_scale);
 				GuiColorNextWidgetBool(gui, b_mana_max);
-				GuiText(gui, 0, 0, tostring(wand_preview["mana_max"]), small_text_scale);
+				GuiText(gui, 0, 0, math.floor(wand_preview["mana_max"]), small_text_scale);
 				GuiColorNextWidgetBool(gui, b_mana_charge_speed);
-				GuiText(gui, 0, 0, tostring(wand_preview["mana_charge_speed"]), small_text_scale);
+				GuiText(gui, 0, 0, math.floor(wand_preview["mana_charge_speed"]), small_text_scale);
 				GuiColorNextWidgetBool(gui, b_capacity);
-				GuiText(gui, 0, 0, tostring(wand_preview["capacity"]), small_text_scale);
+				GuiText(gui, 0, 0, wand_preview["capacity"], small_text_scale);
 				GuiColorNextWidgetBool(gui, b_spread_min or b_spread_max);
-				GuiText(gui, 0, 0, tostring(math.floor(wand_preview["spread"] * 10 + 0.5) / 10), small_text_scale);
+				GuiText(gui, 0, 0, math.floor(wand_preview["spread"] * 10 + 0.5) / 10, small_text_scale);
 				GuiColorNextWidgetBool(gui, b_always_cast_spells);
-				GuiText(gui, 0, 0, tostring(#wand_preview["always_cast_spells"]) .. " spells", small_text_scale);
+				GuiText(gui, 0, 0, #wand_preview["always_cast_spells"] .. " spells", small_text_scale);
 				GuiLayoutEnd(gui);
 				GuiLayoutEnd(gui);
 				if #wand_preview["always_cast_spells"] > 0 then

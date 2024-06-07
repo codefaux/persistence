@@ -90,6 +90,7 @@ function get_spells(profile_id)
 end
 
 local function update_spells_known_count(profile_id)
+	GamePrint("SPELLS " .. profile_id .. GameGetFrameNum());
 	local spells_known = 0;
 	for _, known in pairs(data_store[profile_id]["spells"]) do
 		if known then
@@ -120,6 +121,7 @@ end
 ---@param profile_id integer profile id
 ---@return integer always_casts_known quantity known always cast spells
 local function update_always_cast_spells_known_count(profile_id)
+	GamePrint("ALWAYS CAST " .. profile_id .. GameGetFrameNum());
 	local always_casts_known = 0;
 	for _, known in pairs(data_store[profile_id]["always_cast_spells"]) do
 		if known then
@@ -147,6 +149,7 @@ function get_wand_types(profile_id)
 end
 
 local function update_wand_types_known_count(profile_id)
+	GamePrint("WAND TYPES " .. profile_id .. GameGetFrameNum());
 	local wand_types_known = 0;
 	for _, known in pairs(data_store[profile_id]["wand_types"]) do
 		if known then

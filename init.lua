@@ -92,7 +92,7 @@ function OnWorldPostUpdate()
 		is_post_player_spawned = true;
 	end
 
-	if get_selected_save_id == nil or get_selected_save_id() == 0 then
+	if get_selected_profile_id == nil or get_selected_profile_id() == 0 then
 		return;
 	end
 
@@ -109,7 +109,7 @@ function OnWorldPostUpdate()
 		gui_update();
 	end
 
-	if get_selected_save_id() == nil then
+	if get_selected_profile_id() == nil then
 		return;
 	end
 
@@ -230,53 +230,53 @@ function OnPostPlayerSpawned()
 		set_run_created_with_mod();
 	end
 
-	local selected_save_id = get_selected_save_id();
-	if selected_save_id == nil then
+	local selected_profile_id = get_selected_profile_id();
+	if selected_profile_id == nil then
 		if not get_run_created_with_mod() then
-			set_selected_save_id(0);
+			set_selected_profile_id(0);
 		else
-			load_save_ids();
+			load_profile_ids();
 			local load_slot_id = tonumber(ModSettingGet("persistence.always_choose_save_id"))
 			if load_slot_id >= 0 then
 				if load_slot_id == 0 then
-					set_selected_save_id(0);
+					set_selected_profile_id(0);
 				else
-					if get_save_ids()[load_slot_id] == nil then
-						set_selected_save_id(load_slot_id);
-						create_new_save(load_slot_id);
-						OnSaveAvailable(load_slot_id);
+					if get_profile_ids()[load_slot_id] == nil then
+						set_selected_profile_id(load_slot_id);
+						create_new_profile(load_slot_id);
+						OnProfileAvailable(load_slot_id);
 					else
-						set_selected_save_id(load_slot_id);
-						load(load_slot_id);
-						OnSaveAvailable(load_slot_id);
+						set_selected_profile_id(load_slot_id);
+						load_profile(load_slot_id);
+						OnProfileAvailable(load_slot_id);
 					end
 				end
 			else
-				show_save_selector_gui();
+				show_profile_selector_gui();
 			end
 		end
 	else
-		if selected_save_id ~= 0 then
-			load(selected_save_id);
-			OnSaveAvailable(selected_save_id);
+		if selected_profile_id ~= 0 then
+			load_profile(selected_profile_id);
+			OnProfileAvailable(selected_profile_id);
 		end
 	end
 end
 
-function OnSaveAvailable(save_id)
+function OnProfileAvailable(profile_id)
 
 end
 
 function OnPlayerDied(player_entity)
 	hide_all_gui();
-	if get_selected_save_id() == nil or get_selected_save_id() == 0 then
+	if get_selected_profile_id() == nil or get_selected_profile_id() == 0 then
 		return;
 	end
 
 	local money = get_player_money();
 	local money_to_save = math.floor(money * ModSettingGet("persistence.money_saved_on_death") );
 	GamePrintImportant("You died", " $ " .. money_to_save .. " was saved.");
-	set_safe_money(get_selected_save_id(), math.abs(get_safe_money(get_selected_save_id()) + money_to_save));
+	set_stash_money(get_selected_profile_id(), math.abs(get_stash_money(get_selected_profile_id()) + money_to_save));
 end
 
 function GameOnCompleted()

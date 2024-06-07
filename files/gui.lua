@@ -52,70 +52,86 @@ local function GuiColorNextWidgetBool(gui, value)
 end
 
 
--- SAVE SELECTOR
-local save_open = false;
-function show_save_selector_gui()
-	save_open = true;
+-- PROFILE SELECTOR
+local profile_ui_open = false;
+function show_profile_selector_gui()
+	profile_ui_open = true;
 	disable_controls();
 
-	local delete_save_confirmation = 0;
-	active_windows["save_selector"] = { true, function (get_next_id)
-		GuiBeginScrollContainer(gui, get_next_id(), 30, 30, 250, 250);
-		GuiLayoutBeginVertical(gui, 3, 3);
-		GuiText(gui, 0, 0, "Select a save slot to proceed:");
+	local delete_profile_confirmation = 0;
+	active_windows["profile_selector"] = { true, function (get_next_id)
+		local block_width = 115;
+		local row_height = 9;
+
+		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
+		GuiText(gui, 20, 0, "Select a profile slot to proceed:");
+
 		GuiColorNextWidgetEnum(gui, COLORS.Tip);
-		GuiText(gui, 0, 0, "(Auto-load can be configured in the Mod Options menu)");
-		for i = 1, get_save_count() do
-			GuiText(gui, 0, 4, "Save slot " .. pad_number(i, #tostring(get_save_count())) .. ":");
-			if get_save_ids()[i] == nil then
+		GuiText(gui, 200, 0, "(Auto-load can be configured in the Mod Options menu)");
+		for i = 1, get_profile_count() do
+			local x_offset = (i-1) * block_width;
+
+			GuiText(gui, 15 + x_offset, row_height * 4, "Profile slot " .. pad_number(i, #tostring(get_profile_count())) .. ":");
+			if get_profile_ids()[i] == nil then
 				GuiColorNextWidgetEnum(gui, COLORS.Green);
-				if GuiButton(gui, 20, 0, "- Create new save", get_next_id()) then
-					set_selected_save_id(i);
-					create_new_save(i);
-					hide_save_selector_gui();
-					OnSaveAvailable(i);
+				if GuiButton(gui, x_offset + 10, row_height * 2, "- Create new profile", get_next_id()) then
+					set_selected_profile_id(i);
+					create_new_profile(i);
+					hide_profile_selector_gui();
+					OnProfileAvailable(i);
 					enable_controls();
-					save_open = false;
+					profile_ui_open = false;
 				end
 			else
 				GuiColorNextWidgetEnum(gui, COLORS.Green);
-				if GuiButton(gui, 20, 0, "- Load save", get_next_id()) then
-					set_selected_save_id(i);
-					load(i);
-					hide_save_selector_gui();
-					OnSaveAvailable(i);
+				if GuiButton(gui, x_offset + 10, row_height * 2, "- Load profile", get_next_id()) then
+					set_selected_profile_id(i);
+					load_profile(i);
+					hide_profile_selector_gui();
+					OnProfileAvailable(i);
 					enable_controls();
-					save_open = false;
+					profile_ui_open = false;
 				end
-				if delete_save_confirmation == i then
+				if delete_profile_confirmation == i then
 					GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-					if GuiButton(gui, 20, 0, "- Press again to delete", get_next_id()) then
-						delete_save_confirmation = 0;
-						delete_save(i);
+					if GuiButton(gui, x_offset + 10, row_height * 3, "- Press again to delete", get_next_id()) then
+						delete_profile_confirmation = 0;
+						delete_profile(i);
 					end
 				else
 					GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-					if GuiButton(gui, 20, 0, "- Delete save", get_next_id()) then
-						delete_save_confirmation = i;
+					if GuiButton(gui, x_offset + 10, row_height * 3, "- Delete profile", get_next_id()) then
+						delete_profile_confirmation = i;
 					end
 				end
+				GuiText(gui, 5 + x_offset, row_height * 6, "Stashed Money: ", small_text_scale);
+				GuiText(gui, 5 + x_offset, row_height * 7, "Spells: ", small_text_scale);
+				GuiText(gui, 5 + x_offset, row_height * 8, "Wand Types: ", small_text_scale);
+				GuiText(gui, 5 + x_offset, row_height * 9, "Always Casts: ", small_text_scale);
+				local s_stash, s_spells, s_types, s_always = load_profile_quick(i);
+				GuiText(gui, 75 + x_offset, row_height * 6,  s_stash~=nil and  s_stash or "..");
+				GuiText(gui, 75 + x_offset, row_height * 7, s_spells~=nil and s_spells or "..");
+				GuiText(gui, 75 + x_offset, row_height * 8,  s_types~=nil and  s_types or "..");
+				GuiText(gui, 75 + x_offset, row_height * 9, s_always~=nil and s_always or "..");
 			end
+
+
 		end
-		GuiText(gui, 0, 8, "Alternatively:");
+		GuiText(gui, 0, 180, "Alternatively:");
 		GuiColorNextWidgetEnum(gui, COLORS.Green);
-		if GuiButton(gui, 20, 0, "- Play without this mod", get_next_id()) then
-			set_selected_save_id(0);
-			hide_save_selector_gui();
+		if GuiButton(gui, 20, 180 + (row_height), "- Play without this mod", get_next_id()) then
+			set_selected_profile_id(0);
+			hide_profile_selector_gui();
 			enable_controls();
-			save_open = false;
+			profile_ui_open = false;
 		end
-		GuiLayoutEnd(gui);
 		GuiEndScrollContainer(gui);
 	end };
 end
 
-function hide_save_selector_gui()
-	active_windows["save_selector"] = nil;
+
+function hide_profile_selector_gui()
+	active_windows["profile_selector"] = nil;
 end
 
 
@@ -125,8 +141,8 @@ local money_open = false;
 function show_money_gui()
 	money_open = true;
 	active_windows["money"] = { true, function(get_next_id)
-		local save_id = get_selected_save_id();
-		local safe_money = get_safe_money(save_id);
+		local profile_id = get_selected_profile_id();
+		local stash_money = get_stash_money(profile_id);
 		local player_money = get_player_money();
 		local money_amts = {1, 10, 100, 1000};
 
@@ -135,20 +151,20 @@ function show_money_gui()
 		GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 
 		for _, money_amt in ipairs(money_amts) do
-			if safe_money < money_amt then
+			if stash_money < money_amt then
 				GuiColorNextWidgetEnum(gui, COLORS.Dark)
 				GuiText(gui, 0, 0, "Take $ " .. money_amt);
 			else
 				GuiColorNextWidgetEnum(gui, COLORS.Green);
 				if GuiButton(gui, 0, 0, "Take $ " .. money_amt, get_next_id()) then
-					transfer_money_to_player(save_id, money_amt);
+					transfer_money_stash_to_player(profile_id, money_amt);
 				end
 			end
 		end
 
 		GuiColorNextWidgetEnum(gui, COLORS.Green);
 		if GuiButton(gui, 0, 0, "Take ALL", get_next_id()) then
-			transfer_money_to_player(save_id, safe_money);
+			transfer_money_stash_to_player(profile_id, stash_money);
 		end
 
 		GuiLayoutEnd(gui);
@@ -162,21 +178,21 @@ function show_money_gui()
 			else
 				GuiColorNextWidgetEnum(gui, COLORS.Green);
 				if GuiButton(gui, 0, 0, "Stash $ " .. money_amt, get_next_id()) then
-					transfer_money_to_safe(save_id, money_amt);
+					transfer_money_player_to_stash(profile_id, money_amt);
 				end
 			end
 		end
 
 		GuiColorNextWidgetEnum(gui, COLORS.Green);
 		if GuiButton(gui, 0, 0, "Stash ALL", get_next_id()) then
-			transfer_money_to_safe(save_id, player_money);
+			transfer_money_player_to_stash(profile_id, player_money);
 		end
 		GuiLayoutEnd(gui);
 		GuiLayoutEnd(gui);
 		GuiLayoutEnd(gui);
 
 		GuiLayoutBeginHorizontal(gui, 84, 33);
-		GuiText(gui, 0, 0, "Stashed: $ " .. tostring(safe_money));
+		GuiText(gui, 0, 0, "Stashed: $ " .. tostring(stash_money));
 		GuiLayoutEnd(gui);
 	end };
 end
@@ -215,8 +231,8 @@ end
 
 local research_wands_open = false;
 function show_research_wands_gui()
-	local save_id = get_selected_save_id();
-	if not data_store_safe(save_id) then
+	local profile_id = get_selected_profile_id();
+	if not data_store_safe(profile_id) then
 		return;
 	end
 	local wand_entity_ids = get_all_wands();
@@ -231,7 +247,7 @@ function show_research_wands_gui()
 		for i = 0, 3 do
 			x_offset = i * block_width;
 			local is_new, b_spells_per_cast, b_cast_delay_min, b_cast_delay_max, b_recharge_time_min, b_recharge_time_max, b_mana_max, b_mana_charge_speed, b_capacity, b_spread_min, b_spread_max, b_always_cast_spells, b_wand_types, i_always_cast_spells
-						 = research_wand_is_new(get_selected_save_id(), wand_entity_ids[i]);
+						 = research_wand_is_new(get_selected_profile_id(), wand_entity_ids[i]);
 
 			if is_new then
 				GuiColorNextWidgetEnum(gui, COLORS.Tip);
@@ -246,13 +262,13 @@ function show_research_wands_gui()
 
 			if wand_entity_ids[i] ~= nil then
 
-				local price = research_wand_price(get_selected_save_id(), wand_entity_ids[i]);
+				local price = research_wand_price(get_selected_profile_id(), wand_entity_ids[i]);
 				local wand_preview = read_wand(wand_entity_ids[i]);
 
 				local new_spells = false;
 				if #wand_preview["spells"] then
 					local new_spell_count = 0;
-					local already_researched_spells = get_spells(get_selected_save_id());
+					local already_researched_spells = get_spells(get_selected_profile_id());
 
 					for _, spell_action_id in ipairs(wand_preview["spells"]) do
 						if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
@@ -280,7 +296,7 @@ function show_research_wands_gui()
 
 					GuiColorNextWidgetBool(gui, price <= player_money);
 					if GuiButton(gui, 6 + x_offset, 5, " Research for $" .. price, get_next_id()) then
-						research_wand(get_selected_save_id(), wand_entity_ids[i]);
+						research_wand(get_selected_profile_id(), wand_entity_ids[i]);
 						wand_entity_ids[i] = nil; -- Verify this works
 						GamePrintImportant("Wand Researched");
 					end
@@ -388,14 +404,14 @@ end
 
 local research_spells_open = false;
 function show_research_spells_gui()
-	local save_id = get_selected_save_id();
+	local save_id = get_selected_profile_id();
 	if not data_store_safe(save_id) or not spells_safe(save_id) then
 		return;
 	end
 	research_spells_open = true;
 
 	local inv_spell_entity_ids = get_all_inv_spells();
-	local already_researched_spells = get_spells(get_selected_save_id());
+	local already_researched_spells = get_spells(get_selected_profile_id());
 
 	local idx = 1;
 	local researchable_spell_entities = {};
@@ -430,7 +446,7 @@ function show_research_spells_gui()
 				else
 					GuiColorNextWidgetEnum(gui, COLORS.Green);
 					if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell_price, get_next_id()) then
-						research_spell_entity(get_selected_save_id(), researchable_spell_entities[r_s_e_idx]);
+						research_spell_entity(get_selected_profile_id(), researchable_spell_entities[r_s_e_idx]);
 						GamePrintImportant("Spell Researched", curr_spell.name);
 						hide_research_spells_gui();
 						show_research_spells_gui();
@@ -459,34 +475,34 @@ end
 
 local buy_wands_open = false;
 function show_buy_wands_gui()
-	local save_id = get_selected_save_id();
-	if not data_store_safe(save_id) or not wand_types_safe(save_id) or not always_cast_safe(save_id) or not templates_safe(save_id) then
+	local profile_id = get_selected_profile_id();
+	if not data_store_safe(profile_id) or not wand_types_safe(profile_id) or not always_cast_safe(profile_id) or not templates_safe(profile_id) then
 		return;
 	end
 
 	buy_wands_open = true;
 
-	if can_create_wand(save_id) then
+	if can_create_wand(profile_id) then
 		local WINDOW_ID = { id_base=0, id_pick_alwayscast=1, id_pick_icon=2};
 		local window_nr = WINDOW_ID.id_base;
 		local gui_margin_y_global = gui_margin_y;
 		local gui_margin_y = 3; -- Override
 		local gui_margin_short_x = 5;
 		local spells_per_cast_min = 1;
-		local spells_per_cast_max = get_spells_per_cast(save_id);
-		local cast_delay_min = get_cast_delay_min(save_id);
-		local cast_delay_max = get_cast_delay_max(save_id);
-		local recharge_time_min = get_recharge_time_min(save_id);
-		local recharge_time_max = get_recharge_time_max(save_id);
+		local spells_per_cast_max = get_spells_per_cast(profile_id);
+		local cast_delay_min = get_cast_delay_min(profile_id);
+		local cast_delay_max = get_cast_delay_max(profile_id);
+		local recharge_time_min = get_recharge_time_min(profile_id);
+		local recharge_time_max = get_recharge_time_max(profile_id);
 		local mana_min = 1;
-		local mana_max = get_mana_max(save_id);
+		local mana_max = get_mana_max(profile_id);
 		local mana_charge_speed_min = 1;
-		local mana_charge_speed_max = get_mana_charge_speed(save_id);
+		local mana_charge_speed_max = get_mana_charge_speed(profile_id);
 		local capacity_min = 1;
-		local capacity_max = get_capacity(save_id);
-		local spread_min = get_spread_min(save_id);
-		local spread_max = get_spread_max(save_id);
-		local wand_types = get_wand_types(save_id);
+		local capacity_max = get_capacity(profile_id);
+		local spread_min = get_spread_min(profile_id);
+		local spread_max = get_spread_max(profile_id);
+		local wand_types = get_wand_types(profile_id);
 		local always_cast_spells = {};
 
 		local wand_data_selected = {
@@ -510,7 +526,7 @@ function show_buy_wands_gui()
 		wand_stat_limits.max = {spells_per_cast_max, cast_delay_max, recharge_time_max, mana_max, mana_charge_speed_max, capacity_max, spread_max };
 
 		local idx = 0;
-		for spell_id, _ in pairs(get_always_cast_spells(save_id)) do
+		for spell_id, _ in pairs(get_always_cast_spells(profile_id)) do
 			always_cast_spells[idx] = actions_by_id[spell_id];
 			always_cast_spells[idx].id = spell_id;
 			idx = idx + 1;
@@ -693,14 +709,14 @@ function show_buy_wands_gui()
 				GuiLayoutEnd(gui);
 
 				for i = 1, get_template_count() do
-					local template_preview = get_template(save_id, i);
+					local template_preview = get_template(profile_id, i);
 					local template_hover = 0;
 					GuiLayoutBeginVertical(gui, 80, 44 + ((i-1) * 11));
 					GuiText(gui, 0, 0, "Template Slot " .. pad_number(i, #tostring(get_template_count())) .. ":");
 					if template_preview == nil then	-- Template empty
 						GuiColorNextWidgetEnum(gui, COLORS.Green);
 						if GuiButton(gui, 16, 6, "Save template", get_next_id()) then
-							set_template(save_id, i, wand_data_selected);
+							set_template(profile_id, i, wand_data_selected);
 						end
 					else -- Template exists
 						if select(3, GuiGetPreviousWidgetInfo(gui)) then
@@ -729,7 +745,7 @@ function show_buy_wands_gui()
 							GuiColorNextWidgetEnum(gui, COLORS.Yellow);
 							if GuiButton(gui, 0, 0, "Press again to delete", get_next_id()) then
 								delete_template_confirmation = 0;
-								delete_template(save_id, i);
+								delete_template(profile_id, i);
 								template_hover = 0;
 							elseif select(3, GuiGetPreviousWidgetInfo(gui)) then
 								template_hover = i;
@@ -864,15 +880,15 @@ end
 
 local buy_spells_open = false;
 function show_buy_spells_gui()
-	local save_id = get_selected_save_id();
-	if not data_store_safe(save_id) and not spells_safe(save_id) then
+	local profile_id = get_selected_profile_id();
+	if not data_store_safe(profile_id) and not spells_safe(profile_id) then
 		return;
 	end
 	buy_spells_open = true;
 
 	local idx = 1;
 	local spells = {};
-	for spell_id, _ in pairs(get_spells(save_id)) do
+	for spell_id, _ in pairs(get_spells(profile_id)) do
 		spells[idx] = actions_by_id[spell_id];
 		spells[idx].id = spell_id;
 		idx = idx + 1;
@@ -1032,7 +1048,7 @@ function gui_update()
 		hide_buy_spells_gui();
 	end
 
-	local submenu_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open or save_open;
+	local submenu_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open or profile_ui_open;
 	if submenu_open then
 		if not menu_switched then
 			menu_switched = true;

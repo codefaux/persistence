@@ -123,7 +123,7 @@ function OnWorldPostUpdate()
 		local custom_workshop = EntityGetClosestWithTag(shop_x, shop_y, "persistence_workshop");
 		local custom_x, custom_y = EntityGetTransform(custom_workshop);
 		if custom_workshop == nil or custom_workshop == 0 or (shop_x - custom_x) * (shop_y - custom_y) > 10 then
-			GamePrint("Updating workshop " .. custom_workshop .. " for " .. workshop .. " from idx " .. idx .. " to " .. workshop_count + idx );
+			-- GamePrint("Updating workshop " .. custom_workshop .. " for " .. workshop .. " from idx " .. idx .. " to " .. workshop_count + idx );
 			custom_workshop = EntityLoad("mods/persistence/files/workshop_collider.xml", shop_x, shop_y);
 			local workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent"); 
 			local custom_workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(custom_workshop, "HitboxComponent");
@@ -142,7 +142,7 @@ function OnWorldPostUpdate()
 	if ModSettingGet("persistence.reusable_holy_mountain") == true then
 		local persistence_list = EntityGetWithTag("persistence_workshop");
     for _, persistence_item in ipairs(persistence_list) do
-			GamePrint("Adding workshop " .. persistence_item .. " at " .. #workshop_list + 1 );
+			-- GamePrint("Adding workshop " .. persistence_item .. " at " .. #workshop_list + 1 );
 			workshop_list[#workshop_list+1] = persistence_item;
 		end
 	end

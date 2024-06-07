@@ -784,7 +784,7 @@ function show_buy_wands_gui()
 				end
 				GuiEndScrollContainer(gui);
 				GuiColorNextWidgetEnum(gui, COLORS.Green);
-				GuiText(gui, 30, 225, "You know " .. #always_cast_spells .. " always-cast spells.", small_text_scale);
+				GuiText(gui, 30, 225, "You know " .. #always_cast_spells+1 .. " always-cast spells.", small_text_scale);
 
 			elseif window_nr == WINDOW_ID.id_pick_icon then
 				idx = 0;

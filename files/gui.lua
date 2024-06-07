@@ -279,7 +279,7 @@ function show_research_wands_gui()
 					end
 
 					GuiColorNextWidgetBool(gui, price <= player_money);
-					if GuiButton(gui, 6 + x_offset, 5, " Research for $" .. tostring(price), get_next_id()) then
+					if GuiButton(gui, 6 + x_offset, 5, " Research for $" .. price, get_next_id()) then
 						research_wand(get_selected_save_id(), wand_entity_ids[i]);
 						wand_entity_ids[i] = nil; -- Verify this works
 						GamePrintImportant("Wand Researched");
@@ -422,13 +422,14 @@ function show_research_spells_gui()
 			local line_height = 28;
 			for r_s_e_idx = 1, #researchable_spell_entities do
 				curr_spell = actions_by_id[get_spell_entity_action_id(researchable_spell_entities[r_s_e_idx])];
+				local curr_spell_price = research_spell_entity_price(researchable_spell_entities[r_s_e_idx]);
 				local line_pos = (r_s_e_idx - 1) * line_height;
-				if player_money < curr_spell.price then
+				if player_money < curr_spell_price then
 					GuiColorNextWidgetEnum(gui, COLORS.Red);
-					GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell.price)
+					GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell_price)
 				else
 					GuiColorNextWidgetEnum(gui, COLORS.Green);
-					if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell.price, get_next_id()) then
+					if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell_price, get_next_id()) then
 						research_spell_entity(get_selected_save_id(), researchable_spell_entities[r_s_e_idx]);
 						GamePrintImportant("Spell Researched", curr_spell.name);
 						hide_research_spells_gui();
@@ -468,6 +469,7 @@ function show_buy_wands_gui()
 	if can_create_wand(save_id) then
 		local WINDOW_ID = { id_base=0, id_pick_alwayscast=1, id_pick_icon=2};
 		local window_nr = WINDOW_ID.id_base;
+		local gui_margin_y_global = gui_margin_y;
 		local gui_margin_y = 3; -- Override
 		local gui_margin_short_x = 5;
 		local spells_per_cast_min = 1;
@@ -715,11 +717,8 @@ function show_buy_wands_gui()
 						if GuiButton(gui, 0, 0, "Load template", get_next_id()) then
 							wand_data_selected = template_preview;
 							for _, curr_spell in pairs(always_cast_spells) do
-								for i = 0, #wand_data_selected["always_cast_spells"] do
-									curr_spell.selected = wand_data_selected["always_cast_spells"][i] == curr_spell.id;
-									-- if wand_data_selected["always_cast_spells"][i] == curr_spell.id then
-									-- 	curr_spell.selected = true;
-									-- end
+								for ii = 0, #wand_data_selected["always_cast_spells"] do
+									curr_spell.selected = wand_data_selected["always_cast_spells"][ii] == curr_spell.id;
 								end
 							end
 						end
@@ -749,8 +748,7 @@ function show_buy_wands_gui()
 					end
 					GuiLayoutEnd(gui);
 
-					if template_hover ~= 0 then
-						local template_preview = get_template(save_id, i);
+					if template_hover == i then
 						GuiBeginScrollContainer(gui, get_next_id(), 400, 180, 90, 140);
 						GuiLayoutBeginHorizontal(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
@@ -781,16 +779,21 @@ function show_buy_wands_gui()
 						GuiEndScrollContainer(gui);
 					end
 				end
-			elseif window_nr == WINDOW_ID.id_pick_alwayscast then
+			elseif window_nr == WINDOW_ID.id_pick_alwayscast then    -- ALWAYS CAST --
 
-				GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
+				GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y_global);
 				idx = 0;
 				local line_height = 28;
 				for _, curr_spell in pairs(always_cast_spells) do
 					local line_pos = idx * line_height;
 					GuiColorNextWidgetBool(gui, curr_spell.selected==true);
+					GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+					if GuiButton(gui, 12, 0 + line_pos, curr_spell.selected==true and "$menu_yes" or "$menu_no", get_next_id()) then
+						toggle_select_spell(curr_spell.id);
+					end	-- Button (Cost)
 					local newprice = math.ceil((curr_spell.price * 5) * ModSettingGet("persistence.buy_wand_price_multiplier"));
-					if GuiButton(gui, 0, 3 + line_pos, " $ " .. newprice, get_next_id()) then
+					GuiColorNextWidgetBool(gui, player_money >= newprice);
+					if GuiButton(gui, 0, 8 + line_pos, " $ " .. newprice, get_next_id()) then
 						toggle_select_spell(curr_spell.id);
 					end	-- Button (Cost)
 					GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
@@ -802,7 +805,7 @@ function show_buy_wands_gui()
 				GuiColorNextWidgetEnum(gui, COLORS.Green);
 				GuiText(gui, 30, 225, "You know " .. #always_cast_spells+1 .. " always-cast spells.", small_text_scale);
 
-			elseif window_nr == WINDOW_ID.id_pick_icon then
+			elseif window_nr == WINDOW_ID.id_pick_icon then -- PICK ICON --
 				idx = 0;
 				local line_gap = 60;
 				local icon_gap_x = 128;
@@ -883,12 +886,13 @@ function show_buy_spells_gui()
 		local line_height = 28;
 		for _, curr_spell in pairs(spells) do
 			local line_pos = idx * line_height;
-			if player_money < curr_spell.price then
+			local curr_spell_cost = create_spell_price(curr_spell.id);
+			if player_money < curr_spell_cost then
 				GuiColorNextWidgetEnum(gui, COLORS.Red);
-				GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell.price)
+				GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell_cost)
 			else
 				GuiColorNextWidgetEnum(gui, COLORS.Green);
-				if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell.price, get_next_id()) then
+				if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell_cost, get_next_id()) then
 					create_spell(curr_spell.id);
 					GamePrintImportant("Spell Purchased", curr_spell.name);
 				end	-- Button (Cost)

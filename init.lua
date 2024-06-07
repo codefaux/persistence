@@ -117,7 +117,7 @@ function OnWorldPostUpdate()
 	local workshop_count = #workshop_list;
 
 	-- for idx, workshop in ipairs(workshop_list) do
-	for idx = 0, workshop_count do
+	for idx = 1, workshop_count do
 		local workshop = workshop_list[idx];
 		local shop_x, shop_y = EntityGetTransform(workshop);
 		local custom_workshop = EntityGetClosestWithTag(shop_x, shop_y, "persistence_workshop");
@@ -131,7 +131,7 @@ function OnWorldPostUpdate()
 			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_min_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_min_y"));
 			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_x", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_x"));
 			ComponentSetValue2(custom_workshop_hitbox_comp, "aabb_max_y", ComponentGetValue2(workshop_hitbox_comp, "aabb_max_y"));
-			workshop_list[workshop_count + idx + 1] = custom_workshop;
+			workshop_list[workshop_count + idx] = custom_workshop;
 		end
 	end
 

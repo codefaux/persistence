@@ -432,7 +432,7 @@ function show_research_spells_gui()
 			local uses_max = actions_by_id[spell_action_id].max_uses;
 			local item_comp = EntityGetComponentIncludingDisabled(inv_spell_entity_id, "ItemComponent");
 			local uses_now = ComponentGetValue2(item_comp[0]~= nil and item_comp[0] or item_comp[1], "uses_remaining");
-			if uses_max==uses_now and not hash[spell_action_id] then
+			if (uses_max == nil or uses_max==uses_now) and not hash[spell_action_id] then
 				researchable_spell_entities[idx] = inv_spell_entity_id;
 				hash[spell_action_id] = true;
 				idx = idx + 1;
@@ -917,24 +917,33 @@ function show_buy_spells_gui()
 		local line_height = 28;
 		idx = 0;
 
-		if sort==0 then
-			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Name") then
-				sort = 1;
+		-- TODO : ADD SORT BY TYPE
+		if sort==1 then
+			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Cost") then
+				sort = 2;
+				sorted = false;
+			end
+		elseif sort==2 then
+			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Type") then
+				sort = 0;
 				sorted = false;
 			end
 		else
-			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Cost") then
-				sort = 0;
+			-- if sort==0 then
+			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Name") then
+				sort = 1;
 				sorted = false;
 			end
 		end
 
 		if not sorted then
 			sorted = true;
-			if sort == 0 then
-				table.sort(spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
-			else
+			if sort == 1 then
 				table.sort(spells, function(a, b) return a.price < b.price end );
+			elseif sort == 2 then
+				table.sort(spells, function(a, b) return a.type < b.type end );
+			else
+				table.sort(spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
 			end
 		end
 

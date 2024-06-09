@@ -98,7 +98,7 @@ My changes so far:
 -- Added framed on-hover stats for saved templates
 
 - Buy Spells GUI
--- Complete rework with icon, name, cast count, type, description, and cost -- filter by type, sort by cost/name
+-- Complete rework with icon, name, cast count, type, description, and cost -- filter by type, sort by cost/name/type
 
 - ALL GUIs
 -- Tabs lock controls while open. Click tab again to close. Pending fix. (Anyone know how to read user keybindings? I want my mod to match system keybinds to eg. close menus in case user rebinds tab/i for example.)

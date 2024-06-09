@@ -60,6 +60,7 @@ end
 
 
 -- PROFILE SELECTOR
+
 local profile_ui_open = false;
 function show_profile_selector_gui()
 	profile_ui_open = true;
@@ -425,17 +426,17 @@ function show_research_spells_gui()
 	local hash = {};
 
 	for _, inv_spell_entity_id in ipairs(inv_spell_entity_ids) do
-		-- TODO: Don't accept partially used spells
-		-- Entity / ItemComponent / member 'uses_remaining'  -1 == inf
 		local spell_action_id = get_spell_entity_action_id(inv_spell_entity_id);
 		if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
 			local uses_max = actions_by_id[spell_action_id].max_uses;
 			local item_comp = EntityGetComponentIncludingDisabled(inv_spell_entity_id, "ItemComponent");
-			local uses_now = ComponentGetValue2(item_comp[0]~= nil and item_comp[0] or item_comp[1], "uses_remaining");
-			if (uses_max == nil or uses_max==uses_now) and not hash[spell_action_id] then
-				researchable_spell_entities[idx] = inv_spell_entity_id;
-				hash[spell_action_id] = true;
-				idx = idx + 1;
+			if item_comp ~= nil then
+				local uses_now = ComponentGetValue2(item_comp[0]~= nil and item_comp[0] or item_comp[1], "uses_remaining");
+				if (uses_max == nil or uses_max==uses_now) and not hash[spell_action_id] then
+					researchable_spell_entities[idx] = inv_spell_entity_id;
+					hash[spell_action_id] = true;
+					idx = idx + 1;
+				end
 			end
 		end
 	end
@@ -917,7 +918,6 @@ function show_buy_spells_gui()
 		local line_height = 28;
 		idx = 0;
 
-		-- TODO : ADD SORT BY TYPE
 		if sort==1 then
 			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Cost") then
 				sort = 2;

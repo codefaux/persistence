@@ -1,5 +1,5 @@
 dofile_once("data/scripts/lib/mod_settings.lua");
-dofile_once("data/scripts/gun/gun_actions.lua");
+dofile_once("mods/persistence/files/action_types.lua");
 
 actions_by_id = {};
 

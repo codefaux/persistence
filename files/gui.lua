@@ -3,8 +3,8 @@ dofile_once("mods/persistence/files/data_store.lua");
 dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/gun/procedural/wands.lua");
 dofile_once("mods/persistence/files/wand_spell_helper.lua");
-dofile_once("data/scripts/gun/gun_actions.lua");
 dofile_once("data/scripts/debug/keycodes.lua");
+dofile_once("mods/persistence/files/action_types.lua");
 
 local gui = GuiCreate();
 local active_windows = {};
@@ -17,12 +17,15 @@ local small_text_scale = 0.9;
 local COLORS = {
 	Green = "GREEN",
 	Red = "RED",
+	Blue = "BLUE",
 	Yellow = "YELLOW",
 	Dim = "DIM",
 	Dark = "DARK",
 	Tip = "TIP",
-	Bright = "BRIGHT"
+	Bright = "BRIGHT",
+	Purple = "PURPLE"
 }
+
 
 ---@param value colors
 local function GuiColorNextWidgetEnum(gui, value)
@@ -30,6 +33,8 @@ local function GuiColorNextWidgetEnum(gui, value)
 		GuiColorSetForNextWidget(gui, 0.5, 1, 0.5, 1);
 	elseif value == "RED" then
 		GuiColorSetForNextWidget(gui, 1, 0.5, 0.5, 1);
+	elseif value == "BLUE" then
+		GuiColorSetForNextWidget(gui, 0.25, 0.25, 1, 1);
 	elseif value == "YELLOW" then
 		GuiColorSetForNextWidget(gui, 1, 1, 0.5, 1);
 	elseif value == "DIM" then
@@ -40,6 +45,8 @@ local function GuiColorNextWidgetEnum(gui, value)
 		GuiColorSetForNextWidget(gui, 0.666, 0.666, 0.80, 1);
 	elseif value == "BRIGHT" then
 		GuiColorSetForNextWidget(gui, 0.85, 0.9, 1, 1);
+	elseif value == "PURPLE" then
+		GuiColorSetForNextWidget(gui, 1, 0.25, 1, 1);
 	end
 end
 
@@ -419,6 +426,7 @@ function show_research_spells_gui()
 
 	for _, inv_spell_entity_id in ipairs(inv_spell_entity_ids) do
 		-- TODO: Don't accept partially used spells
+		-- Entity / ItemComponent / member 'uses_remaining'  -1 == inf
 		local spell_action_id = get_spell_entity_action_id(inv_spell_entity_id);
 		if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
 			if not hash[spell_action_id] then
@@ -888,42 +896,94 @@ function show_buy_spells_gui()
 
 	local idx = 1;
 	local spells = {};
+	local type_hash = {};
+	local active_filter = 99;
+	local sort = 0;
+	local sorted = false;
+
+	type_hash[99] = true;
 	for spell_id, _ in pairs(get_spells(profile_id)) do
 		spells[idx] = actions_by_id[spell_id];
 		spells[idx].id = spell_id;
 		idx = idx + 1;
+		type_hash[actions_by_id[spell_id].type] = true;
 	end
-	table.sort(spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
 
 	active_windows["buy_spells"] = { true, function(get_next_id)
 		local player_money = get_player_money();
-		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
-		idx = 0;
 		local line_height = 28;
-		for _, curr_spell in pairs(spells) do
-			local line_pos = idx * line_height;
-			local curr_spell_cost = create_spell_price(curr_spell.id);
-			if player_money < curr_spell_cost then
-				GuiColorNextWidgetEnum(gui, COLORS.Red);
-				GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell_cost)
-			else
-				GuiColorNextWidgetEnum(gui, COLORS.Green);
-				if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell_cost, get_next_id()) then
-					create_spell(curr_spell.id);
-					GamePrintImportant("Spell Purchased", curr_spell.name);
-				end	-- Button (Cost)
-			end -- Colorize Button
-			GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
-			GuiLayoutBeginHorizontal(gui, 60, 0 + line_pos, true, 4, 0);
-			GuiColorNextWidgetEnum(gui, COLORS.Tip);
-			GuiText(gui, 0, 0, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
-			if curr_spell.max_uses ~= nil then
-				GuiColorNextWidgetEnum(gui, COLORS.Bright);
-				GuiText(gui, 0, 0, "(" .. curr_spell.max_uses .. ")");
+		idx = 0;
+
+		if sort==0 then
+			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Name") then
+				sort = 1;
+				sorted = false;
 			end
-			GuiLayoutEnd(gui);
-			GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
-			idx = idx + 1;
+		else
+			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Cost") then
+				sort = 0;
+				sorted = false;
+			end
+		end
+
+		if not sorted then
+			sorted = true;
+			if sort == 0 then
+				table.sort(spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
+			else
+				table.sort(spells, function(a, b) return a.price < b.price end );
+			end
+		end
+
+		local ii = 1;
+		GuiText(gui, 26, 6, "Filter:");
+		for type_nr, type_bool in pairs(type_hash) do
+			if type_bool then
+				if type_nr~=99 then
+					ii = ii + 1;
+				end
+				local type_x_offset = 40 + ( (type_nr==99 and 1 or ii) * 20);
+				if GuiImageButton(gui, get_next_id(), type_x_offset, 1, "", action_type_to_slot_sprite(type_nr)) then
+					active_filter = type_nr;
+				end
+				GuiTooltip(gui, type_nr==99 and "ALL" or action_type_to_string(type_nr), "");
+				if type_nr==active_filter then
+					local new_offset_x = 10;
+					local new_offset_y = 8;
+					GuiImage(gui, get_next_id(), type_x_offset + new_offset_x, new_offset_y, "data/ui_gfx/damage_indicators/explosion.png", 0.5, 1, 1, math.rad(45)); -- radians are annoying
+				end
+			end
+		end
+
+		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
+		for _, curr_spell in pairs(spells) do
+			if active_filter==99 or active_filter==curr_spell.type then
+				local line_pos = idx * line_height;
+				local curr_spell_cost = create_spell_price(curr_spell.id);
+				if player_money < curr_spell_cost then
+					GuiColorNextWidgetEnum(gui, COLORS.Red);
+					GuiText(gui, 0, 5 + line_pos, " $ " .. curr_spell_cost)
+				else
+					GuiColorNextWidgetEnum(gui, COLORS.Green);
+					if GuiButton(gui, 0, 5 + line_pos, " $ " .. curr_spell_cost, get_next_id()) then
+						create_spell(curr_spell.id);
+						GamePrintImportant("Spell Purchased", curr_spell.name);
+					end	-- Button (Cost)
+				end -- Colorize Button
+				GuiImage(gui, get_next_id(), 32, 0 + line_pos, action_type_to_slot_sprite(curr_spell.type), 1.2, 1.2, 0);
+				GuiImage(gui, get_next_id(), 36, 4 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
+				GuiLayoutBeginHorizontal(gui, 60, 2 + line_pos, true, 4, 0);
+				GuiColorNextWidgetEnum(gui, COLORS.Tip);
+				GuiText(gui, 0, 0, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
+				if curr_spell.max_uses ~= nil then
+					GuiColorNextWidgetEnum(gui, COLORS.Bright);
+					GuiText(gui, 0, 0, "(" .. curr_spell.max_uses .. ")");
+				end
+				GuiLayoutEnd(gui);
+				GuiText(gui, 60, 12 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
+
+				idx = idx + 1;
+			end
 		end
 		GuiEndScrollContainer(gui);
 		GuiColorNextWidgetEnum(gui, COLORS.Tip);

@@ -56,6 +56,10 @@ local is_in_workshop = false;
 
 -- GAME ENGINE EVENTS
 
+function OnModPreInit()
+ ModLuaFileAppend( "mods/persistence/files/action_types.lua", "data/scripts/gun/gun_actions.lua");
+end
+
 function OnWorldPostUpdate()
 	if #actions_by_id < 1 then
 		load_actions_by_id();

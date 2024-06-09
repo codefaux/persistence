@@ -66,7 +66,7 @@ My changes so far:
 -- Fixed New Save issue
 
 - Select Save GUI
--- Basic rework
+-- Moderate rework, preview stats
 
 - Research Spell GUI
 -- Complete rework with icons, names, descriptions, and cost
@@ -98,7 +98,7 @@ My changes so far:
 -- Added framed on-hover stats for saved templates
 
 - Buy Spells GUI
--- Complete rework with icons, names, descriptions, and costs
+-- Complete rework with icon, name, cast count, type, description, and cost -- filter by type, sort by cost/name
 
 - ALL GUIs
 -- Tabs lock controls while open. Click tab again to close. Pending fix. (Anyone know how to read user keybindings? I want my mod to match system keybinds to eg. close menus in case user rebinds tab/i for example.)

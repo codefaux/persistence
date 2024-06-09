@@ -115,7 +115,7 @@ function show_profile_selector_gui()
 				GuiText(gui, 5 + x_offset, row_height * 7, "Spells: ", small_text_scale);
 				GuiText(gui, 5 + x_offset, row_height * 8, "Wand Types: ", small_text_scale);
 				GuiText(gui, 5 + x_offset, row_height * 9, "Always Casts: ", small_text_scale);
-				local s_stash, s_spells, s_types, s_always = load_profile_quick(i);
+				local s_stash, s_always, s_spells, s_types = load_profile_quick(i);
 				GuiText(gui, 75 + x_offset, row_height * 6,  s_stash~=nil and  s_stash or "..");
 				GuiText(gui, 75 + x_offset, row_height * 7, s_spells~=nil and s_spells or "..");
 				GuiText(gui, 75 + x_offset, row_height * 8,  s_types~=nil and  s_types or "..");
@@ -429,7 +429,10 @@ function show_research_spells_gui()
 		-- Entity / ItemComponent / member 'uses_remaining'  -1 == inf
 		local spell_action_id = get_spell_entity_action_id(inv_spell_entity_id);
 		if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
-			if not hash[spell_action_id] then
+			local uses_max = actions_by_id[spell_action_id].max_uses;
+			local item_comp = EntityGetComponentIncludingDisabled(inv_spell_entity_id, "ItemComponent");
+			local uses_now = ComponentGetValue2(item_comp[0]~= nil and item_comp[0] or item_comp[1], "uses_remaining");
+			if uses_max==uses_now and not hash[spell_action_id] then
 				researchable_spell_entities[idx] = inv_spell_entity_id;
 				hash[spell_action_id] = true;
 				idx = idx + 1;

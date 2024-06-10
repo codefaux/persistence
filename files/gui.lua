@@ -242,6 +242,7 @@ function show_research_wands_gui()
 		return;
 	end
 	local wand_entity_ids = get_all_wands();
+	local buy_confirm = -1;
 
 	research_wands_open = true;
 	active_windows["research_wands"] = { true, function(get_next_id)
@@ -260,6 +261,7 @@ function show_research_wands_gui()
 			end
 			GuiText(gui, x_offset + 20, 32, "Wand Slot " .. tostring(i+1) .. ":");
 			local gui_icon = (is_new) and "data/ui_gfx/inventory/full_inventory_box_highlight.png" or "data/ui_gfx/inventory/full_inventory_box.png";
+			local buy_line_y = 5;
 			local frame_y = 77;
 			local frame_x = 2;
 			local frame_offset_y = -14;
@@ -301,14 +303,26 @@ function show_research_wands_gui()
 					end
 
 					GuiColorNextWidgetBool(gui, price <= player_money);
-					if GuiButton(gui, 6 + x_offset, 5, " Research for $" .. price, get_next_id()) then
+					if GuiButton(gui, 6 + x_offset, buy_line_y, " Research for $" .. price, get_next_id()) then
 						research_wand(get_selected_profile_id(), wand_entity_ids[i]);
-						wand_entity_ids[i] = nil; -- Verify this works
+						wand_entity_ids[i] = nil;
 						GamePrintImportant("Wand Researched");
 					end
 				else
-					GuiColorNextWidgetEnum(gui, COLORS.Dim);
-					GuiText(gui, 14 + x_offset, 7, " No improved stats ");
+					if buy_confirm==i then
+						GuiColorNextWidgetEnum(gui, COLORS.Red);
+						if GuiButton(gui, 6 + x_offset, 5, "Click again to recycle wand", get_next_id()) then
+							buy_confirm = -1;
+							wand_entity_ids[i] = nil;
+							GamePrintImportant("Wand Recycled");
+						end
+						GuiTooltip(gui, "WAND WILL BE DESTROYED", "NO COST, NO GAIN");
+					else
+						GuiColorNextWidgetEnum(gui, COLORS.Dim);
+						if GuiButton(gui, 6 + x_offset, 5, "No improved stats", get_next_id()) then
+							buy_confirm = i;
+						end
+					end
 				end
 
 				-- local wand_offset_x, wand_offset_y = get_wand_grip_offset(wand_preview["wand_type"]);
@@ -325,12 +339,12 @@ function show_research_wands_gui()
 				end
 				GuiBeginScrollContainer(gui, get_next_id(), x_offset + frame_x + 37, frame_y - 31, 64, 26, true, 0, 0);
 				for idx = 0, wand_preview["capacity"] - 1 do
-					local grid_x = ((idx%5) * 12); -- + 33;
-					local grid_y = (math.floor(idx/5) * 12); -- - 34;
+					local grid_h = 12;
+					local grid_columns = 5;
+					local grid_x = ((idx%grid_columns) * grid_h);
+					local grid_y = (math.floor(idx/grid_columns) * grid_h);
 					GuiImage(gui, get_next_id(), grid_x, grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
-					-- GuiImage(gui, get_next_id(), x_offset + frame_x + grid_x, frame_y + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.75, 0.75, 0);
 					if wand_preview["spells"][idx+1] ~= nil then
-						-- GuiImage(gui, get_next_id(), x_offset + frame_x + grid_x, frame_y + grid_y, actions_by_id[wand_preview["spells"][idx+1]].sprite, 1, 0.75, 0.75, 0);
 						GuiImage(gui, get_next_id(), grid_x, grid_y, actions_by_id[wand_preview["spells"][idx+1]].sprite, 1, 0.8, 0.8, 0);
 						GuiTooltip(gui, actions_by_id[wand_preview["spells"][idx+1]].name, actions_by_id[wand_preview["spells"][idx+1]].description );
 					end
@@ -386,7 +400,7 @@ function show_research_wands_gui()
 
 			else
 				GuiColorNextWidgetEnum(gui, COLORS.Dim);
-				GuiText(gui, 6 + x_offset, 5, "(Not New)");
+				GuiText(gui, 6 + x_offset, buy_line_y, "(No wand found)");
 			end
 		end
 		GuiEndScrollContainer(gui);
@@ -419,37 +433,50 @@ function show_research_spells_gui()
 	local inv_spell_entity_ids = get_all_inv_spells();
 	local already_researched_spells = get_spells(get_selected_profile_id());
 
-	local idx = 1;
+	local research_idx = 1;
+	local recycle_idx = 1;
 	local researchable_spell_entities = {};
-	local hash = {};
+	local recyclable_spell_entities = {};
+	local research_hash = {};
+	local dont_recycle_hash = {};
+	local recycle_confirm_id = -1;
 
 	for _, inv_spell_entity_id in ipairs(inv_spell_entity_ids) do
 		local spell_action_id = get_spell_entity_action_id(inv_spell_entity_id);
-		if spell_action_id ~= nil and (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
-			local uses_max = actions_by_id[spell_action_id].max_uses;
-			local item_comp = EntityGetComponentIncludingDisabled(inv_spell_entity_id, "ItemComponent");
-			if item_comp ~= nil then
-				local uses_now = ComponentGetValue2(item_comp[0]~= nil and item_comp[0] or item_comp[1], "uses_remaining");
-				if (uses_max == nil or uses_max==uses_now) and not hash[spell_action_id] then
-					researchable_spell_entities[idx] = inv_spell_entity_id;
-					hash[spell_action_id] = true;
-					idx = idx + 1;
+		if spell_action_id ~= nil then
+			if (already_researched_spells == nil or already_researched_spells[spell_action_id] == nil) then
+				local uses_max = actions_by_id[spell_action_id].max_uses;
+				local item_comp = EntityGetComponentIncludingDisabled(inv_spell_entity_id, "ItemComponent");
+				if item_comp ~= nil then
+					local uses_now = ComponentGetValue2(item_comp[0]~= nil and item_comp[0] or item_comp[1], "uses_remaining");
+					if (uses_max == nil or uses_max==uses_now) and not research_hash[spell_action_id] then
+						researchable_spell_entities[research_idx] = inv_spell_entity_id;
+						research_hash[spell_action_id] = true;
+						dont_recycle_hash[inv_spell_entity_id] = true;
+						research_idx = research_idx + 1;
+					end
 				end
+			end
+			if not dont_recycle_hash[inv_spell_entity_id] and not research_hash[spell_action_id] then
+				recyclable_spell_entities[recycle_idx] = inv_spell_entity_id;
+				recycle_idx = recycle_idx + 1;
 			end
 		end
 	end
 	table.sort(researchable_spell_entities, function(a, b) return GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(a)].name) < GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(b)].name) end );
+	table.sort(recyclable_spell_entities, function(a, b) return GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(a)].name) < GameTextGetTranslatedOrNot(actions_by_id[get_spell_entity_action_id(b)].name) end );
 
 	active_windows["research_spells"] = { true, function(get_next_id)
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
-		if #researchable_spell_entities > 0 then
+		if #researchable_spell_entities > 0 or #recyclable_spell_entities > 0 then
 			local player_money = get_player_money();
 
 			local line_height = 28;
+			local line_idx = 0;
 			for r_s_e_idx = 1, #researchable_spell_entities do
 				curr_spell = actions_by_id[get_spell_entity_action_id(researchable_spell_entities[r_s_e_idx])];
 				local curr_spell_price = research_spell_entity_price(researchable_spell_entities[r_s_e_idx]);
-				local line_pos = (r_s_e_idx - 1) * line_height;
+				local line_pos = line_idx * line_height;
 				if player_money < curr_spell_price then
 					GuiColorNextWidgetEnum(gui, COLORS.Red);
 					GuiText(gui, 0, 3 + line_pos, " $ " .. curr_spell_price)
@@ -458,13 +485,44 @@ function show_research_spells_gui()
 					if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell_price, get_next_id()) then
 						research_spell_entity(get_selected_profile_id(), researchable_spell_entities[r_s_e_idx]);
 						GamePrintImportant("Spell Researched", curr_spell.name);
-						hide_research_spells_gui();
-						show_research_spells_gui();
+						table.remove(researchable_spell_entities, r_s_e_idx);
 					end
 				end -- Colorize Button
 				GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
 				GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
 				GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
+				line_idx = line_idx + 1;
+			end
+
+			for d_s_e_idx = 1, #recyclable_spell_entities do
+				local d_s_e_id = recyclable_spell_entities[d_s_e_idx];
+				curr_spell = actions_by_id[get_spell_entity_action_id(d_s_e_id)];
+				if not dont_recycle_hash[d_s_e_id] then
+					local line_pos = line_idx * line_height;
+					GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 0.5, 1, 0, math.rad(0)); -- Icon
+					GuiColorNextWidgetEnum(gui, COLORS.Dim);
+					GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
+					GuiColorNextWidgetEnum(gui, COLORS.Dark);
+					GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
+
+					if recycle_confirm_id==d_s_e_id then
+						GuiColorNextWidgetEnum(gui, COLORS.Red);
+						if GuiButton(gui, 0, 10 + line_pos, "CONFIRM", get_next_id()) then
+							GamePrintImportant("Spell Recycled", curr_spell.name);
+							delete_spell_entity(d_s_e_id);
+							table.remove(recyclable_spell_entities, d_s_e_idx);
+							break;
+						end
+						GuiTooltip(gui, "RECYCLE SPELL", "NO COST. NO GAIN.")
+					else
+						GuiColorNextWidgetEnum(gui, COLORS.Dim);
+						if GuiButton(gui, 0, 0 + line_pos, " $ ---", get_next_id()) then
+							recycle_confirm_id = d_s_e_id;
+						end
+						GuiTooltip(gui, "Recycle Spell", "No cost. No gain.")
+					end -- Colorize Button
+					line_idx = line_idx + 1;
+				end
 			end
 		else
 			GuiText(gui, 40, 40, "No new spells to research");
@@ -914,21 +972,22 @@ function show_buy_spells_gui()
 	active_windows["buy_spells"] = { true, function(get_next_id)
 		local player_money = get_player_money();
 		local line_height = 28;
+		local sort_x = 400;
 		idx = 0;
 
 		if sort==1 then
-			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Cost") then
+			if GuiButton(gui, get_next_id(), sort_x, 6, "Sort: Cost") then
 				sort = 2;
 				sorted = false;
 			end
 		elseif sort==2 then
-			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Type") then
+			if GuiButton(gui, get_next_id(), sort_x, 6, "Sort: Type") then
 				sort = 0;
 				sorted = false;
 			end
 		else
 			-- if sort==0 then
-			if GuiButton(gui, get_next_id(), 325, 6, "Sort: Name") then
+			if GuiButton(gui, get_next_id(), sort_x, 6, "Sort: Name") then
 				sort = 1;
 				sorted = false;
 			end

@@ -91,6 +91,15 @@ function show_profile_selector_gui()
 					profile_ui_open = false;
 				end
 			else
+				GuiText(gui, 5 + x_offset, row_height * 6, "Stashed Money: ", small_text_scale);
+				GuiText(gui, 5 + x_offset, row_height * 7, "Spells: ", small_text_scale);
+				GuiText(gui, 5 + x_offset, row_height * 8, "Wand Types: ", small_text_scale);
+				GuiText(gui, 5 + x_offset, row_height * 9, "Always Casts: ", small_text_scale);
+				local s_stash, s_always, s_spells, s_types = load_profile_quick(i);
+				GuiText(gui, 75 + x_offset, row_height * 6,  s_stash~=nil and  s_stash or "..");
+				GuiText(gui, 75 + x_offset, row_height * 7, s_spells~=nil and s_spells or "..");
+				GuiText(gui, 75 + x_offset, row_height * 8,  s_types~=nil and  s_types or "..");
+				GuiText(gui, 75 + x_offset, row_height * 9, s_always~=nil and s_always or "..");
 				GuiColorNextWidgetEnum(gui, COLORS.Green);
 				if GuiButton(gui, x_offset + 10, row_height * 2, "- Load profile", get_next_id()) then
 					set_selected_profile_id(i);
@@ -112,18 +121,7 @@ function show_profile_selector_gui()
 						delete_profile_confirmation = i;
 					end
 				end
-				GuiText(gui, 5 + x_offset, row_height * 6, "Stashed Money: ", small_text_scale);
-				GuiText(gui, 5 + x_offset, row_height * 7, "Spells: ", small_text_scale);
-				GuiText(gui, 5 + x_offset, row_height * 8, "Wand Types: ", small_text_scale);
-				GuiText(gui, 5 + x_offset, row_height * 9, "Always Casts: ", small_text_scale);
-				local s_stash, s_always, s_spells, s_types = load_profile_quick(i);
-				GuiText(gui, 75 + x_offset, row_height * 6,  s_stash~=nil and  s_stash or "..");
-				GuiText(gui, 75 + x_offset, row_height * 7, s_spells~=nil and s_spells or "..");
-				GuiText(gui, 75 + x_offset, row_height * 8,  s_types~=nil and  s_types or "..");
-				GuiText(gui, 75 + x_offset, row_height * 9, s_always~=nil and s_always or "..");
 			end
-
-
 		end
 		GuiText(gui, 0, 180, "Alternatively:");
 		GuiColorNextWidgetEnum(gui, COLORS.Green);
@@ -652,13 +650,13 @@ function show_buy_wands_gui()
 				end
 
 				GuiText(gui, 0, 0, wand_data_selected["shuffle"] and "$menu_yes" or "$menu_no");
-				GuiText(gui, 0, 0, tostring(wand_data_selected["spells_per_cast"]));
-				GuiText(gui, 0, 0, tostring(math.floor((wand_data_selected["cast_delay"] / 60) * 100 + 0.5) / 100));
-				GuiText(gui, 0, 0, tostring(math.floor((wand_data_selected["recharge_time"] / 60) * 100 + 0.5) / 100));
-				GuiText(gui, 0, 0, tostring(wand_data_selected["mana_max"]));
-				GuiText(gui, 0, 0, tostring(wand_data_selected["mana_charge_speed"]));
-				GuiText(gui, 0, 0, tostring(wand_data_selected["capacity"]));
-				GuiText(gui, 0, 0, tostring(math.floor(wand_data_selected["spread"] * 10 + 0.5) / 10));
+				GuiText(gui, 0, 0, wand_data_selected["spells_per_cast"]);
+				GuiText(gui, 0, 0, cast_time_to_time(wand_data_selected["cast_delay"]));
+				GuiText(gui, 0, 0, cast_time_to_time(wand_data_selected["recharge_time"]));
+				GuiText(gui, 0, 0, wand_data_selected["mana_max"]);
+				GuiText(gui, 0, 0, wand_data_selected["mana_charge_speed"]);
+				GuiText(gui, 0, 0, wand_data_selected["capacity"]);
+				GuiText(gui, 0, 0, math.floor(wand_data_selected["spread"] * 10 + 0.5) / 10);
 				GuiColorNextWidgetEnum(gui, COLORS.Tip);
 				if GuiButton(gui, 0, 0, "Select", get_next_id()) then
 					window_nr = WINDOW_ID.id_pick_alwayscast;
@@ -795,13 +793,13 @@ function show_buy_wands_gui()
 						GuiText(gui, 0, 0, i .. " - ");
 						GuiText(gui, 0, 0, template_preview["shuffle"] and "$menu_yes" or "$menu_no");
 						GuiText(gui, 0, 0, template_preview["spells_per_cast"] );
-						GuiText(gui, 0, 0, tostring(math.floor((template_preview["cast_delay"] / 60) * 100 + 0.5) / 100) );
-						GuiText(gui, 0, 0, tostring(math.floor((template_preview["recharge_time"] / 60) * 100 + 0.5) / 100) );
-						GuiText(gui, 0, 0, tostring(template_preview["mana_max"]) );
-						GuiText(gui, 0, 0, tostring(template_preview["mana_charge_speed"]) );
-						GuiText(gui, 0, 0, tostring(template_preview["capacity"]) );
-						GuiText(gui, 0, 0, tostring(math.floor(template_preview["spread"] * 10 + 0.5) / 10) );
-						GuiText(gui, 0, 0, tostring(#template_preview["always_cast_spells"]) .. " spells" );
+						GuiText(gui, 0, 0, cast_time_to_time(template_preview["cast_delay"]));
+						GuiText(gui, 0, 0, cast_time_to_time(template_preview["recharge_time"]));
+						GuiText(gui, 0, 0, template_preview["mana_max"]);
+						GuiText(gui, 0, 0, template_preview["mana_charge_speed"]);
+						GuiText(gui, 0, 0, template_preview["capacity"]);
+						GuiText(gui, 0, 0, math.floor(template_preview["spread"] * 10 + 0.5) / 10);
+						GuiText(gui, 0, 0, #template_preview["always_cast_spells"] .. " spells" );
 						GuiLayoutEnd(gui);
 						GuiLayoutEnd(gui);
 						GuiEndScrollContainer(gui);

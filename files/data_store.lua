@@ -263,14 +263,16 @@ end
 
 local function load_all_spells(profile_id)
 	local profile_id_string = tostring(profile_id);
-	data_store[profile_id]["always_cast_spells"] = {};
-	data_store[profile_id]["spells"] = {};
-	for i = 1, #actions do
-		if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_spell_" .. string.lower(actions[i].id)) then
-			data_store[profile_id]["spells"][actions[i].id] = true;
-		end
-		if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_always_cast_spell_" .. string.lower(actions[i].id)) then
-			data_store[profile_id]["always_cast_spells"][actions[i].id] = true;
+	if data_store ~= nil and data_store[profile_id] ~= nil then
+		data_store[profile_id]["always_cast_spells"] = {};
+		data_store[profile_id]["spells"] = {};
+		for i = 1, #actions do
+			if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_spell_" .. string.lower(actions[i].id)) then
+				data_store[profile_id]["spells"][actions[i].id] = true;
+			end
+			if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_always_cast_spell_" .. string.lower(actions[i].id)) then
+				data_store[profile_id]["always_cast_spells"][actions[i].id] = true;
+			end
 		end
 	end
 end

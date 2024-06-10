@@ -3,14 +3,28 @@ dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/gun/gun_actions.lua");
 dofile_once("data/scripts/gun/procedural/gun_procedural.lua");
 
-wands_by_type = {};
-
-function load_wands_by_type()
-	for _, wand_entry in pairs(wands) do
-		wands_by_type[sprite_file_to_wand_type(wand_entry.file)] = wand_entry;
+function sprite_file_to_wand_type(sprite_file)
+	for i = 1, #mod_config.default_wands do
+		if mod_config.default_wands[i].file == sprite_file then
+			return "default_" .. i;
+		end
 	end
+	return string.sub(sprite_file, string.find(sprite_file, "/[^/]*$") + 1, -5);
 end
 
+function load_wands_by_type()
+	local out_table = {};
+	for _, wand_entry in pairs(wands) do
+		out_table[sprite_file_to_wand_type(wand_entry.file)] = wand_entry;
+	end
+	return out_table;
+end
+
+wands_by_type = load_wands_by_type();
+
+function cast_time_to_time(value)
+	return math.floor((value / 60) * 100 + 0.5) / 100;
+end
 
 function wand_type_to_sprite_file(wand_type)
 	if string.sub(wand_type, 1, #"default") == "default" then
@@ -45,16 +59,6 @@ end
 function get_wand_rotated_offset(grip_x, grip_y, rot_degrees)
 	return (grip_x)*math.cos(-rot_degrees) - (grip_y)*math.sin(-rot_degrees),
 				 (grip_x)*math.sin(-rot_degrees) + (grip_y)*math.cos(-rot_degrees);
-end
-
-
-function sprite_file_to_wand_type(sprite_file)
-	for i = 1, #mod_config.default_wands do
-		if mod_config.default_wands[i].file == sprite_file then
-			return "default_" .. i;
-		end
-	end
-	return string.sub(sprite_file, string.find(sprite_file, "/[^/]*$") + 1, -5);
 end
 
 function read_wand(entity_id)
@@ -191,10 +195,11 @@ end
 
 function get_all_wands()
 	local wands = {};
-	if EntityGetWithName("inventory_quick") == nil then
+	local inv_quick = EntityGetWithName("inventory_quick");
+	if inv_quick == nil then
 		return wands;
 	end
-	local inventory_quick_childs = EntityGetAllChildren(EntityGetWithName("inventory_quick"));
+	local inventory_quick_childs = EntityGetAllChildren(inv_quick);
 	if inventory_quick_childs ~=nil then
 		for _, item in ipairs(inventory_quick_childs) do
 			if EntityHasTag(item, "wand") then

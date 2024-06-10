@@ -57,18 +57,9 @@ local is_in_workshop = false;
 -- GAME ENGINE EVENTS
 
 function OnModPreInit()
- ModLuaFileAppend( "mods/persistence/files/action_types.lua", "data/scripts/gun/gun_actions.lua");
 end
 
 function OnWorldPostUpdate()
-	if #actions_by_id < 1 then
-		load_actions_by_id();
-	end
-
-	if #wands_by_type < 1 then
-		load_wands_by_type();
-	end
-
 	if lobby_collider == nil or lobby_collider == 0 then
 		local controls_mouse = EntityGetWithTag("controls_mouse")[1];
 		if controls_mouse ~= nil and controls_mouse ~= 0 then

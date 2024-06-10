@@ -1,15 +1,6 @@
 dofile_once("data/scripts/lib/mod_settings.lua");
 dofile_once("mods/persistence/files/action_types.lua");
 
-actions_by_id = {};
-
-function load_actions_by_id()
-	for i = 1, #actions do
-		actions_by_id[actions[i].id] = actions[i];
-		actions_by_id[actions[i].id].actions_index = i;
-	end
-end
-
 function pad_number(number, length)
 	local output = tostring(number);
 	for i = 1, length - #output do

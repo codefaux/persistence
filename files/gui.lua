@@ -269,9 +269,9 @@ function show_research_wands_gui()
 			GuiImage(gui, get_next_id(), x_offset + frame_x, frame_y, gui_icon, 1, 1.75, 1.75, math.rad(-90)); -- radians are annoying
 
 			if wand_entity_ids[i] ~= nil then
-
-				local price = research_wand_price(get_selected_profile_id(), wand_entity_ids[i]);
-				local wand_preview = read_wand(wand_entity_ids[i]);
+				local wand_entity = wand_entity_ids[i];
+				local price = research_wand_price(get_selected_profile_id(), wand_entity);
+				local wand_preview = read_wand(wand_entity);
 
 				local new_spells = false;
 				if #wand_preview["spells"] then
@@ -304,7 +304,7 @@ function show_research_wands_gui()
 
 					GuiColorNextWidgetBool(gui, price <= player_money);
 					if GuiButton(gui, 6 + x_offset, buy_line_y, " Research for $" .. price, get_next_id()) then
-						research_wand(get_selected_profile_id(), wand_entity_ids[i]);
+						research_wand(get_selected_profile_id(), wand_entity);
 						wand_entity_ids[i] = nil;
 						GamePrintImportant("Wand Researched");
 					end
@@ -313,6 +313,7 @@ function show_research_wands_gui()
 						GuiColorNextWidgetEnum(gui, COLORS.Red);
 						if GuiButton(gui, 6 + x_offset, 5, "Click again to recycle wand", get_next_id()) then
 							buy_confirm = -1;
+							delete_wand_entity(wand_entity)
 							wand_entity_ids[i] = nil;
 							GamePrintImportant("Wand Recycled");
 						end
@@ -386,8 +387,7 @@ function show_research_wands_gui()
 				GuiLayoutEnd(gui);
 				GuiLayoutEnd(gui);
 				if #wand_preview["always_cast_spells"] > 0 then
-					local idx = 0;
-					for i = 0, #wand_preview["always_cast_spells"] - 1 do
+					for idx = 0, #wand_preview["always_cast_spells"] - 1 do
 						local grid_x = ((idx%5) * 12); -- + 33;
 						local grid_y = (math.floor(idx/5) * 12); -- - 34;
 						GuiImage(gui, get_next_id(), x_offset + 8 + grid_x, 177 + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);

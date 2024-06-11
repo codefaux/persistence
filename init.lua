@@ -164,9 +164,6 @@ function OnWorldPostUpdate()
 		if not is_in_lobby then
 			is_in_lobby = true;
 			enter_lobby();
-			if inventory_open then
-				hide_lobby_gui();
-			end
 		end
 		GlobalsSetValue("lobby_collider_triggered", "0");
 	else
@@ -186,14 +183,7 @@ function OnWorldPostUpdate()
 		if not inventory_open then
 			inventory_open = true;
 			if menu_open then
-				hide_lobby_gui();
-			end
-		end
-	else
-		if inventory_open then
-			inventory_open = false;
-			if menu_open then
-				show_lobby_gui();
+				close_menus();
 			end
 		end
 	end

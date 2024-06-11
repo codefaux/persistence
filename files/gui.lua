@@ -570,7 +570,7 @@ function show_buy_wands_gui()
 		local capacity_max = get_capacity(profile_id);
 		local spread_min = get_spread_min(profile_id);
 		local spread_max = get_spread_max(profile_id);
-		local wand_types = get_wand_types(profile_id);
+		local known_wand_types, known_wand_types_count = get_wand_types_idx(profile_id);
 		local always_cast_spells = {};
 
 		local wand_data_selected = {
@@ -643,8 +643,42 @@ function show_buy_wands_gui()
 				local frame_offset_x = 11;
 
 				GuiLayoutBeginLayer(gui);
+				if GuiButton(gui, frame_x - 12, frame_y - 16, "<<", get_next_id()) then
+					local found_at = -1;
+					local scan_idx = 0;
+					for _, type in ipairs(known_wand_types) do
+						scan_idx = scan_idx + 1;
+						if type == wand_data_selected["wand_type"] then
+							found_at = scan_idx;
+							break;
+						end
+					end
+					if found_at~=-1 then
+						found_at = found_at>1 and found_at - 1 or known_wand_types_count;
+					else
+						found_at = known_wand_types_count;
+					end
+					wand_data_selected["wand_type"] = known_wand_types[found_at];
+				end
 				GuiImage(gui, get_next_id(), frame_x, frame_y, frame_icon, 1, 1.5, 1.5, math.rad(-90)); -- radians are annoying
 				GuiImage(gui, get_next_id(), frame_x+frame_offset_x-wand_offset_x, frame_y+frame_offset_y-wand_offset_y, wand_type_to_sprite_file(wand_data_selected["wand_type"]), 1, 1, 1,  math.rad(-45)); -- radians are annoying
+				if GuiButton(gui, frame_x + 32, frame_y - 16, ">>", get_next_id()) then
+					local found_at = -1;
+					local scan_idx = 0;
+					for _, type in ipairs(known_wand_types) do
+						scan_idx = scan_idx + 1;
+						if type == wand_data_selected["wand_type"] then
+							found_at = scan_idx;
+							break;
+						end
+					end
+					if found_at~=-1 then
+						found_at = found_at<known_wand_types_count and found_at + 1 or 1;
+					else
+						found_at = 1;
+					end
+					wand_data_selected["wand_type"] = known_wand_types[found_at];
+				end
 				GuiLayoutEndLayer(gui);
 
 				GuiLayoutBeginHorizontal(gui, 25, 20);
@@ -895,7 +929,7 @@ function show_buy_wands_gui()
 				local icon_gap_x = 128;
 
 				GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
-				for wand_type, _ in pairs(wand_types) do
+				for _, wand_type in pairs(known_wand_types) do
 					x_offset = 20 + ((idx % 4) * icon_gap_x);
 					y_offset = math.floor(idx / 4) * (line_gap);
 					local frame_x = 0;
@@ -1161,6 +1195,15 @@ function hide_lobby_gui()
 	hide_buy_wands_gui();
 	hide_buy_spells_gui();
 	active_windows["menu"] = nil;
+end
+
+function close_menus()
+	menu_open = false;
+	hide_money_gui();
+	hide_research_wands_gui();
+	hide_research_spells_gui();
+	hide_buy_wands_gui();
+	hide_buy_spells_gui();
 end
 
 function hide_all_gui()

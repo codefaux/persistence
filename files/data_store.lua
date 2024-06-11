@@ -86,7 +86,7 @@ end
 
 -- spells
 function get_spells(profile_id)
-	return data_store[profile_id]["spells"];
+	return data_store[profile_id]["spells"], data_store[profile_id]["spells_known"]~=nil and data_store[profile_id]["spells_known"] or 0;
 end
 
 local function update_spells_known_count(profile_id)
@@ -113,7 +113,7 @@ end
 
 -- always cast spells
 function get_always_cast_spells(profile_id)
-	return data_store[profile_id]["always_cast_spells"];
+	return data_store[profile_id]["always_cast_spells"], data_store[profile_id]["always_cast_spells_known"]~=nil and data_store[profile_id]["always_cast_spells_known"] or 0;
 end
 
 ---Update profile stored always_cast_spells_known key
@@ -143,7 +143,13 @@ end
 
 -- wand types
 function get_wand_types(profile_id)
-	return data_store[profile_id]["wand_types"];
+	return data_store[profile_id]["wand_types"],
+				data_store[profile_id]["wand_types_known"]~=nil and data_store[profile_id]["wand_types_known"] or 0;
+end
+
+function get_wand_types_idx(profile_id)
+	return data_store[profile_id]["wand_types_idx"],
+				data_store[profile_id]["wand_types_known"]~=nil and data_store[profile_id]["wand_types_known"] or 0;
 end
 
 local function update_wand_types_known_count(profile_id)
@@ -279,14 +285,20 @@ end
 
 local function load_wand_types(profile_id)
 	local profile_id_string = tostring(profile_id);
+	local idx = 1;
 	data_store[profile_id]["wand_types"] = {};
+	data_store[profile_id]["wand_types_idx"] = {};
 	for i = 1, #mod_config.default_wands do
 		data_store[profile_id]["wand_types"]["default_" .. tostring(i)] = true;
+		data_store[profile_id]["wand_types_idx"][idx] = "default_" .. tostring(i);
+		idx = idx + 1;
 	end
 	for i = 1, #wands do
 		local wand_type = sprite_file_to_wand_type(wands[i].file);
 		if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_wand_type_" .. string.lower(wand_type)) then
 			data_store[profile_id]["wand_types"][wand_type] = true;
+			data_store[profile_id]["wand_types_idx"][idx] = wand_type;
+			idx = idx + 1;
 		end
 	end
 end
@@ -351,8 +363,10 @@ function load_profile(profile_id)
 		spread_max = spread_max / 10;
 	end
 	data_store[profile_id]["spread_max"] = spread_max;
-	data_store[profile_id]["money"] = hex_to_number(load_hex(profile_id_string .. "_money"));
-
+	data_store[profile_id]["money"],
+	data_store[profile_id]["always_cast_spells_known"],
+	data_store[profile_id]["spells_known"],
+	data_store[profile_id]["wand_types_known"] = load_profile_quick(profile_id);
 
 	load_all_spells(profile_id);
 	load_wand_types(profile_id);

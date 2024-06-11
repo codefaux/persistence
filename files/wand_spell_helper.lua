@@ -144,7 +144,7 @@ function create_wand(wand_data)
 		return false;
 	end
 
-	local x, y = EntityGetTransform(get_player_id());
+	local x, y = EntityGetTransform(get_player_entity_id());
 	local entity_id = EntityLoad("mods/persistence/files/wand_empty.xml", x, y);
 	local ability_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent");
 	local wand = wand_type_to_base_wand(wand_data["wand_type"]);
@@ -186,7 +186,7 @@ function create_spell(action_id)
 		return false;
 	end
 
-	local x, y = EntityGetTransform(get_player_id());
+	local x, y = EntityGetTransform(get_player_entity_id());
 	CreateItemActionEntity(action_id, x, y);
 
 	set_player_money(get_player_money() - price);

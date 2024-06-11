@@ -24,29 +24,29 @@ end
 
 function teleport_back_to_lobby()
 	disable_edit_wands_in_lobby();
-	EntitySetTransform(get_player_id(), lobby_x, lobby_y);
+	EntitySetTransform(get_player_entity_id(), lobby_x, lobby_y);
 end
 
 function disable_controls()
-	local player_id = get_player_id();
+	local player_id = get_player_entity_id();
 	EntitySetComponentIsEnabled(player_id, get_inventory_gui(), false);
 	EntitySetComponentIsEnabled(player_id, get_inventory2(), false);
 	EntitySetComponentIsEnabled(player_id, get_controls_component(), false);
 end
 
 function enable_controls()
-	local player_id = get_player_id();
+	local player_id = get_player_entity_id();
 	EntitySetComponentIsEnabled(player_id, get_controls_component(), true);
 	EntitySetComponentIsEnabled(player_id, get_inventory2(), true);
 	EntitySetComponentIsEnabled(player_id, get_inventory_gui(), true);
 end
 
 function update_screen_size()
-	teleport_component = EntityGetFirstComponentIncludingDisabled(get_player_id(), "TeleportComponent");
+	teleport_component = EntityGetFirstComponentIncludingDisabled(get_player_entity_id(), "TeleportComponent");
 	if teleport_component ~= nil and teleport_component ~= 0 then
-		EntitySetComponentIsEnabled(get_player_id(), teleport_component, true);
+		EntitySetComponentIsEnabled(get_player_entity_id(), teleport_component, true);
 	else
-		EntityAddComponent2(get_player_id(), "TeleportComponent", {});
+		EntityAddComponent2(get_player_entity_id(), "TeleportComponent", {});
 	end
 end
 
@@ -69,15 +69,15 @@ function OnWorldPostUpdate()
 		end
 	end
 
-	if get_player_id() == nil or get_player_id() == 0 or not EntityGetIsAlive(get_player_id()) then
+	if get_player_entity_id() == nil or get_player_entity_id() == 0 or not EntityGetIsAlive(get_player_entity_id()) then
 		return;
 	end
 
-	teleport_component = EntityGetFirstComponentIncludingDisabled(get_player_id(), "TeleportComponent");
+	teleport_component = EntityGetFirstComponentIncludingDisabled(get_player_entity_id(), "TeleportComponent");
 	if teleport_component ~= nil and teleport_component ~= 0 then
 		local a, b, c, d = ComponentGetValue2(teleport_component, "source_location_camera_aabb");
 		if a ~= 0 or b ~= 0 or c ~= 0 or d ~= 0 then
-			EntitySetComponentIsEnabled(get_player_id(), teleport_component, false);
+			EntitySetComponentIsEnabled(get_player_entity_id(), teleport_component, false);
 			ComponentSetValue2(teleport_component, "source_location_camera_aabb", 0, 0, 0, 0);
 		end
 	end
@@ -130,7 +130,7 @@ function OnWorldPostUpdate()
 		end
 	end
 
-	local plr_x, plr_y = EntityGetTransform(get_player_id());
+	local plr_x, plr_y = EntityGetTransform(get_player_entity_id());
 	local is_in_workshop_before = is_in_workshop;
 	is_in_workshop = false;
 	-- for _, qualified_workshop in ipairs(EntityGetWithTag(ModSettingGet("persistence.reusable_holy_mountain") and "persistence_workshop" or "workshop")) do
@@ -196,7 +196,7 @@ function OnPlayerSpawned(player_entity)
 	lobby_collider = EntityGetWithName("persistence_lobby_collider");
 	if lobby_collider == nil or lobby_collider == 0 then
 		if ModSettingGet("persistence.move_lobby_to_spawn") then
-			local x, y = EntityGetTransform(get_player_id());
+			local x, y = EntityGetTransform(get_player_entity_id());
 			lobby_collider = EntityLoad("mods/persistence/files/lobby_collider.xml", x, y);
 			lobby_x, lobby_y = EntityGetTransform(lobby_collider);
 		end

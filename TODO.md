@@ -1,11 +1,8 @@
 
 -- TODO : function EntityGetInRadius(pos_x, pos_y, radius) to auto close menu? -- EntityGetHerdRelationSafe( entity_a:int, entity_b:int )
 -- TODO : amount of money (from stash) for player on new run
--- TODO : find player keybinds
 -- TODO : alt. scaling of costs (nonlinear)
 -- TODO : persistence tokens
--- TODO : gui GuiAutoBox(gui)
---            GuiEndAutoBoxNinePiece(gui, margin, size_min_x, size_min_y, mirrorize_over_x_axis, x_axis, sprite_filename, sprite_highlight_filename)
--- TODO : gui GuiBeginScrollContainer(gui, id, x, y, width, height, scrollbar_gamepad_focusable, margin_x, margin_y)
---            GuiEndScrollContainer(gui)
--- TODO : init.lua -- workshop / persistence_workshop runs EVERY LOOP
+-- TODO : find code which runs every frame and reduce
+-- TODO : Push IDs / Z order
+-- TODO : Fix bypassing "no wand tinkering"

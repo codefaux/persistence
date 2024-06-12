@@ -27,7 +27,7 @@ The 'Lobby' area can be configured to move to your spawn location, for random ru
 
 While in the 'Lobby area':
 
-The Persistence GUI will appear. Click a left-edge tab label to open it, and click it again to close it. (I'm working on improving this.)
+The Persistence GUI will appear. Click a left-edge tab label to open it, and click it again to close it. Tab, I and Space close all open windows.
 
 The 'Money' tab is for recovering your stashed money, or stashing more.
 
@@ -43,8 +43,6 @@ You can research a spell, and buy as many copies of it as you can afford. (I'm v
 
 The mod gives the option to edit wands while in the Lobby. This is disabled by default, as returning to the surface at any time is a bit too easy, but it helps with debugging and I assume many will enjoy it for a good, overpowered run.
 
-The 'Reuse Holy Mountain' option might be fixed -- confirmation pending.
-
 
 Link to the original mod: https://steamcommunity.com/sharedfiles/filedetails/?id=2144130266
 
@@ -59,6 +57,8 @@ My changes so far:
 - Tab, I, and Space all close the Persistence menus if they are open.
 -- Custom keybinds are going to take some work but they are coming.
 
+- Teleport moved to BOTTOM of screen (more free space)
+
 - Datastore
 -- Fixed 'Wand Templates stick to each other' due to Lua always using by-ref assignment
 -- Optimized safety checks; consolidated instead of spamming
@@ -69,12 +69,15 @@ My changes so far:
 
 - Research Spell GUI
 -- Complete rework with icons, names, descriptions, and cost
+-- Refuse to research used spells with max quantities
+-- Allow recycling known/spent spells
 
 - Research Wand GUI
 -- Optimised for single data pass, sacrificing 'perfect' alignment
 -- Optimised to avoid needless multiple duplication of largely unused data
 -- Complete rework with icons, names, stats, colored for improvement
 -- Scrollable list w/ capacity and spells on each wand
+-- Allow recycling known wands
 
 - Reworked Money GUI
 -- Added as sub-tab as other menus
@@ -95,9 +98,14 @@ My changes so far:
 -- Added frame for wand icon
 -- Added icon to Saved Template list
 -- Added framed on-hover stats for saved templates
+-- Added display of Always Cast spells to both tooltip and main window
+-- Template 1 is now Default (used when loading UI), numbers changed accordingly
 
 - Buy Spells GUI
--- Complete rework with icon, name, cast count, type, description, and cost -- filter by type, sort by cost/name/type
+-- Complete rework with icon, name, cast count, type, description, and cost
+-- Filter by type
+-- Search by name
+-- Sort by name/cost
 
 - ALL GUIs
 -- Tabs lock controls while open. Click tab again to close. Pending fix. (Anyone know how to read user keybindings? I want my mod to match system keybinds to eg. close menus in case user rebinds tab/i for example.)
@@ -108,8 +116,8 @@ My changes so far:
 -- reworked most lookups to take advantage of actions_by_id[]
 -- wands[] cloned to wands_by_type[] and reworked lookups to use
 
-TODO: (Help wanted -- If you have experience and are willing to help, please comment at Github or here.)
+TODO/Known Issues: (Help wanted -- If you have experience and are willing to help, please comment at Github or here.)
 - Translations for strings
 -- Prefer in-game strings to avoid need for mod translation mods, mostly just need to find which ones are best
-- Rework GUI/tab behavior
-- Confirm 'Reuse Holy Mountain' / 'Edit Wands at Lobby' bug squashed
+
+- Holding direction when opening UI causes movement to continue until UI is closed

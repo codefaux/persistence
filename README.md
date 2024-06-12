@@ -1,4 +1,3 @@
-# persistence
 Add some Lite to your Rogue
 
 
@@ -15,6 +14,8 @@ The original author wishes to thank the great modding community on the official 
 I don't use Discord or other information sources which are ephemeral in nature, so my source is the Wiki, the API, and example/well-documented mods. My personal, deepest thanks to those willing to store their knowledge someplace it is public, persistent, and does not require live interaction to disseminate. I acknowledge the efforts of live support members on Discord, but their efforts help a few people, until the chat history isn't visible and they're offline. Finding written knowledge on this has been DIFFICULT.
 
 
+My Github repo can be found here: https://github.com/codefaux/persistence
+Feel free to open issues for bugs, requests, or suggestions.
 
 
 This mod allows you to save money into a stash for future uses including wand crafting and spell purchase. You will save automatically on death (amount configurable, 10%~100%, default 25%) or you can manually access the stash mid-run at the Lobby area.

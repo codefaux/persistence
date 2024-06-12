@@ -402,13 +402,13 @@ function show_research_wands_gui()
 				GuiLayoutEnd(gui);
 				GuiLayoutEnd(gui);
 				if #wand_preview["always_cast_spells"] > 0 then
-					for idx = 0, #wand_preview["always_cast_spells"] - 1 do
-						local grid_x = ((idx%5) * 12); -- + 33;
-						local grid_y = (math.floor(idx/5) * 12); -- - 34;
+					for wand_prev_ac_idx, curr_wand_prev_ac_id in ipairs(wand_preview["always_cast_spells"]) do
+						local grid_x = (((wand_prev_ac_idx-1)%5) * 12);
+						local grid_y = (math.floor((wand_prev_ac_idx-1)/5) * 12);
 						GuiImage(gui, get_next_id(), x_offset + 8 + grid_x, 177 + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
-						if wand_preview["always_cast_spells"][idx+1] ~= nil then
-							GuiImage(gui, get_next_id(), x_offset + 8 + grid_x, 177 + grid_y, actions_by_id[wand_preview["always_cast_spells"][idx+1]].sprite, 1, 0.8, 0.8, 0);
-							GuiTooltip(gui, actions_by_id[wand_preview["always_cast_spells"][idx+1]].name, actions_by_id[wand_preview["always_cast_spells"][idx+1]].description );
+						if wand_preview["always_cast_spells"][(wand_prev_ac_idx-1)+1] ~= nil then
+							GuiImage(gui, get_next_id(), x_offset + 8 + grid_x, 177 + grid_y, actions_by_id[curr_wand_prev_ac_id].sprite, 1, 0.8, 0.8, 0);
+							GuiTooltip(gui, actions_by_id[curr_wand_prev_ac_id].name, actions_by_id[curr_wand_prev_ac_id].description );
 						end
 					end
 				end
@@ -498,15 +498,9 @@ function show_research_spells_gui()
 					GuiColorNextWidgetEnum(gui, COLORS.Green);
 					if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell_price, get_next_id()) then
 						research_spell_entity(get_selected_profile_id(), researchable_spell_entities[r_s_e_idx]);
-						GuiEndScrollContainer(gui);
 						GamePrintImportant("Spell Researched", curr_spell.name);
 						table.remove(researchable_spell_entities, r_s_e_idx);
-						curr_spell = {};
-						-- return; ---- ??????????
-						 ---- ?????????? ---- ?????????? ---- ??????????
-						  ---- ?????????? ---- ?????????? ---- ??????????
-							 ---- ?????????? ---- ?????????? ---- ??????????
-							  ---- ?????????? ---- ?????????? ---- ??????????
+						break;
 					end
 				end -- Colorize Button
 				GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
@@ -591,7 +585,7 @@ function show_buy_wands_gui()
 		local spread_min = get_spread_min(profile_id);
 		local spread_max = get_spread_max(profile_id);
 		local known_wand_types, known_wand_types_count = get_wand_types_idx(profile_id);
-		local always_cast_spells = {};
+		local known_always_cast_spells = {};
 
 		local wand_data_selected = {
 			["shuffle"] = true,
@@ -606,16 +600,6 @@ function show_buy_wands_gui()
 			["wand_type"] = "default_1";
 		};
 
-		local template_default = get_template(profile_id, 1);
-		if template_default ~= nil then	-- Template empty
-			wand_data_selected = template_default;
-			for _, curr_spell in pairs(always_cast_spells) do
-				for ii = 0, #wand_data_selected["always_cast_spells"] do
-					curr_spell.selected = wand_data_selected["always_cast_spells"][ii] == curr_spell.id;
-				end
-			end
-		end
-
 		local delete_template_confirmation = 0;
 
 		local wand_stat_names = {"spells_per_cast", "cast_delay",  "recharge_time",        "mana_max",  "mana_charge_speed",  "capacity",     "spread" };
@@ -625,12 +609,29 @@ function show_buy_wands_gui()
 		wand_stat_limits.max = {spells_per_cast_max, cast_delay_max, recharge_time_max, mana_max, mana_charge_speed_max, capacity_max, spread_max };
 
 		local idx = 0;
-		for spell_id, _ in pairs(get_always_cast_spells(profile_id)) do
-			always_cast_spells[idx] = actions_by_id[spell_id];
-			always_cast_spells[idx].id = spell_id;
-			idx = idx + 1;
+		for action_id, action_val in pairs(get_always_cast_spells(profile_id)) do
+			if action_val==true then
+				idx = idx + 1;
+				known_always_cast_spells[idx] = actions_by_id[action_id];
+				known_always_cast_spells[idx].id = action_id;
+			end
 		end
-		table.sort(always_cast_spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
+		table.sort(known_always_cast_spells, function(a, b) return GameTextGetTranslatedOrNot(a.name) < GameTextGetTranslatedOrNot(b.name) end );
+
+		local template_default = get_template(profile_id, 1);
+		if template_default ~= nil then	-- Template empty
+			wand_data_selected = template_default;
+			for _, curr_known_spell in ipairs(known_always_cast_spells) do
+				curr_known_spell.selected = false;
+				for __, curr_ac_spell_id in ipairs(wand_data_selected["always_cast_spells"]) do
+					if curr_ac_spell_id == curr_known_spell.id then
+						curr_known_spell.selected = true;
+						break;
+					end
+				end
+			end
+		end
+
 
 
 
@@ -638,21 +639,21 @@ function show_buy_wands_gui()
 			local selected = false;
 			local found = false;
 
-			for i = 0, #always_cast_spells do
-				if always_cast_spells[i].id == action_id then
-					selected = not always_cast_spells[i].selected;
-					always_cast_spells[i].selected = selected;
+			for _, curr_spell in ipairs(known_always_cast_spells) do
+				if curr_spell.id == action_id then
+					selected = not curr_spell.selected;
+					curr_spell.selected = selected;
 					break;
 				end
 			end
 
-			for i = 0, #wand_data_selected["always_cast_spells"] do
-				if wand_data_selected["always_cast_spells"][i] == action_id then
+			for ac_idx, spellid in ipairs(wand_data_selected["always_cast_spells"]) do
+				if spellid == action_id then
 					found = true;
 					if not selected then
-						table.remove(wand_data_selected["always_cast_spells"], i);
+						table.remove(wand_data_selected["always_cast_spells"], ac_idx);
+						break;
 					end
-					break;
 				end
 			end
 
@@ -668,7 +669,7 @@ function show_buy_wands_gui()
 				local wand_offset_x, wand_offset_y = get_wand_grip_offset(wand_data_selected["wand_type"]);
 				wand_offset_x, wand_offset_y = get_wand_rotated_offset(wand_offset_x, wand_offset_y, 45);
 				local frame_icon = "data/ui_gfx/inventory/full_inventory_box_highlight.png";
-				local frame_y = 70;
+				local frame_y = 90;
 				local frame_x = 267;
 				local frame_offset_y = -12;
 				local frame_offset_x = 11;
@@ -712,7 +713,7 @@ function show_buy_wands_gui()
 				end
 				GuiLayoutEndLayer(gui);
 
-				GuiLayoutBeginHorizontal(gui, 25, 20);
+				GuiLayoutBeginHorizontal(gui, 25, 25);
 				GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 				GuiText(gui, 0, 0, "Wand design");
 				GuiText(gui, 0, 0, "$inventory_shuffle");
@@ -827,7 +828,22 @@ function show_buy_wands_gui()
 				end
 				GuiLayoutEnd(gui);
 
-				GuiLayoutBeginHorizontal(gui, 31, 60, false, gui_margin_x, gui_margin_y);
+				if #wand_data_selected["always_cast_spells"] > 0 then
+					for sel_wand_ac_idx, ac_spell_id in ipairs(wand_data_selected["always_cast_spells"]) do
+						local grid_h = 20;
+						local grid_x = 150 + ((sel_wand_ac_idx%5) * grid_h);
+						local grid_y = 230 + (math.floor(sel_wand_ac_idx/5) * grid_h);
+						GuiImage(gui, get_next_id(), grid_x, grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 1.1, 1.1, 0);
+						if ac_spell_id ~= nil then
+							GuiImage(gui, get_next_id(), grid_x, grid_y, actions_by_id[ac_spell_id].sprite, 1, 1, 1, 0);
+							GuiTooltip(gui, actions_by_id[ac_spell_id].name, actions_by_id[ac_spell_id].description );
+						end
+					end
+				end
+
+
+
+				GuiLayoutBeginHorizontal(gui, 31, 75, false, gui_margin_x, gui_margin_y);
 				GuiText(gui, 0, 0, "Purchase Price:");
 				if player_money < price then
 					GuiColorNextWidgetEnum(gui, COLORS.Red);
@@ -865,9 +881,13 @@ function show_buy_wands_gui()
 						GuiColorNextWidgetEnum(gui, COLORS.Green);
 						if GuiButton(gui, 0, 0, "Load template", get_next_id()) then
 							wand_data_selected = template_preview;
-							for _, curr_spell in pairs(always_cast_spells) do
-								for ii = 0, #wand_data_selected["always_cast_spells"] do
-									curr_spell.selected = wand_data_selected["always_cast_spells"][ii] == curr_spell.id;
+							for _, curr_spell in ipairs(known_always_cast_spells) do
+								curr_spell.selected = false;
+								for __, curr_a_c_spell_id in ipairs(wand_data_selected["always_cast_spells"]) do
+									if curr_a_c_spell_id == curr_spell.id then
+										curr_spell.selected = true;
+										break;
+									end
 								end
 							end
 						end
@@ -898,7 +918,7 @@ function show_buy_wands_gui()
 					GuiLayoutEnd(gui);
 
 					if template_hover == i then
-						GuiBeginScrollContainer(gui, get_next_id(), 400, 180, 90, 140);
+						GuiBeginScrollContainer(gui, get_next_id(), 400, 160, 90, 170);
 						GuiLayoutBeginHorizontal(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
 						GuiText(gui, 0, 0, " - Template");
@@ -925,6 +945,17 @@ function show_buy_wands_gui()
 						GuiText(gui, 0, 0, #template_preview["always_cast_spells"] .. " spells" );
 						GuiLayoutEnd(gui);
 						GuiLayoutEnd(gui);
+						for preview_ac_idx, ac_spell_id in ipairs(template_preview["always_cast_spells"]) do
+							local grid_h = 13;
+							local grid_x = 2;
+							local grid_y = 127 + preview_ac_idx * grid_h;
+							GuiImage(gui, get_next_id(), grid_x, grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
+							if ac_spell_id ~= nil then
+								GuiImage(gui, get_next_id(), grid_x, grid_y, actions_by_id[ac_spell_id].sprite, 1, 0.75, 0.75, 0);
+								GuiText(gui, grid_x + 16, grid_y + 2, actions_by_id[ac_spell_id].name, 0.75);
+							end
+						end
+
 						GuiEndScrollContainer(gui);
 					end
 				end
@@ -933,7 +964,7 @@ function show_buy_wands_gui()
 				GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y_global);
 				idx = 0;
 				local line_height = 28;
-				for _, curr_spell in pairs(always_cast_spells) do
+				for _, curr_spell in pairs(known_always_cast_spells) do
 					local line_pos = idx * line_height;
 					GuiColorNextWidgetBool(gui, curr_spell.selected==true);
 					GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
@@ -952,7 +983,7 @@ function show_buy_wands_gui()
 				end
 				GuiEndScrollContainer(gui);
 				GuiColorNextWidgetEnum(gui, COLORS.Green);
-				GuiText(gui, 30, 225, "You know " .. #always_cast_spells+1 .. " always-cast spells.", small_text_scale);
+				GuiText(gui, 30, 225, "You know " .. #known_always_cast_spells+1 .. " always-cast spells.", small_text_scale);
 
 			elseif window_nr == WINDOW_ID.id_pick_icon then -- PICK ICON --
 				idx = 0;
@@ -1180,6 +1211,7 @@ function show_buy_spells_gui()
 	local active_filter = 99;
 	local sort = 0;
 	local sorted = false;
+	local search_for = "";
 
 	type_hash[99] = true;
 	for spell_id, _ in pairs(get_spells(profile_id)) do
@@ -1224,6 +1256,9 @@ function show_buy_spells_gui()
 			end
 		end
 
+		GuiText(gui, 220, 6, "Search:", 1);
+		search_for = GuiTextInput(gui, get_next_id(), 255, 5, search_for, 100, 20);
+
 		local ii = 1;
 		GuiText(gui, 26, 6, "Filter:");
 		for type_nr, type_bool in pairs(type_hash) do
@@ -1247,7 +1282,15 @@ function show_buy_spells_gui()
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
 		spell_tooltip_id = "";
 		for _, curr_spell in pairs(spells) do
-			if active_filter==99 or active_filter==curr_spell.type then
+			local show_curr_spell = true;
+			if search_for~= "" and string.find(string.lower(GameTextGetTranslatedOrNot(curr_spell.name)), string.lower(search_for), 1, true)==nil then
+				show_curr_spell = false;
+			end
+			if active_filter~=99 and active_filter~=curr_spell.type then
+				show_curr_spell = false;
+			end
+
+			if show_curr_spell then
 				local line_pos = idx * line_height;
 				local curr_spell_cost = create_spell_price(curr_spell.id);
 				if player_money < curr_spell_cost then

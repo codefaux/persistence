@@ -373,7 +373,7 @@ function load_profile(profile_id)
 
 	data_store[profile_id]["templates"] = {};
 	for i = 1, get_template_count() do
-    load_template(profile_id, i);
+		load_template(profile_id, i);
 	end
 end
 
@@ -557,7 +557,6 @@ function load_template(profile_id, template_id)
 		for key, _ in pairs(data_store[profile_id]["always_cast_spells"]) do
 			if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_template_" .. template_id_string .. "_always_cast_spell_" .. string.lower(key)) then
 				table.insert(data_store[profile_id]["templates"][template_id]["always_cast_spells"], key);
-				break;
 			end
 		end
 

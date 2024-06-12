@@ -1,6 +1,6 @@
 dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/lib/mod_settings.lua");
-dofile_once("mods/persistence/files/wand_spell_helper.lua")
+-- dofile_once("mods/persistence/files/wand_spell_helper.lua")
 
 local is_in_lobby = false;
 local inventory_open = false;
@@ -46,7 +46,7 @@ function update_screen_size()
 	if teleport_component ~= nil and teleport_component ~= 0 then
 		EntitySetComponentIsEnabled(get_player_entity_id(), teleport_component, true);
 	else
-		EntityAddComponent2(get_player_entity_id(), "TeleportComponent", {});
+		-- EntityAddComponent2(get_player_entity_id(), "TeleportComponent", {});
 	end
 end
 
@@ -257,6 +257,56 @@ function OnPlayerDied(player_entity)
 	if get_selected_profile_id() == nil or get_selected_profile_id() == 0 then
 		return;
 	end
+
+	local stat_dead = StatsGetValue("dead");
+	local stat_death_count = StatsGetValue("death_count");
+	local stat_streaks = StatsGetValue("streaks");
+	local stat_world_seed = StatsGetValue("world_seed");
+	local stat_killed_by = StatsGetValue("killed_by");
+	local stat_killed_by_extra = StatsGetValue("killed_by_extra");
+	local stat_playtime = StatsGetValue("playtime");
+	local stat_playtime_str = StatsGetValue("playtime_str");
+	local stat_places_visited = StatsGetValue("places_visited");
+	local stat_enemies_killed = StatsGetValue("enemies_killed");
+	local stat_heart_containers = StatsGetValue("heart_containers");
+	local stat_hp = StatsGetValue("hp");
+	local stat_gold = StatsGetValue("gold");
+	local stat_gold_all = StatsGetValue("gold_all");
+	local stat_gold_infinite = StatsGetValue("gold_infinite");
+	local stat_items = StatsGetValue("items");
+	local stat_projectiles_shot = StatsGetValue("projectiles_shot");
+	local stat_kicks = StatsGetValue("kicks");
+	local stat_damage_taken = StatsGetValue("damage_taken");
+	local stat_healed = StatsGetValue("healed");
+	local stat_teleports = StatsGetValue("teleports");
+	local stat_wands_edited = StatsGetValue("wands_edited");
+	local stat_biomes_visited_with_wands = StatsGetValue("biomes_visited_with_wands");
+	local stat_death_pos = StatsGetValue("death_pos");
+
+	GamePrint("stat_dead " .. stat_dead);
+	GamePrint("stat_death_count " .. stat_death_count);
+	GamePrint("stat_streaks " .. stat_streaks);
+	GamePrint("stat_world_seed " .. stat_world_seed);
+	GamePrint("stat_killed_by " .. stat_killed_by);
+	GamePrint("stat_killed_by_extra " .. stat_killed_by_extra);
+	GamePrint("stat_playtime " .. stat_playtime);
+	GamePrint("stat_playtime_str " .. stat_playtime_str);
+	GamePrint("stat_places_visited " .. stat_places_visited);
+	GamePrint("stat_enemies_killed " .. stat_enemies_killed);
+	GamePrint("stat_heart_containers " .. stat_heart_containers);
+	GamePrint("stat_hp " .. stat_hp);
+	GamePrint("stat_gold " .. stat_gold);
+	GamePrint("stat_gold_all " .. stat_gold_all);
+	GamePrint("stat_gold_infinite " .. stat_gold_infinite);
+	GamePrint("stat_items " .. stat_items);
+	GamePrint("stat_projectiles_shot " .. stat_projectiles_shot);
+	GamePrint("stat_kicks " .. stat_kicks);
+	GamePrint("stat_damage_taken " .. stat_damage_taken);
+	GamePrint("stat_healed " .. stat_healed);
+	GamePrint("stat_teleports " .. stat_teleports);
+	GamePrint("stat_wands_edited " .. stat_wands_edited);
+	GamePrint("stat_biomes_visited_with_wands " .. stat_biomes_visited_with_wands);
+	GamePrint("stat_death_pos " .. stat_death_pos);
 
 	local money = get_player_money();
 	local money_to_save = math.floor(money * ModSettingGet("persistence.money_saved_on_death") );

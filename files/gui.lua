@@ -230,7 +230,7 @@ end
 function show_teleport_gui()
 	local teleport_confirmation = false;
 	active_windows["teleport"] = { false, function(get_next_id)
-		GuiLayoutBeginHorizontal(gui, 45, 1);
+		GuiLayoutBeginHorizontal(gui, 45, 95);
 		if teleport_confirmation then
 			if GuiButton(gui, 0, 0, "Press again to teleport to Lobby", get_next_id()) then
 				teleport_back_to_lobby();
@@ -1256,8 +1256,8 @@ function show_buy_spells_gui()
 			end
 		end
 
-		GuiText(gui, 220, 6, "Search:", 1);
-		search_for = GuiTextInput(gui, get_next_id(), 255, 5, search_for, 100, 20);
+		GuiText(gui, 240, 6, "Search:", 1);
+		search_for = GuiTextInput(gui, get_next_id(), 270, 5, search_for, 100, 20);
 
 		local ii = 1;
 		GuiText(gui, 26, 6, "Filter:");

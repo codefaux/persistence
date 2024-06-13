@@ -1258,7 +1258,9 @@ function show_buy_spells_gui()
 
 		GuiText(gui, 240, 6, "Search:", 1);
 		search_for = GuiTextInput(gui, get_next_id(), 270, 5, search_for, 100, 20);
-
+		if select(2, GuiGetPreviousWidgetInfo(gui))  then
+			search_for = "";
+		end
 		local ii = 1;
 		GuiText(gui, 26, 6, "Filter:");
 		for type_nr, type_bool in pairs(type_hash) do

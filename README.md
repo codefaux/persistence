@@ -105,7 +105,7 @@ My changes so far:
 - Buy Spells GUI
 -- Complete rework with icon, name, cast count, type, description, and cost
 -- Filter by type
--- Search by name
+-- Search by name, right-click to clear
 -- Sort by name/cost
 
 - ALL GUIs

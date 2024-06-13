@@ -57,7 +57,7 @@ Documentation in flux, check back for updates. I'm still figuring all this out.
 My changes so far:
 - In-game Mod Options menu support instead of manually finding/editing lua files
 
-- Tab, I, and Space all close the Persistence menus if they are open.
+- Tab and Space both close the Persistence menus if they are open.
 -- Custom keybinds are going to take some work but they are coming.
 
 - Teleport moved to BOTTOM of screen (more free space)

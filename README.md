@@ -55,7 +55,7 @@ Documentation in flux, check back for updates. I'm still figuring all this out.
 My changes so far:
 - In-game Mod Options menu support instead of manually finding/editing lua files
 
-- Tab, I, and Space all close the Persistence menus if they are open.
+- Tab and Space both close the Persistence menus if they are open.
 -- Custom keybinds are going to take some work but they are coming.
 
 - Teleport moved to BOTTOM of screen (more free space)
@@ -109,7 +109,7 @@ My changes so far:
 -- Sort by name/cost
 
 - ALL GUIs
--- Tabs lock controls while open. Click tab again to close. Pending fix. (Anyone know how to read user keybindings? I want my mod to match system keybinds to eg. close menus in case user rebinds tab/i for example.)
+-- Tabs lock controls while open. Click tab again to close. Pending fix. (Anyone know how to read user keybindings? I want my mod to match system keybinds to eg. close menus in case user rebinds tab for example.)
 -- Background fixed so wands/text no longer appears 'on top of' darkness
 
 - Optimizations

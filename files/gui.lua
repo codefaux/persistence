@@ -266,15 +266,15 @@ function show_research_wands_gui()
 		local block_width = 115;
 
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
-		for i = 0, 3 do
-			x_offset = i * block_width;
+		for wand_slot_idx = 0, 3 do
+			x_offset = wand_slot_idx * block_width;
 			local is_new, b_spells_per_cast, b_cast_delay_min, b_cast_delay_max, b_recharge_time_min, b_recharge_time_max, b_mana_max, b_mana_charge_speed, b_capacity, b_spread_min, b_spread_max, b_always_cast_spells, b_wand_types, i_always_cast_spells
-						 = research_wand_is_new(get_selected_profile_id(), wand_entity_ids[i]);
+						 = research_wand_is_new(get_selected_profile_id(), wand_entity_ids[wand_slot_idx]);
 
 			if is_new then
 				GuiColorNextWidgetEnum(gui, COLORS.Tip);
 			end
-			GuiText(gui, x_offset + 20, 32, "Wand Slot " .. tostring(i+1) .. ":");
+			GuiText(gui, x_offset + 20, 32, "Wand Slot " .. tostring(wand_slot_idx+1) .. ":");
 			local gui_icon = (is_new) and "data/ui_gfx/inventory/full_inventory_box_highlight.png" or "data/ui_gfx/inventory/full_inventory_box.png";
 			local buy_line_y = 5;
 			local frame_y = 77;
@@ -283,8 +283,8 @@ function show_research_wands_gui()
 			local frame_offset_x = 6;
 			GuiImage(gui, get_next_id(), x_offset + frame_x, frame_y, gui_icon, 1, 1.75, 1.75, math.rad(-90)); -- radians are annoying
 
-			if wand_entity_ids[i] ~= nil then
-				local wand_entity = wand_entity_ids[i];
+			if wand_entity_ids[wand_slot_idx] ~= nil then
+				local wand_entity = wand_entity_ids[wand_slot_idx];
 				local price = research_wand_price(get_selected_profile_id(), wand_entity);
 				local wand_preview = read_wand(wand_entity);
 
@@ -320,23 +320,23 @@ function show_research_wands_gui()
 					GuiColorNextWidgetBool(gui, price <= player_money);
 					if GuiButton(gui, 6 + x_offset, buy_line_y, " Research for $" .. price, get_next_id()) then
 						research_wand(get_selected_profile_id(), wand_entity);
-						wand_entity_ids[i] = nil;
+						wand_entity_ids[wand_slot_idx] = nil;
 						GamePrintImportant("Wand Researched");
 					end
 				else
-					if buy_confirm==i then
+					if buy_confirm==wand_slot_idx then
 						GuiColorNextWidgetEnum(gui, COLORS.Red);
 						if GuiButton(gui, 6 + x_offset, 5, "Click again to recycle wand", get_next_id()) then
 							buy_confirm = -1;
 							delete_wand_entity(wand_entity)
-							wand_entity_ids[i] = nil;
+							wand_entity_ids[wand_slot_idx] = nil;
 							GamePrintImportant("Wand Recycled");
 						end
 						GuiTooltip(gui, "WAND WILL BE DESTROYED", "NO COST, NO GAIN");
 					else
 						GuiColorNextWidgetEnum(gui, COLORS.Dim);
 						if GuiButton(gui, 6 + x_offset, 5, "No improved stats", get_next_id()) then
-							buy_confirm = i;
+							buy_confirm = wand_slot_idx;
 						end
 					end
 				end
@@ -354,15 +354,15 @@ function show_research_wands_gui()
 					GuiTooltip(gui, "This wand provides a new design.", "");
 				end
 				GuiBeginScrollContainer(gui, get_next_id(), x_offset + frame_x + 37, frame_y - 31, 64, 26, true, 0, 0);
-				for idx = 0, wand_preview["capacity"] - 1 do
+				for cap_idx = 1, wand_preview["capacity"] do
 					local grid_h = 12;
 					local grid_columns = 5;
-					local grid_x = ((idx%grid_columns) * grid_h);
-					local grid_y = (math.floor(idx/grid_columns) * grid_h);
+					local grid_x = (((cap_idx-1)%grid_columns) * grid_h);
+					local grid_y = (math.floor((cap_idx-1)/grid_columns) * grid_h);
 					GuiImage(gui, get_next_id(), grid_x, grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
-					if wand_preview["spells"][idx+1] ~= nil then
-						GuiImage(gui, get_next_id(), grid_x, grid_y, actions_by_id[wand_preview["spells"][idx+1]].sprite, 1, 0.8, 0.8, 0);
-						GuiTooltip(gui, actions_by_id[wand_preview["spells"][idx+1]].name, actions_by_id[wand_preview["spells"][idx+1]].description );
+					if wand_preview["spells"][cap_idx] ~= nil then
+						GuiImage(gui, get_next_id(), grid_x, grid_y, actions_by_id[wand_preview["spells"][cap_idx]].sprite, 1, 0.8, 0.8, 0);
+						GuiTooltip(gui, actions_by_id[wand_preview["spells"][cap_idx]].name, actions_by_id[wand_preview["spells"][cap_idx]].description );
 					end
 				end
 				GuiEndScrollContainer(gui);
@@ -487,9 +487,9 @@ function show_research_spells_gui()
 
 			local line_height = 28;
 			local line_idx = 0;
-			for r_s_e_idx = 1, #researchable_spell_entities do
-				curr_spell = actions_by_id[get_spell_entity_action_id(researchable_spell_entities[r_s_e_idx])];
-				local curr_spell_price = research_spell_entity_price(researchable_spell_entities[r_s_e_idx]);
+			for r_s_e_idx, r_s_e_curr in ipairs(researchable_spell_entities) do
+				curr_spell = actions_by_id[get_spell_entity_action_id(r_s_e_curr)];
+				local curr_spell_price = research_spell_entity_price(r_s_e_curr);
 				local line_pos = line_idx * line_height;
 				if player_money < curr_spell_price then
 					GuiColorNextWidgetEnum(gui, COLORS.Red);
@@ -497,7 +497,7 @@ function show_research_spells_gui()
 				else
 					GuiColorNextWidgetEnum(gui, COLORS.Green);
 					if GuiButton(gui, 0, 3 + line_pos, " $ " .. curr_spell_price, get_next_id()) then
-						research_spell_entity(get_selected_profile_id(), researchable_spell_entities[r_s_e_idx]);
+						research_spell_entity(get_selected_profile_id(), r_s_e_curr);
 						GamePrintImportant("Spell Researched", curr_spell.name);
 						table.remove(researchable_spell_entities, r_s_e_idx);
 						break;
@@ -509,8 +509,8 @@ function show_research_spells_gui()
 				line_idx = line_idx + 1;
 			end
 
-			for d_s_e_idx = 1, #recyclable_spell_entities do
-				local d_s_e_id = recyclable_spell_entities[d_s_e_idx];
+			for d_s_e_idx, d_s_e_curr in ipairs(recyclable_spell_entities) do
+				local d_s_e_id = d_s_e_curr;
 				curr_spell = actions_by_id[get_spell_entity_action_id(d_s_e_id)];
 				if not dont_recycle_hash[d_s_e_id] then
 					local line_pos = line_idx * line_height;
@@ -1148,12 +1148,12 @@ function show_spell_tooltip_gui()
 
 			-- icon, Speed					# --- Calculated / pulled from XML
 
-			line_cnt = line_cnt + 1;
-			line_y = base_y + (line_h * line_cnt);
-			-- icon, Cast delay			#
-			GuiImage(gui, get_next_id(), col_a, line_y, i_icons["fire_rate_wait"], 1, 1, 1, 0);
-			GuiText(gui, col_b, line_y, GameTextGetTranslatedOrNot("$inventory_castdelay"));
-			GuiText(gui, col_c, line_y, GameTextGet("$inventory_seconds", (curr_spell.c.fire_rate_wait~=nil and curr_spell. c.fire_rate_wait~=0) and cast_time_to_time(curr_spell.c.fire_rate_wait) or 0 ), 1);
+			-- line_cnt = line_cnt + 1;
+			-- line_y = base_y + (line_h * line_cnt);
+			-- -- icon, Cast delay			#
+			-- GuiImage(gui, get_next_id(), col_a, line_y, i_icons["fire_rate_wait"], 1, 1, 1, 0);
+			-- GuiText(gui, col_b, line_y, GameTextGetTranslatedOrNot("$inventory_castdelay"));
+			-- GuiText(gui, col_c, line_y, GameTextGet("$inventory_seconds", (curr_spell.c.fire_rate_wait~=nil and curr_spell. c.fire_rate_wait~=0) and cast_time_to_time(curr_spell.c.fire_rate_wait) or 0 ), 1);
 
 			-- icon Crit. Chance		#
 			if curr_spell.c.damage_critical_chance~=nil and curr_spell.c.damage_critical_chance>0 then
@@ -1185,7 +1185,7 @@ function show_spell_tooltip_gui()
 			end
 			GuiZSetForNextWidget(gui, z_base);
 			GuiZSet(gui, z_base);
-			GuiEndAutoBoxNinePiece(gui, 4, 100, 75);
+			GuiEndAutoBoxNinePiece(gui, 4, 100, 25);
 			-- GuiLayoutEndLayer(gui);
 		end	};
 	end
@@ -1223,7 +1223,7 @@ function show_buy_spells_gui()
 
 	active_windows["buy_spells"] = { true, function(get_next_id)
 		local player_money = get_player_money();
-		local line_height = 28;
+		local line_height = 24;
 		local sort_x = 400;
 		local idx = 0;
 		GuiZSet(gui, z_base);
@@ -1307,9 +1307,11 @@ function show_buy_spells_gui()
 				GuiImage(gui, get_next_id(), 36, 4 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
 				local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
 				if s_hover then
-					spell_tooltip_id = curr_spell.id;
-					if not spell_tooltip_open then
-						show_spell_tooltip_gui();
+					if y_loc > 20 and y_loc < 220 then
+						spell_tooltip_id = curr_spell.id;
+						if not spell_tooltip_open then
+							show_spell_tooltip_gui();
+						end
 					end
 				end
 				GuiLayoutBeginHorizontal(gui, 60, 2 + line_pos, true, 4, 0);

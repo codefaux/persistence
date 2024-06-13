@@ -146,12 +146,12 @@ dofile_once("data/scripts/gun/gun_actions.lua");
 function load_actions_by_id()
 	local out_table = {};
 
-	for i = 1, #actions do
-		local a_id = actions[i].id;
-		out_table[a_id] = actions[i];
+	for curr_idx, curr_action in ipairs(actions) do
+		local a_id = curr_action.id;
+		out_table[a_id] = curr_action;
 		out_table[a_id].c = {};
-		out_table[a_id].actions_index = i;
-		-- out_table[actions[i].id].c = extract_action_stats(actions[i]);
+		out_table[a_id].actions_index = curr_idx;
+		-- out_table[curr_action.id].c = extract_action_stats(curr_action); -- Simulating spells causes thread(?) close
 	end
 	return out_table;
 end

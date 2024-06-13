@@ -6,3 +6,5 @@
 -- TODO : find code which runs every frame and reduce
 -- TODO : Push IDs / Z order
 -- TODO : Fix bypassing "no wand tinkering"
+-- TODO : Can't research spells when player has "perk which removes limited uses"
+-- TODO : Mod order fixes?

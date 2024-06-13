@@ -4,9 +4,9 @@ dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/gun/procedural/gun_procedural.lua");
 
 function sprite_file_to_wand_type(sprite_file)
-	for i = 1, #mod_config.default_wands do
-		if mod_config.default_wands[i].file == sprite_file then
-			return "default_" .. i;
+	for def_idx, _ in ipairs(mod_config.default_wands) do
+		if mod_config.default_wands[def_idx].file == sprite_file then
+			return "default_" .. def_idx;
 		end
 	end
 	return string.sub(sprite_file, string.find(sprite_file, "/[^/]*$") + 1, -5);
@@ -166,8 +166,8 @@ function create_wand(wand_data)
 	ComponentObjectSetValue2(ability_comp, "gunaction_config", "speed_multiplier", 1);
 	ComponentSetValue2(ability_comp, "item_recoil_recovery_speed", 15);
 	if #wand_data["always_cast_spells"] > 0 then
-		for i = 1, #wand_data["always_cast_spells"] do
-			AddGunActionPermanent(entity_id, wand_data["always_cast_spells"][i]);
+		for _, curr_a_c_action_id in ipairs(wand_data["always_cast_spells"]) do
+			AddGunActionPermanent(entity_id, curr_a_c_action_id);
 		end
 	end
 	SetWandSprite(entity_id, ability_comp, wand.file, wand.grip_x, wand.grip_y, (wand.tip_x - wand.grip_x), (wand.tip_y - wand.grip_y));

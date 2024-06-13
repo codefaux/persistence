@@ -104,9 +104,9 @@ local function add_spells(profile_id, spells)
 	if spells == nil or #spells == 0 then
 		return;
 	end
-	for i = 1, #spells do
-		data_store[profile_id]["spells"][spells[i]] = true;
-		AddFlagPersistent(flag_prefix .. "_" .. tostring(profile_id) .. "_spell_" .. string.lower(spells[i]));
+	for _, spell_id in ipairs(spells) do
+		data_store[profile_id]["spells"][spell_id] = true;
+		AddFlagPersistent(flag_prefix .. "_" .. tostring(profile_id) .. "_spell_" .. string.lower(spell_id));
 	end
 	update_spells_known_count(profile_id);
 end
@@ -134,9 +134,9 @@ local function add_always_cast_spells(profile_id, ac_spells)
 	if ac_spells == nil or #ac_spells == 0 then
 		return;
 	end
-	for i = 1, #ac_spells do
-		data_store[profile_id]["always_cast_spells"][ac_spells[i]] = true;
-		AddFlagPersistent(flag_prefix .. "_" .. tostring(profile_id) .. "_always_cast_spell_" .. string.lower(ac_spells[i]));
+	for _, curr_ac_spell_id in ipairs(ac_spells) do
+			data_store[profile_id]["always_cast_spells"][curr_ac_spell_id] = true;
+		AddFlagPersistent(flag_prefix .. "_" .. tostring(profile_id) .. "_always_cast_spell_" .. string.lower(curr_ac_spell_id));
 	end
 	update_always_cast_spells_known_count(profile_id);
 end
@@ -164,10 +164,10 @@ local function update_wand_types_known_count(profile_id)
 end
 
 local function add_wand_types(profile_id, wand_types)
-	for i = 1, #wand_types do
-		if string.sub(wand_types[i], 1, #"default") ~= "default" then
-			data_store[profile_id]["wand_types"][wand_types[i]] = true;
-			AddFlagPersistent(flag_prefix .. "_" .. tostring(profile_id) .. "_wand_type_" .. string.lower(wand_types[i]));
+	for _, curr_wand_type in ipairs(wand_types) do
+		if string.sub(curr_wand_type, 1, #"default") ~= "default" then
+			data_store[profile_id]["wand_types"][curr_wand_type] = true;
+			AddFlagPersistent(flag_prefix .. "_" .. tostring(profile_id) .. "_wand_type_" .. string.lower(curr_wand_type));
 		end
 	end
 	update_wand_types_known_count(profile_id);
@@ -200,7 +200,7 @@ end
 
 function get_selected_profile_id()
 	if selected_profile_id == nil then
-		for i = 0, get_profile_count() do
+		for i = 1, get_profile_count() do
 			if GameHasFlagRun(flag_prefix .. "_selected_profile_" .. tostring(i)) then
 				selected_profile_id = i;
 				return i;
@@ -213,7 +213,7 @@ function get_selected_profile_id()
 end
 
 function set_selected_profile_id(profile_id)
-	for i = 0, get_profile_count() do
+	for i = 1, get_profile_count() do
 		GameRemoveFlagRun(flag_prefix .. "_selected_profile_" .. tostring(i));
 	end
 	GameAddFlagRun(flag_prefix .. "_selected_profile_" .. tostring(profile_id));
@@ -241,12 +241,12 @@ function delete_profile(profile_id)
 	write_hex(profile_id_string .. "_always_cast_spells_known", nil);
 	write_hex(profile_id_string .. "_spells_known", nil);
 	write_hex(profile_id_string .. "_wand_types_known", nil);
-	for i = 1, #actions do
-		RemoveFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_spell_" .. string.lower(actions[i].id));
-		RemoveFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_always_cast_spell_" .. string.lower(actions[i].id));
+	for _, curr_action in ipairs(actions) do
+			RemoveFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_spell_" .. string.lower(curr_action.id));
+		RemoveFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_always_cast_spell_" .. string.lower(curr_action.id));
 	end
-	for i = 1, #wands do
-		RemoveFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_wand_type_" .. sprite_file_to_wand_type(wands[i].file));
+	for _, curr_wand in ipairs(wands) do
+		RemoveFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_wand_type_" .. sprite_file_to_wand_type(curr_wand.file));
 	end
 
 	for i = 1, get_template_count() do
@@ -272,12 +272,12 @@ local function load_all_spells(profile_id)
 	if data_store ~= nil and data_store[profile_id] ~= nil then
 		data_store[profile_id]["always_cast_spells"] = {};
 		data_store[profile_id]["spells"] = {};
-		for i = 1, #actions do
-			if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_spell_" .. string.lower(actions[i].id)) then
-				data_store[profile_id]["spells"][actions[i].id] = true;
+		for i, curr_action in ipairs(actions) do
+			if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_spell_" .. string.lower(curr_action.id)) then
+				data_store[profile_id]["spells"][curr_action.id] = true;
 			end
-			if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_always_cast_spell_" .. string.lower(actions[i].id)) then
-				data_store[profile_id]["always_cast_spells"][actions[i].id] = true;
+			if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_always_cast_spell_" .. string.lower(curr_action.id)) then
+				data_store[profile_id]["always_cast_spells"][curr_action.id] = true;
 			end
 		end
 	end
@@ -285,20 +285,20 @@ end
 
 local function load_wand_types(profile_id)
 	local profile_id_string = tostring(profile_id);
-	local idx = 1;
+	local idx = 0;
 	data_store[profile_id]["wand_types"] = {};
 	data_store[profile_id]["wand_types_idx"] = {};
-	for i = 1, #mod_config.default_wands do
+	for i, _ in ipairs(mod_config.default_wands) do
+		idx = idx + 1;
 		data_store[profile_id]["wand_types"]["default_" .. tostring(i)] = true;
 		data_store[profile_id]["wand_types_idx"][idx] = "default_" .. tostring(i);
-		idx = idx + 1;
 	end
-	for i = 1, #wands do
-		local wand_type = sprite_file_to_wand_type(wands[i].file);
-		if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_wand_type_" .. string.lower(wand_type)) then
-			data_store[profile_id]["wand_types"][wand_type] = true;
-			data_store[profile_id]["wand_types_idx"][idx] = wand_type;
+	for _, scan_wand in ipairs(wands) do
+		local scan_wand_type = sprite_file_to_wand_type(scan_wand.file);
+		if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_wand_type_" .. string.lower(scan_wand_type)) then
 			idx = idx + 1;
+			data_store[profile_id]["wand_types"][scan_wand_type] = true;
+			data_store[profile_id]["wand_types_idx"][idx] = scan_wand_type;
 		end
 	end
 end
@@ -341,7 +341,7 @@ end
 
 function load_profile(profile_id)
 	local profile_id_string = tostring(profile_id);
-	for to_clear = 0, get_profile_count() do
+	for to_clear = 1, get_profile_count() do
 		data_store[to_clear] = {}
 	end
 
@@ -614,15 +614,15 @@ function delete_template(profile_id, template_id)
 	write_hex(template_prefix .. "_capacity", nil);
 	write_hex(template_prefix .. "_spread", nil);
 
-	for i = 1, #actions do
-		RemoveFlagPersistent(template_flag_prefix .. "_always_cast_spell_" .. string.lower(actions[i].id));
+	for _, scan_action in ipairs(actions) do
+		RemoveFlagPersistent(template_flag_prefix .. "_always_cast_spell_" .. string.lower(scan_action.id));
 	end
 
-	for i = 1, #mod_config.default_wands do
-		RemoveFlagPersistent(template_flag_prefix .. "_wand_type_default_" .. tostring(i));
+	for def_idx, _ in ipairs(mod_config.default_wands) do
+		RemoveFlagPersistent(template_flag_prefix .. "_wand_type_default_" .. tostring(def_idx));
 	end
-	for i = 1, #wands do
-		RemoveFlagPersistent(template_flag_prefix .. "_wand_type_" .. string.lower(sprite_file_to_wand_type(wands[i].file)));
+	for _, scan_wand in ipairs(wands) do
+		RemoveFlagPersistent(template_flag_prefix .. "_wand_type_" .. string.lower(sprite_file_to_wand_type(scan_wand.file)));
 	end
 
 	RemoveFlagPersistent(template_flag_prefix);

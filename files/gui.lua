@@ -1453,7 +1453,7 @@ function hide_all_gui()
 end
 
 function gui_update()
-	if InputIsKeyJustDown(Key_TAB) or InputIsKeyJustDown(Key_SPACE) or InputIsKeyJustDown(Key_i) or InputIsKeyJustDown(Key_ESCAPE) then
+	if InputIsKeyJustDown(Key_TAB) or InputIsKeyJustDown(Key_SPACE) or InputIsKeyJustDown(Key_ESCAPE) then
 		hide_money_gui();
 		hide_research_wands_gui();
 		hide_research_spells_gui();

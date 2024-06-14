@@ -964,7 +964,7 @@ function show_buy_wands_gui()
 				GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y_global);
 				idx = 0;
 				local line_height = 28;
-				for _, curr_spell in pairs(known_always_cast_spells) do
+				for _, curr_spell in ipairs(known_always_cast_spells) do
 					local line_pos = idx * line_height;
 					GuiColorNextWidgetBool(gui, curr_spell.selected==true);
 					GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
@@ -991,7 +991,7 @@ function show_buy_wands_gui()
 				local icon_gap_x = 128;
 
 				GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
-				for _, wand_type in pairs(known_wand_types) do
+				for _, wand_type in ipairs(known_wand_types) do
 					x_offset = 20 + ((idx % 4) * icon_gap_x);
 					y_offset = math.floor(idx / 4) * (line_gap);
 					local frame_x = 0;
@@ -1166,7 +1166,7 @@ function show_spell_tooltip_gui()
 
 			-- icon, Damage       	#
 			local damage_types = { "projectile", "melee", "electricity", "fire", "explosion", "ice", "slice", "healing", "curse", "drill" };
-			for idx, d_t_base in ipairs(damage_types) do
+			for _, d_t_base in ipairs(damage_types) do
 				local d_type = "damage_" .. d_t_base;
 				if curr_spell.c[d_type .. "_add"]~=nil and curr_spell.c[d_type .. "_add"]>0 then
 					line_cnt = line_cnt + 1;
@@ -1283,7 +1283,7 @@ function show_buy_spells_gui()
 
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
 		spell_tooltip_id = "";
-		for _, curr_spell in pairs(spells) do
+		for _, curr_spell in ipairs(spells) do
 			local show_curr_spell = true;
 			if search_for~= "" and string.find(string.lower(GameTextGetTranslatedOrNot(curr_spell.name)), string.lower(search_for), 1, true)==nil then
 				show_curr_spell = false;

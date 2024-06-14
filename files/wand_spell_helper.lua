@@ -14,7 +14,7 @@ end
 
 function load_wands_by_type()
 	local out_table = {};
-	for _, wand_entry in pairs(wands) do
+	for _, wand_entry in ipairs(wands) do
 		out_table[sprite_file_to_wand_type(wand_entry.file)] = wand_entry;
 	end
 	return out_table;

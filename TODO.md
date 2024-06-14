@@ -8,3 +8,35 @@
 -- TODO : Fix bypassing "no wand tinkering"
 -- TODO : Can't research spells when player has "perk which removes limited uses"
 -- TODO : Mod order fixes?
+
+-- TODO for GUI v3:
+-- Buy Spell tab, sort/sub-sort; By Name, or By Type/{Name, Cost}, Cost/{Name, Type}
+-- Spell infos -- self-danger? explosive? other..?
+
+
+-- for archival
+-- function extract_action_stats(action)
+-- 	function draw_actions(_, _) end
+-- 	function add_projectile(x) proc_projectiles(x); end
+-- 	function add_projectile_trigger_hit_world(x, _) proc_projectiles(x); end
+-- 	function add_projectile_trigger_timer(x, _, _) proc_projectiles(x); end
+-- 	function add_projectile_trigger_death(x, _) proc_projectiles(x); end
+-- 	function check_recursion(_, x) return x or 0; end
+-- 	function move_discarded_to_deck() end
+-- 	function order_deck() end
+-- 	function StartReload() end
+-- 	function EntityGetWithTag(_) return {} end
+-- 	function GameGetFrameNum() return 5431289; end
+-- 	function SetRandomSeed() end
+-- 	function Random() return 1; end
+-- 	-- function GetUpdatedEntityID() return 0; end
+-- 	-- function EntityGetComponent(_) return {}; end
+-- 	-- function EntityGetFirstComponent(_, _) return {}; end
+-- 	-- function ComponentGetValue2(_) return 0; end
+-- 	-- function EntityGetTransform(_) return {}; end
+-- 	-- function EntityGetAllChildren(_) return {}; end
+-- 	-- function EntityGetInRadiusWithTag(_, _) return {}; end
+-- 	-- function GlobalsGetValue(_) return 0; end
+-- 	function GlobalsSetValue(_) end
+-- 	function find_the_wand_held() return nil; end
+-- 	-- function EntityGetFirstComponentIncludingDisabled(_) end

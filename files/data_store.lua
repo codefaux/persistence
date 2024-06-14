@@ -2,6 +2,7 @@ dofile_once("mods/persistence/config.lua");
 dofile_once("data/scripts/gun/gun_actions.lua");
 dofile_once("data/scripts/gun/procedural/wands.lua");
 dofile_once("mods/persistence/files/wand_spell_helper.lua");
+dofile_once("mods/persistence/files/helper.lua");
 
 local spells_per_cast_min = 1;
 local mana_max_min = 1;
@@ -91,7 +92,7 @@ end
 
 local function update_spells_known_count(profile_id)
 	local spells_known = 0;
-	for _, known in pairs(data_store[profile_id]["spells"]) do
+	for _, known in ipairs(data_store[profile_id]["spells"]) do
 		if known then
 			spells_known = spells_known + 1;
 		end
@@ -121,7 +122,7 @@ end
 ---@return integer always_casts_known quantity known always cast spells
 local function update_always_cast_spells_known_count(profile_id)
 	local always_casts_known = 0;
-	for _, known in pairs(data_store[profile_id]["always_cast_spells"]) do
+	for _, known in ipairs(data_store[profile_id]["always_cast_spells"]) do
 		if known then
 			always_casts_known = always_casts_known + 1;
 		end
@@ -154,7 +155,7 @@ end
 
 local function update_wand_types_known_count(profile_id)
 	local wand_types_known = 0;
-	for _, known in pairs(data_store[profile_id]["wand_types"]) do
+	for _, known in ipairs(data_store[profile_id]["wand_types"]) do
 		if known then
 			wand_types_known = wand_types_known + 1;
 		end
@@ -258,7 +259,7 @@ function delete_profile(profile_id)
 end
 
 function get_player_money()
-	local money = tonumber(ComponentGetValue2(get_wallet(), "money"));
+	local money = ComponentGetValue2(get_wallet(), "money");
 	return money == nil and 0 or money;
 end
 
@@ -272,7 +273,7 @@ local function load_all_spells(profile_id)
 	if data_store ~= nil and data_store[profile_id] ~= nil then
 		data_store[profile_id]["always_cast_spells"] = {};
 		data_store[profile_id]["spells"] = {};
-		for i, curr_action in ipairs(actions) do
+		for _, curr_action in ipairs(actions) do
 			if HasFlagPersistent(flag_prefix .. "_" .. profile_id_string .. "_spell_" .. string.lower(curr_action.id)) then
 				data_store[profile_id]["spells"][curr_action.id] = true;
 			end

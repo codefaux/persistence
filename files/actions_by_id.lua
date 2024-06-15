@@ -13,37 +13,6 @@ if actions_by_id__init_done==false then
 	dofile_once( "data/scripts/gun/gun.lua" );
 	dofile_once( "data/scripts/lib/utilities.lua" );
 
-	function table_equals(o1, o2, ignore_mt)
-		if o1 == o2 then return true end
-		local o1Type = type(o1)
-		local o2Type = type(o2)
-		if o1Type ~= o2Type then return false end
-		if o1Type ~= 'table' then return false end
-
-		if not ignore_mt then
-				local mt1 = getmetatable(o1)
-				if mt1 and mt1.__eq then
-					  --compare using built in method
-					  return o1 == o2
-				end
-		end
-
-		local keySet = {}
-
-		for key1, value1 in pairs(o1) do
-				local value2 = o2[key1]
-				if value2 == nil or table_equals(value1, value2, ignore_mt) == false then
-					  return false
-				end
-				keySet[key1] = true
-		end
-
-		for key2, _ in pairs(o2) do
-				if not keySet[key2] then return false end
-		end
-		return true
-	end
-
 	---init but don't overwrite public veriables
 	action_count = action_count or 0;
 	actions_by_id = actions_by_id or {};
@@ -51,14 +20,10 @@ if actions_by_id__init_done==false then
 	---returns nothing, directly acts on actions_by_id array
 	---@param action_id string id of action to run
 	function get_action_metadata(action_id)
-		metadata = { c = {}, projectiles = nil, shot_effects = {} };
+		metadata = {};
 
 		---override Reflection_RegisterProjectile(xml) -in this context only-
 		Reflection_RegisterProjectile = function( projectile_xml )
-			if metadata.projectiles==nil then
-				metadata.projectiles = {};
-			end
-
 			local skip_or_modify_hash =
 			{		---list of member names we don't care about, or need to explicitly change
 				config = true,
@@ -149,7 +114,7 @@ if actions_by_id__init_done==false then
 				-- bounce_energy = true,
 				collide_with_tag = true,
 				ragdoll_force_multiplier = true,
-				-- damage = true,
+				damage = true,
 				collide_with_shooter_frames = true,
 				-- knockback_force = true,
 				velocity_sets_scale_coeff = true,
@@ -165,37 +130,55 @@ if actions_by_id__init_done==false then
 				on_death_emit_particle_type = true,
 				-- damage_slice = true,
 				-- damage_holy = true,
-				direction_nonrandom_rad = true,
-				-- direction_random_rad = true
+				-- direction_nonrandom_rad = true,
+				direction_random_rad = true
 			};
 
-			if metadata.projectiles[projectile_xml]~=nil then ---check if projectile data already exists
-				metadata.projectiles[projectile_xml].projectiles = metadata.projectiles[projectile_xml].projectiles + 1 ---data for this projectile_xml already exists, add one to count
-			else ---projectile doesn't exist, create it
-				local proj_entity_id = EntityLoad(projectile_xml, -20000, -20000); ---load projectile entity
-				local proj_comp = EntityGetFirstComponent(proj_entity_id, "ProjectileComponent"); ---find the first projectile component
-				if proj_comp~=nil and proj_comp~=0 then ---ensure projectile component loaded properly
-					metadata.projectiles[projectile_xml] = metadata.projectiles[projectile_xml] or {}; ---create empty table for incoming projectile if doesn't exist
-					for proj_member, _ in pairs(ComponentGetMembers(proj_comp)) do ---iterate thru component members if they exist
-					  if skip_or_modify_hash[proj_member]~=true then ---only directly store members which aren't tagged
-					    metadata.projectiles[projectile_xml][proj_member] = ComponentGetValue2(proj_comp, proj_member); ---store member to structure
-					  elseif proj_member=="damage_by_type" then ---specific processing for "damage_by_type"
-					    for dmg_type, _ in pairs(ComponentObjectGetMembers(proj_comp, proj_member)) do ---break open damage_by_type table
-					      metadata.projectiles[projectile_xml]["damage_" .. dmg_type] = 25 * (ComponentObjectGetValue2(proj_comp, proj_member, dmg_type) or 0); ---store it in singles
-					    end ---for dmg_type in damage_by_type
-					  elseif proj_member=="config_explosion" then ---specific processing for "config_explosion"
-					    metadata.projectiles[projectile_xml]["damage_explosion"] = 25 * (ComponentObjectGetValue2(proj_comp, proj_member, "damage") or 0); ---stored separately, standardise
-					  elseif proj_member=="mStartingLifetime" then ---specific processing for "mStartingLifetime"
-					    metadata.projectiles[projectile_xml]["lifetime"] = ComponentGetValue2(proj_comp, proj_member); ---save with more typical name
-						elseif proj_member=="direction_random_rad" then ---specific processing for "direction_random_rad"
-							metadata.projectiles[projectile_xml]["spread_deg"] = math.deg(ComponentGetValue2(proj_comp, proj_member));
-						end ---if skip_or_modify_hash[proj_member] block
-					end ---for proj_member in ComponentGetMembers(proj_comp); ---iterate thru component members if they exist
-					metadata.projectiles[projectile_xml].projectiles = 1; ---start with one projectile
-					EntityRemoveComponent(proj_entity_id, proj_comp); ---remove the projectile component before we kill it to avoid issues
-				end --- if proj_comp~=nil|0; ---to ensure loaded
-				EntityKill(proj_entity_id); ---kill the projectile entity since we're done with it
-			end ---if metadata.projectiles[projectile_xml]~=nil; ---processing block for existent projectiles
+			-- if metadata.projectiles[projectile_xml]~=nil then ---check if projectile data already exists
+			-- 	metadata.projectiles[projectile_xml].projectiles = metadata.projectiles[projectile_xml].projectiles + 1 ---data for this projectile_xml already exists, add one to count
+			-- else ---projectile doesn't exist, create it
+			local xml_entity_id = EntityLoad(projectile_xml, -20000, -20000); ---load projectile entity
+			if xml_entity_id~=nil and xml_entity_id~=0 then
+				local xml_component_pool = EntityGetAllComponents(xml_entity_id);
+				if xml_component_pool~=nil then
+					for _, xml_comp_id in pairs(xml_component_pool) do
+						if xml_comp_id~=nil and xml_comp_id~=0 then ---ensure component loaded properly
+							local xml_comp_name = ComponentGetTypeName(xml_comp_id);
+							if xml_comp_name=="ProjectileComponent" or xml_comp_name=="LightningComponent" or xml_comp_name=="ExplodeOnDamageComponent" or xml_comp_name=="ExplosionComponent" then
+								local xml_comp_field_pool = ComponentGetMembers(xml_comp_id);
+								if xml_comp_field_pool~=nil then
+									metadata[projectile_xml] = metadata[projectile_xml] or {}; ---create empty table for incoming data if doesn't exist
+									metadata[projectile_xml][xml_comp_name] = metadata[projectile_xml][xml_comp_name] or {}; ---create empty table for incoming data if doesn't exist
+									for xml_comp_field, _ in pairs(xml_comp_field_pool) do ---iterate thru component members if they exist
+										if skip_or_modify_hash[xml_comp_field]~=true then ---only directly store members which aren't tagged
+											metadata[projectile_xml][xml_comp_name][xml_comp_field] = ComponentGetValue2(xml_comp_id, xml_comp_field); ---store member to structure
+										elseif xml_comp_field=="damage" then ---specific processing for "damage"
+											metadata[projectile_xml][xml_comp_name]["damage_basic"] = 25 * (ComponentGetValue2(xml_comp_id, xml_comp_field) or 0);
+										elseif xml_comp_field=="damage_by_type" then ---specific processing for "damage_by_type"
+											local dmg_type_pool = ComponentObjectGetMembers(xml_comp_id, xml_comp_field);
+											if dmg_type_pool~=nil then
+												for dmg_type, _ in pairs(dmg_type_pool) do ---break open damage_by_type table
+													metadata[projectile_xml][xml_comp_name]["damage_" .. dmg_type] = 25 * (ComponentObjectGetValue2(xml_comp_id, xml_comp_field, dmg_type) or 0); ---store it in singles
+												end ---for dmg_type in damage_by_type
+											end
+										elseif xml_comp_field=="config_explosion" then ---specific processing for "config_explosion"
+											metadata[projectile_xml][xml_comp_name]["damage_explosion"] = 25 * (ComponentObjectGetValue2(xml_comp_id, xml_comp_field, "damage") or 0); ---stored separately, standardise
+											metadata[projectile_xml][xml_comp_name]["explosion_radius"] = 25 * (ComponentObjectGetValue2(xml_comp_id, xml_comp_field, "explosion_radius") or 0); ---stored separately, standardise
+										elseif xml_comp_field=="mStartingLifetime" then ---specific processing for "mStartingLifetime"
+											metadata[projectile_xml][xml_comp_name]["lifetime"] = ComponentGetValue2(xml_comp_id, xml_comp_field); ---save with more typical name
+										elseif xml_comp_field=="direction_random_rad" then ---specific processing for "direction_random_rad"
+											metadata[projectile_xml][xml_comp_name]["spread_degrees"] = math.deg(ComponentGetValue2(xml_comp_id, xml_comp_field));
+										end ---if skip_or_modify_hash[proj_member] block
+									end ---for proj_member in ComponentGetMembers(proj_comp); ---iterate thru component members if they exist
+									metadata[projectile_xml][xml_comp_name].projectiles = 1; ---start with one projectile
+								end
+							end
+							EntityRemoveComponent(xml_entity_id, xml_comp_id); ---remove the projectile component before we kill it to avoid issues
+						end
+					end
+				end
+				EntityKill(xml_entity_id); ---kill the projectile entity since we're done with it
+			end
 		end -- function override Reflection_RegisterProjectile();
 
 		---strip values from c which we don't care about, modify others inline, return updated c table
@@ -237,7 +220,7 @@ if actions_by_id__init_done==false then
 				state_shuffled = true,
 				-- explosion_radius = true,
 				custom_xml_file = true,
-				-- action_mana_drain = true,
+				action_mana_drain = true, ---this value seems to be a lie
 				ragdoll_fx = true,
 				-- light = true,
 				-- action_is_dangerous_blast = true,
@@ -269,6 +252,7 @@ if actions_by_id__init_done==false then
 				damage_electricity_add = true,
 				damage_explosion_add = true,
 				damage_projectile_add = true,
+				direction_random_rad = true,
 			};
 			local out_c = {}; ---create out_c table
 			for membername, _ in pairs(in_c) do ---iterate through members in incoming table
@@ -283,6 +267,8 @@ if actions_by_id__init_done==false then
 				elseif 	membername=="reload_time" or
 								membername=="fire_rate_wait" then
 					out_c[membername] = in_c[membername] / 60;
+				elseif  membername=="direction_random_rad" then ---specific processing for "direction_random_rad"
+					out_c["spread_degrees"] = math.deg(in_c[membername]);
 				end ---if skip_hash[membername];
 			end ---for membername in in_ic
 			return out_c; ---return data table
@@ -306,7 +292,7 @@ if actions_by_id__init_done==false then
 		actions_by_id[action_id].c.draw_actions = draws; -- add a few flags
 		actions_by_id[action_id].c.reload_time = current_reload_time;
 		actions_by_id[action_id].c.recoil_knockback = shot_effects.recoil_knockback;
-		actions_by_id[action_id].c.projectiles =  metadata.projectiles;
+		actions_by_id[action_id].metadata = metadata;
 		c = _c; -- restore the global c context
 	end -- function get_action_metadata(action_id)
 
@@ -345,11 +331,64 @@ end -- if initialized
 
 ---intended to be run every world update w/ minimal impact
 if action_count<#actions then
-	print("actions_by_id: capturing new actions, group " .. action_count .. " to (at most) " .. action_count + 150);
-	collect_action_data(150);
+	print("actions_by_id: capturing new actions, group " .. action_count .. " to (at most) " .. action_count + 100);
+	collect_action_data(100);
 	actions_bt_id__notify_when_finished = true;
 elseif actions_bt_id__notify_when_finished==true then
 	actions_bt_id__notify_when_finished = false;
 	print("actions_by_id: scan done, storing " .. action_count .. " actions")
-	print(table_dump(actions_by_id["BOMB"]));
+	local debug_action = actions_by_id["RUBBER_BALL"];
+
+	print("table = " .. table_dump(debug_action));
+	print("action: " .. GameTextGetTranslatedOrNot(debug_action.name));
+	local action_datum_pool = { "mana", "price", "type", "name", "description", "spread_degrees", "damage.*", "speed.*" }
+	for action_member, action_value in pairs(debug_action) do
+		print("- members: " .. action_member);
+		for _, datum_pattern in ipairs(action_datum_pool) do
+			if string.find(action_member, datum_pattern)~=nil and type(action_value)~="boolean" then
+				if type(action_value)=="boolean" then
+					print(".. " .. (action_value and "true" or "false") )
+				else
+					print(" .. " .. action_value);
+				end
+			end
+		end
+	end
+
+	print "c:"
+	local c_datum_pool = { "mana", "price", "action_name", "action_type", "spread_degrees", "damage.*", "speed.*" }
+	for c_member, c_value in pairs(debug_action.c) do
+		print("- members: " .. c_member);
+		for _, datum_pattern in ipairs(c_datum_pool) do
+			if string.find(c_member, datum_pattern)~=nil then
+				if type(c_value)=="boolean" then
+					print(".. " .. (c_value and "true" or "false") )
+				else
+					print(" .. " .. c_value);
+				end
+			end
+		end
+	end
+
+
+	local datum_pool = { "spread_degrees", "damage.*", "speed.*", "projectiles" }
+	print("meta:");
+	for curr_xml, xml_member_pool in pairs(debug_action.metadata) do
+		print("- xml: " .. curr_xml);
+		for xml_component_name, xml_component_value in pairs(xml_member_pool) do
+			print("-- component: " .. xml_component_name);
+			for xml_member, member_value in pairs(xml_component_value) do
+				print("--- members: " .. xml_member);
+				for _, datum_pattern in ipairs(datum_pool) do
+					if string.find(xml_member, datum_pattern)~=nil and type(member_value)~="boolean" then
+						if type(member_value)=="boolean" then
+							print(".. " .. (member_value and "true" or "false") )
+						else
+							print(" .. " .. member_value);
+						end
+					end
+				end
+			end
+		end
+	end
 end

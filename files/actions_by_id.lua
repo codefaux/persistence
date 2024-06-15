@@ -1,8 +1,13 @@
-if initialized==nil then initialized=false; end
-if initialized==false then
-	initialized = true;
-	dump_once = true;
+---how to use for your own mod: drop this file into files\ and call it with dofile() -- NOT dofile_once() -- in init.lua OnWorldPostUpdate()
 
+---only run function one time, but must init variable
+if actions_by_id__init_done==nil then actions_by_id__init_done=false; end
+if actions_by_id__init_done==false then
+	---variables and functions run/register/initialize only once
+	actions_by_id__init_done = true;
+	actions_bt_id__notify_when_finished = true;
+
+	---kill file cache, force reload
 	__loaded = {};
 
 	dofile_once( "data/scripts/gun/gun.lua" );
@@ -39,26 +44,23 @@ if initialized==false then
 		return true
 	end
 
+	---init but don't overwrite public veriables
 	action_count = action_count or 0;
-	action_data = action_data or {};
-	action_metadata = action_metadata or {};
-	metadata = {};
+	actions_by_id = actions_by_id or {};
 
-	function get_action_metadata( action_id )
-		metadata =
-		{
-			c = {},
-			projectiles = nil,
-			shot_effects = {},
-		};
-		reflecting = true;
+	---returns nothing, directly acts on actions_by_id array
+	---@param action_id string id of action to run
+	function get_action_metadata(action_id)
+		metadata = { c = {}, projectiles = nil, shot_effects = {} };
+
+		---override Reflection_RegisterProjectile(xml) -in this context only-
 		Reflection_RegisterProjectile = function( projectile_xml )
 			if metadata.projectiles==nil then
 				metadata.projectiles = {};
 			end
 
 			local skip_or_modify_hash =
-			{
+			{		---list of member names we don't care about, or need to explicitly change
 				config = true,
 				config_explosion = true,
 				damage_critical = true,
@@ -164,183 +166,190 @@ if initialized==false then
 				-- damage_slice = true,
 				-- damage_holy = true,
 				direction_nonrandom_rad = true,
-				direction_random_rad = true
+				-- direction_random_rad = true
 			};
 
-			if metadata.projectiles[projectile_xml]~=nil then
-				metadata.projectiles[projectile_xml].projectiles = metadata.projectiles[projectile_xml].projectiles + 1
-			else
-				local proj_entity_id = EntityLoad(projectile_xml, -20000, -20000);
-				local proj_comp = EntityGetFirstComponent(proj_entity_id, "ProjectileComponent");
-				if proj_comp~=nil and proj_comp~=0 then
-					metadata.projectiles[projectile_xml] = {};
-					for proj_member, _ in pairs(ComponentGetMembers(proj_comp)) do
-					  if skip_or_modify_hash[proj_member]~=true then
-					    metadata.projectiles[projectile_xml][proj_member] = ComponentGetValue2(proj_comp, proj_member);
-					  elseif proj_member=="damage_by_type" then
-					    for dmg_type, _ in pairs(ComponentObjectGetMembers(proj_comp, proj_member)) do
-					      metadata.projectiles[projectile_xml]["damage_" .. dmg_type] = ComponentObjectGetValue2(proj_comp, proj_member, dmg_type) or 0;
-					    end
-					  elseif proj_member=="config_explosion" then
-					    metadata.projectiles[projectile_xml]["damage_explosion"] = ComponentObjectGetValue2(proj_comp, proj_member, "damage" );
-					  elseif proj_member=="mStartingLifetime" then
-					    metadata.projectiles[projectile_xml]["lifetime"] = ComponentGetValue2(proj_comp, proj_member);
-					  end
-					end
-					metadata.projectiles[projectile_xml].projectiles = 1;
-					-- ComponentSetValue2(proj_comp, "on_death_explode", false);
-					-- ComponentSetValue2(proj_comp, "on_lifetime_out_explode", false);
-					-- ComponentSetValue2(proj_comp, "collide_with_entities", false);
-					-- ComponentSetValue2(proj_comp, "collide_with_world", false);
-					-- ComponentSetValue2(proj_comp, "lifetime", 999 );
-
-					EntityRemoveComponent(proj_entity_id, proj_comp);
-				end
-				EntityKill(proj_entity_id);
-			end
+			if metadata.projectiles[projectile_xml]~=nil then ---check if projectile data already exists
+				metadata.projectiles[projectile_xml].projectiles = metadata.projectiles[projectile_xml].projectiles + 1 ---data for this projectile_xml already exists, add one to count
+			else ---projectile doesn't exist, create it
+				local proj_entity_id = EntityLoad(projectile_xml, -20000, -20000); ---load projectile entity
+				local proj_comp = EntityGetFirstComponent(proj_entity_id, "ProjectileComponent"); ---find the first projectile component
+				if proj_comp~=nil and proj_comp~=0 then ---ensure projectile component loaded properly
+					metadata.projectiles[projectile_xml] = metadata.projectiles[projectile_xml] or {}; ---create empty table for incoming projectile if doesn't exist
+					for proj_member, _ in pairs(ComponentGetMembers(proj_comp)) do ---iterate thru component members if they exist
+					  if skip_or_modify_hash[proj_member]~=true then ---only directly store members which aren't tagged
+					    metadata.projectiles[projectile_xml][proj_member] = ComponentGetValue2(proj_comp, proj_member); ---store member to structure
+					  elseif proj_member=="damage_by_type" then ---specific processing for "damage_by_type"
+					    for dmg_type, _ in pairs(ComponentObjectGetMembers(proj_comp, proj_member)) do ---break open damage_by_type table
+					      metadata.projectiles[projectile_xml]["damage_" .. dmg_type] = 25 * (ComponentObjectGetValue2(proj_comp, proj_member, dmg_type) or 0); ---store it in singles
+					    end ---for dmg_type in damage_by_type
+					  elseif proj_member=="config_explosion" then ---specific processing for "config_explosion"
+					    metadata.projectiles[projectile_xml]["damage_explosion"] = 25 * (ComponentObjectGetValue2(proj_comp, proj_member, "damage") or 0); ---stored separately, standardise
+					  elseif proj_member=="mStartingLifetime" then ---specific processing for "mStartingLifetime"
+					    metadata.projectiles[projectile_xml]["lifetime"] = ComponentGetValue2(proj_comp, proj_member); ---save with more typical name
+						elseif proj_member=="direction_random_rad" then ---specific processing for "direction_random_rad"
+							metadata.projectiles[projectile_xml]["spread_deg"] = math.deg(ComponentGetValue2(proj_comp, proj_member));
+						end ---if skip_or_modify_hash[proj_member] block
+					end ---for proj_member in ComponentGetMembers(proj_comp); ---iterate thru component members if they exist
+					metadata.projectiles[projectile_xml].projectiles = 1; ---start with one projectile
+					EntityRemoveComponent(proj_entity_id, proj_comp); ---remove the projectile component before we kill it to avoid issues
+				end --- if proj_comp~=nil|0; ---to ensure loaded
+				EntityKill(proj_entity_id); ---kill the projectile entity since we're done with it
+			end ---if metadata.projectiles[projectile_xml]~=nil; ---processing block for existent projectiles
 		end -- function override Reflection_RegisterProjectile();
 
-		local function strip_c(in_c)
+		---strip values from c which we don't care about, modify others inline, return updated c table
+		---@param in_c table incoming c table
+		---@return table stripped c table
+		local function parse_c(in_c)
 			local skip_or_modify_hash =
-			{
-				pattern_degrees = true,
-				damage_curse_add = true,
-				bounces = true,
-				action_spawn_level = true,
-				lightning_count = true,
+			{		---table of values to remove, modify here if add'l data required
+				-- pattern_degrees = true,
+				-- bounces = true,
+				-- action_spawn_level = true,
+				-- lightning_count = true,
 				state_destroyed_action = true,
-				action_ai_never_uses = true,
-				action_name = true,
-				recoil = true,
-				action_max_uses = true,
-				damage_electricity_add = true,
+				-- action_ai_never_uses = true,
+				-- action_name = true,
+				-- recoil = true,
+				-- action_max_uses = true,
 				fire_rate_wait = true,
 				sprite = true,
-				explosion_damage_to_materials = true,
+				-- explosion_damage_to_materials = true,
 				physics_impulse_coeff = true,
-				trail_material = true,
-				child_speed_multiplier = true,
-				action_draw_many_count = true,
-				lifetime_add = true,
-				damage_critical_chance = true,
+				-- trail_material = true,
+				-- child_speed_multiplier = true,
+				-- action_draw_many_count = true,
+				-- damage_critical_chance = true,
 				gore_particles = true,
 				action_sprite_filename = true,
-				action_type = true,
+				-- action_type = true,
 				game_effect_entities = true,
 				screenshake = true,
-				damage_explosion_add = true,
-				damage_slice_add = true,
-				material = true,
+				-- material = true,
 				extra_entities = true,
-				damage_projectile_add = true,
-				action_never_unlimited = true,
-				friendly_fire = true,
+				-- action_never_unlimited = true,
+				-- friendly_fire = true,
 				sound_loop_tag = true,
-				damage_ice_add = true,
-				action_spawn_probability = true,
+				-- action_spawn_probability = true,
 				reload_time = true,
 				projectile_file = true,
 				state_shuffled = true,
-				explosion_radius = true,
-				damage_healing_add = true,
+				-- explosion_radius = true,
 				custom_xml_file = true,
-				action_mana_drain = true,
+				-- action_mana_drain = true,
 				ragdoll_fx = true,
-				light = true,
-				action_is_dangerous_blast = true,
-				spread_degrees = true,
+				-- light = true,
+				-- action_is_dangerous_blast = true,
+				-- spread_degrees = true,
 				state_discarded_action = true,
-				damage_drill_add = true,
 				action_unidentified_sprite_filename = true,
-				action_description = true,
-				speed_multiplier = true,
-				damage_fire_add = true,
-				dampening = true,
-				damage_null_all = true,
-				knockback_force = true,
-				action_spawn_requires_flag = true,
-				blood_count_multiplier = true,
-				trail_material_amount = true,
-				damage_critical_multiplier = true,
+				-- action_description = true,
+				-- speed_multiplier = true,
+				-- dampening = true,
+				-- damage_null_all = true,
+				-- knockback_force = true,
+				-- action_spawn_requires_flag = true,
+				-- blood_count_multiplier = true,
+				-- trail_material_amount = true,
+				-- damage_critical_multiplier = true,
 				state_cards_drawn = true,
 				action_spawn_manual_unlock = true,
-				material_amount = true,
-				action_id = true,
-				gravity = true,
-				damage_melee_add = true
+				-- material_amount = true,
+				-- action_id = true,
+				-- gravity = true,
+				-- lifetime_add = true,
+				-- damage_slice_add = true,
+				-- damage_ice_add = true,
+				-- damage_curse_add = true,
+				-- damage_healing_add = true,
+				-- damage_drill_add = true,
+				damage_fire_add = true,
+				damage_melee_add = true,
+				damage_electricity_add = true,
+				damage_explosion_add = true,
+				damage_projectile_add = true,
 			};
-					if skip_or_modify_hash[proj_member]~=true then
-
-					end
-
-		end
-
+			local out_c = {}; ---create out_c table
+			for membername, _ in pairs(in_c) do ---iterate through members in incoming table
+				if skip_or_modify_hash[membername]~=true then ---check against skip_hash to only store desired info
+					out_c[membername] = in_c[membername]; ---copy member to output table
+				elseif	membername=="damage_electricity_add" or
+								membername=="damage_melee_add" or
+								membername=="damage_explosion_add" or
+								membername=="damage_projectile_add" or
+								membername=="damage_fire_add" then
+					out_c[membername] = in_c[membername] * 25;
+				elseif 	membername=="reload_time" or
+								membername=="fire_rate_wait" then
+					out_c[membername] = in_c[membername] / 60;
+				end ---if skip_hash[membername];
+			end ---for membername in in_ic
+			return out_c; ---return data table
+		end ---function strip_c(in_c); ---returns stripped c structure
 
 		-- local _draw_actions = draw_actions;
-		local draws = 0;
-		draw_actions = function( x ) draws = draws + x; end
+		local draws = 0; -- start at 0 additional draws
+		draw_actions = function( x ) draws = draws + x; end -- another local override for action() to count draw_action calls
 
+		local _c = c; -- capture the global c context
+		c = {}; -- clear c context so we only get one action()
+		shot_effects = {}; -- clear shot_effects context so we only get one action()
+		current_reload_time = 0; -- clear current_reload_time so we only get one action()
+		reset_modifiers( c ); -- prepare c table structure and initialize for relative operations
+		ConfigGunShotEffects_Init( shot_effects ); -- prepare shot_effects table structure and initialize for relative operations
+		reflecting = true; -- This is how we tell the game not to do the things, this redirects many of the action's calls to Reflection_RegisterProjectile() which allows us to extract data
+		actions_by_id[action_id].action(); -- call the action() function
+		reflecting = false; -- Return to normal. Likely not necessary but....
+		actions_by_id[action_id] = actions_by_id[action_id] or {}; -- new table if not already present
+		actions_by_id[action_id].c = parse_c(c); -- strip c before storing its data
+		actions_by_id[action_id].c.draw_actions = draws; -- add a few flags
+		actions_by_id[action_id].c.reload_time = current_reload_time;
+		actions_by_id[action_id].c.recoil_knockback = shot_effects.recoil_knockback;
+		actions_by_id[action_id].c.projectiles =  metadata.projectiles;
+		c = _c; -- restore the global c context
+	end -- function get_action_metadata(action_id)
 
-
-		local _c = c;
-		c = {};
-		shot_effects = {};
-		current_reload_time = 0;
-		reset_modifiers( c );
-		ConfigGunShotEffects_Init( shot_effects );
-		action_data[action_id].action();
-		-- draw_actions = _draw_actions;
-		action_metadata[action_id] = action_metadata[action_id] or {};
-		action_metadata[action_id].c = c;
-		action_metadata[action_id].draw_actions = draws;
-		action_metadata[action_id].reload_time = current_reload_time;
-		action_metadata[action_id].recoil_knockback = shot_effects.recoil_knockback;
-		action_metadata[action_id].projectiles =  metadata.projectiles;
-		c = _c;
-		reflecting = false;
-	end
-
-	function collect_action_data(amt)
-		local target_cnt = action_count + amt;
+	---intended to be run when new actions are found, typically by code below -- feeds information directly into actions_by_id
+	---@param max_new_actions_this_pass number
+	function collect_action_data(max_new_actions_this_pass)
+		local target_cnt = action_count + max_new_actions_this_pass; ---track how many actions we're targeting as our max
 		local player = EntityGetWithTag("player_unit")[1];
 
-		if player then EntityRemoveTag(player, "player_unit"); end
-		for _,curr_action in pairs(actions) do
-			if action_count < target_cnt then
-				if action_data[curr_action.id]==nil then
-					print(" -- " .. curr_action.id);
-					action_count = (action_count or 0) + 1;
-					action_data[curr_action.id] = curr_action;
-					get_action_metadata(curr_action.id);
-				end
-			else
-				break;
-			end
-		end
-		if player then EntityAddTag(player, "player_unit"); end
-		refresh_actions = false;
-	end
+		if player then EntityRemoveTag(player, "player_unit"); end ---remove player_unit tag, this protects us from some actions
+		for _,curr_action in pairs(actions) do ---iterate thru actions until finished or stopped
+			if actions_by_id[curr_action.id]==nil and curr_action.id~=nil then ---only process non-nil entries
+				action_count = (action_count or 0) + 1; ---add to the action count, start at zero if un-initialized
+				actions_by_id[curr_action.id] = curr_action; ---store current action basic data
+				get_action_metadata(curr_action.id); ---process action to add metadata
+			end ---if actions_by_id[curr_action.id]==nil and curr_action.id~=nil;
+			if action_count >= target_cnt then break; end
+		end ---for curr_action in actions;
+		if player then EntityAddTag(player, "player_unit"); end ---re-add player_unit tag to stored player entity
+	end -- function collect_action_data(max_new_actions_this_pass)
 
-	function dump(o)
+	---debugging function
+	function table_dump(o)
 		if type(o) == 'table' then
 			 local s = '{ '
 			 for k,v in pairs(o) do
 					if type(k) ~= 'number' then k = '"'..k..'"' end
-					s = s .. '['..k..'] = ' .. dump(v) .. ','
+					s = s .. '['..k..'] = ' .. table_dump(v) .. ','
 			 end
 			 return s .. '} '
 		else
 			 return tostring(o)
 		end
-	end
+ end ---function table_dump(0);
 end -- if initialized
 
+---intended to be run every world update w/ minimal impact
 if action_count<#actions then
-	dump_once = true;
-	print("capturing actions, group " .. action_count .. " .. " .. action_count + 150);
+	print("actions_by_id: capturing new actions, group " .. action_count .. " to (at most) " .. action_count + 150);
 	collect_action_data(150);
-elseif dump_once==true then
-	dump_once = false;
-	print(dump(action_data["BOMB"]));
-	print(dump(action_metadata["BOMB"]));
+	actions_bt_id__notify_when_finished = true;
+elseif actions_bt_id__notify_when_finished==true then
+	actions_bt_id__notify_when_finished = false;
+	print("actions_by_id: scan done, storing " .. action_count .. " actions")
+	print(table_dump(actions_by_id["BOMB"]));
 end

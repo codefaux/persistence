@@ -6,7 +6,8 @@
 -- TODO : find code which runs every frame and reduce
 -- TODO : Push IDs / Z order
 -- TODO : Fix bypassing "no wand tinkering"
--- TODO : Can't research spells when player has "perk which removes limited uses"
+-- TODO : Can't research spells when player has "unlimited spells" perk
+-- TODO : Spells bought while "unlimited spells" perk have count
 -- TODO : Mod order fixes?
 
 -- TODO for GUI v3:

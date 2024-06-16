@@ -4,8 +4,6 @@ dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/gun/procedural/wands.lua");
 dofile_once("mods/persistence/files/wand_spell_helper.lua");
 dofile_once("data/scripts/debug/keycodes.lua");
--- dofile_once("mods/persistence/files/action_types.lua");
--- dofile_once("data/scripts/gun/gun_collect_metadata.lua");
 
 
 local gui = GuiCreate();
@@ -1042,54 +1040,18 @@ end
 
 -- SPELL TOOLTIP
 
-function show_spell_tooltip_gui()
+function show_spell_tooltip_gui(x_loc, y_loc)
 	if spell_tooltip_id~="" and buy_spells_open then
 		spell_tooltip_open = true;
 
 		local curr_spell = actions_by_id[spell_tooltip_id];
+		if curr_spell.metadata==nil then get_action_metadata(curr_spell.id); end
 		-- curr_spell.c = extract_action_stats(curr_spell);
 
 		active_windows["spell_tooltip"] = { true, function(get_next_id)
-			local i_base = "data/ui_gfx/inventory/";
 
-			local i_icons = {
-				warning = i_base .. "icon_warning.png",
-				action_max_uses = i_base .. "icon_action_max_uses.png",
-				action_type = i_base .. "icon_action_type.png",
-				bounces = i_base .. "icon_bounces.png",
-				damage_critical_chance = i_base .. "icon_damage_critical_chance.png",
-				damage_curse = i_base .. "icon_damage_curse.png",
-				damage_drill = i_base .. "icon_damage_drill.png",
-				damage_electricity = i_base .. "icon_damage_electricity.png",
-				damage_explosion = i_base .. "icon_damage_explosion.png",
-				damage_fire = i_base .. "icon_damage_fire.png",
-				damage_healing = i_base .. "icon_damage_healing.png",
-				damage_holy = i_base .. "icon_damage_holy.png",
-				damage_ice = i_base .. "icon_damage_ice.png",
-				damage_melee = i_base .. "icon_damage_melee.png",
-				damage_projectile = i_base .. "icon_damage_projectile.png",
-				damage_slice = i_base .. "icon_damage_slice.png",
-				danger = i_base .. "icon_danger.png",
-				explosion_radius = i_base .. "icon_explosion_radius.png",
-				fire_rate_wait = i_base .. "icon_fire_rate_wait.png",
-				gun_actions_per_round = i_base .. "icon_gun_actions_per_round.png",
-				gun_capacity = i_base .. "icon_gun_capacity.png",
-				gun_charge = i_base .. "icon_gun_charge.png",
-				gun_permanent_actions = i_base .. "icon_gun_permanent_actions.png",
-				gun_reload_time = i_base .. "icon_gun_reload_time.png",
-				gun_shuffle = i_base .. "icon_gun_shuffle.png",
-				info = i_base .. "icon_info.png",
-				knockback = i_base .. "icon_knockback.png",
-				mana_charge_speed = i_base .. "icon_mana_charge_speed.png",
-				mana_drain = i_base .. "icon_mana_drain.png",
-				mana_max = i_base .. "icon_mana_max.png",
-				reload_time = i_base .. "icon_reload_time.png",
-				speed_multiplier = i_base .. "icon_speed_multiplier.png",
-				spread_degrees = i_base .. "icon_spread_degrees.png",
-			}
-
-			local x_loc = 120;
-			local y_loc = 250;
+			local x_loc = x_loc or 120;
+			local y_loc = y_loc or 245;
 
 			local col_a = x_loc + 0;
 			local col_b = x_loc + 15;
@@ -1099,90 +1061,30 @@ function show_spell_tooltip_gui()
 			local line_h = 8;
 			local base_y = y_loc + 6;
 			local line_y = 3;
-			local line_cnt = 0;
+			local line_cnt = 1;
 
 			-- GuiLayoutBeginLayer(gui);
 			GuiZSet(gui, z_base);
 			GuiBeginAutoBox(gui);
-
 			GuiZSet(gui, z_base - z_gap);
-			GuiText(gui, col_a, y_loc, GameTextGetTranslatedOrNot(curr_spell.name));			-- NAME
-			GuiText(gui, col_a, y_loc + 3 + line_h, GameTextGetTranslatedOrNot(curr_spell.description));			-- Description
 
-			GuiImage(gui, get_next_id(), col_d, y_loc + 28, curr_spell.sprite, 1, 1.5, 1.5, 0);		-- ICON
-
-			line_cnt = 2;
-			line_y = base_y + (line_h * line_cnt);
-			-- icon, Type         	Projectile
-			GuiImage(gui, get_next_id(), col_a, line_y, i_icons["action_type"], 1, 1, 1, 0);
-			GuiText(gui, col_b, line_y, GameTextGetTranslatedOrNot("$inventory_actiontype"))
-			GuiText(gui, col_c, line_y, action_type_to_string(curr_spell.type), 1);
-
-			-- icon, Uses						#
-			if curr_spell.max_uses~=nil and curr_spell.max_uses > 0 then
-				line_cnt = line_cnt + 1;
-				line_y = base_y + (line_h * line_cnt);
-				GuiImage(gui, get_next_id(), col_a, line_y, i_icons["action_max_uses"], 1, 1, 1, 0);
-				GuiText(gui, col_b, line_y, GameTextGetTranslatedOrNot("$inventory_usesremaining"));
-				GuiText(gui, col_c, line_y, curr_spell.max_uses, 1);
-			end
-
-			-- icon, Mana drain   	#
-			if curr_spell.mana~=nil and curr_spell.mana > 0 then
-				line_cnt = line_cnt + 1;
-				line_y = base_y + (line_h * line_cnt);
-				GuiImage(gui, get_next_id(), col_a, line_y, i_icons["mana_drain"], 1, 1, 1, 0);
-				GuiText(gui, col_b, line_y, GameTextGetTranslatedOrNot("$inventory_manadrain"));
-				GuiText(gui, col_c, line_y, curr_spell.mana, 1);
-			end
-
-			-- icon, Spread       	#
-			if curr_spell.c.spread_degrees~=nil and curr_spell.c.spread_degrees~=0 then
-				line_cnt = line_cnt + 1;
-				line_y = base_y + (line_h * line_cnt);
-				GuiImage(gui, get_next_id(), col_a, line_y, i_icons["spread_degrees"], 1, 1, 1, 0);
-				GuiText(gui, col_b, line_y, GameTextGetTranslatedOrNot("$inventory_spread"));
-				GuiText(gui, col_c, line_y, GameTextGet("$inventory_degrees", curr_spell.c.spread_degrees), 1);
-			end
-
-
-			-- icon, Speed					# --- Calculated / pulled from XML
-
-			-- line_cnt = line_cnt + 1;
-			-- line_y = base_y + (line_h * line_cnt);
-			-- -- icon, Cast delay			#
-			-- GuiImage(gui, get_next_id(), col_a, line_y, i_icons["fire_rate_wait"], 1, 1, 1, 0);
-			-- GuiText(gui, col_b, line_y, GameTextGetTranslatedOrNot("$inventory_castdelay"));
-			-- GuiText(gui, col_c, line_y, GameTextGet("$inventory_seconds", (curr_spell.c.fire_rate_wait~=nil and curr_spell. c.fire_rate_wait~=0) and cast_time_to_time(curr_spell.c.fire_rate_wait) or 0 ), 1);
-
-			-- icon Crit. Chance		#
-			if curr_spell.c.damage_critical_chance~=nil and curr_spell.c.damage_critical_chance>0 then
-				line_cnt = line_cnt + 1;
-				line_y = base_y + (line_h * line_cnt);
-				GuiImage(gui, get_next_id(), col_a, line_y, i_icons["damage_critical_chance"], 1, 1, 1, 0);
-				GuiText(gui, col_b, line_y, GameTextGetTranslatedOrNot("$inventory_mod_critchance"));
-				GuiText(gui, col_c, line_y, GameTextGet("$menu_slider_percentage", cast_time_to_time(curr_spell.c.damage_critical_chance)), 1);
-			end
-
-			-- icon, Damage       	#
-			local damage_types = { "projectile", "melee", "electricity", "fire", "explosion", "ice", "slice", "healing", "curse", "drill" };
-			for _, d_t_base in ipairs(damage_types) do
-				local d_type = "damage_" .. d_t_base;
-				if curr_spell.c[d_type .. "_add"]~=nil and curr_spell.c[d_type .. "_add"]>0 then
+			local action_struct_pool = get_action_struct(curr_spell);
+			for _, action_struct in ipairs(action_struct_pool) do
+				if action_struct.name=="name" then
+					GuiText(gui, col_a, y_loc, action_struct.value);			-- NAME
+				elseif action_struct.name=="description" then
+					GuiText(gui, col_a, y_loc + 3 + line_h, action_struct.value);			-- Description
+				elseif action_struct.name=="sprite" then
+					GuiImage(gui, get_next_id(), col_d, y_loc + 28, action_struct.icon, 1, 1.5, 1.5, 0);		-- ICON
+				else
 					line_cnt = line_cnt + 1;
 					line_y = base_y + (line_h * line_cnt);
-					GuiImage(gui, get_next_id(), col_a, line_y, i_icons[d_type], 1, 1, 1, 0);
-					local d_t_str = "$inventory_mod_damage_" .. d_t_base;
-					if d_t_base=="electricity" then
-						d_t_str = "$inventory_mod_damage_electric";
-					end
-					if d_t_base=="projectile" then
-						d_t_str = "$inventory_mod_damage";
-					end
-					GuiText(gui, col_b, line_y, GameTextGetTranslatedOrNot(d_t_str));
-					GuiText(gui, col_c, line_y, curr_spell.c[d_type .. "_add"]~=nil and 25 * curr_spell.c[d_type .. "_add"] or 0 );
+					GuiImage(gui, get_next_id(), col_a, line_y + 2, action_struct.icon, 1, 1, 1, 0);
+					GuiText(gui, col_b, line_y, action_struct.label);
+					GuiText(gui, col_c, line_y, action_struct.value);
 				end
 			end
+
 			GuiZSetForNextWidget(gui, z_base);
 			GuiZSet(gui, z_base);
 			GuiEndAutoBoxNinePiece(gui, 4, 100, 25);

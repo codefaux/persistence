@@ -1,10 +1,8 @@
 dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/lib/mod_settings.lua");
--- dofile_once("mods/persistence/files/wand_spell_helper.lua")
 
 local is_in_lobby = false;
 local inventory_open = false;
--- local screen_size_x, screen_size_y;
 local lobby_collider; ---type: @entity_id
 local lobby_collider_enabled = false;
 local lobby_x, lobby_y;
@@ -60,6 +58,8 @@ function OnModPreInit()
 end
 
 function OnWorldPostUpdate()
+	dofile("mods/persistence/files/actions_by_id.lua");
+
 	if lobby_collider == nil or lobby_collider == 0 then
 		local controls_mouse = EntityGetWithTag("controls_mouse")[1];
 		if controls_mouse ~= nil and controls_mouse ~= 0 then
@@ -211,7 +211,7 @@ function OnPostPlayerSpawned()
 	dofile_once("mods/persistence/files/data_store.lua");
 	dofile_once("mods/persistence/files/gui.lua");
 
-	if GameGetFrameNum() < 20 then
+	if GameGetFrameNum() < 60 then
 		set_run_created_with_mod();
 	end
 

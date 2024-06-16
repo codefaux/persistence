@@ -1,7 +1,7 @@
 dofile_once("mods/persistence/config.lua");
 dofile_once("mods/persistence/files/helper.lua");
--- dofile_once("data/scripts/gun/gun_actions.lua");
 dofile_once("data/scripts/gun/procedural/gun_procedural.lua");
+dofile_once("data/scripts/gun/procedural/gun_action_utils.lua");
 
 function sprite_file_to_wand_type(sprite_file)
 	for def_idx, _ in ipairs(mod_config.default_wands) do

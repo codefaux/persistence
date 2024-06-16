@@ -447,7 +447,7 @@ if actions_by_id__init_done==false then
 		max_uses 									=	{ "data/ui_gfx/inventory/icon_action_max_uses.png",					"$inventory_usesremaining",						__show_nz,						__val },
 		mana											=	{ "data/ui_gfx/inventory/icon_mana_drain.png",							"$inventory_manadrain",								__show_nz,		 				__val },
 		fire_rate_wait						=	{ "data/ui_gfx/inventory/icon_gun_reload_time.png",					"$inventory_castdelay",								__show_always, 				__time },
-		reload_time								=	{ "data/ui_gfx/inventory/icon_reload_time.png",							"$inventory_rechargetime",						__show_always, 				__time },
+		reload_time								=	{ "data/ui_gfx/inventory/icon_reload_time.png",							"$inventory_rechargetime",						__show_nz, 				__time },
 		damage_projectile_add			=	{ "data/ui_gfx/inventory/icon_damage_projectile.png",				"$inventory_damage",									__show_nz,						__round },
 		damage_basic							=	{ "data/ui_gfx/inventory/icon_damage_projectile.png",				"$inventory_mod_damage",							__show_nz,						__round },
 		damage_slice							=	{ "data/ui_gfx/inventory/icon_damage_slice.png",						"$inventory_dmg_slice",								__show_nz,						__round },

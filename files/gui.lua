@@ -339,10 +339,6 @@ function show_research_wands_gui()
 					end
 				end
 
-				-- local wand_offset_x, wand_offset_y = get_wand_grip_offset(wand_preview["wand_type"]);
-				-- wand_offset_x, wand_offset_y = get_wand_rotated_offset(wand_offset_x, wand_offset_y, -45)
-
-				-- GuiImage(gui, get_next_id(), x_offset + frame_x + frame_offset_x - wand_offset_x, frame_y - frame_offset_y + wand_offset_y, wand_type_to_sprite_file(wand_preview["wand_type"]), 1, 1.333, 1, math.rad(-45)); -- radians are annoying
 				GuiImage(gui, get_next_id(), x_offset + frame_x + frame_offset_x, frame_y + frame_offset_y, wand_type_to_sprite_file(wand_preview["wand_type"]), 1, 1.333, 1.333, math.rad(-45)); -- radians are annoying
 				if b_wand_types then
 					local new_icon = "data/ui_gfx/damage_indicators/explosion.png";
@@ -352,6 +348,7 @@ function show_research_wands_gui()
 					GuiTooltip(gui, "This wand provides a new design.", "");
 				end
 				GuiBeginScrollContainer(gui, get_next_id(), x_offset + frame_x + 37, frame_y - 31, 64, 26, true, 0, 0);
+
 				for cap_idx = 1, wand_preview["capacity"] do
 					local grid_h = 12;
 					local grid_columns = 5;
@@ -359,8 +356,15 @@ function show_research_wands_gui()
 					local grid_y = (math.floor((cap_idx-1)/grid_columns) * grid_h);
 					GuiImage(gui, get_next_id(), grid_x, grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
 					if wand_preview["spells"][cap_idx] ~= nil then
-						GuiImage(gui, get_next_id(), grid_x, grid_y, actions_by_id[wand_preview["spells"][cap_idx]].sprite, 1, 0.8, 0.8, 0);
-						GuiTooltip(gui, actions_by_id[wand_preview["spells"][cap_idx]].name, actions_by_id[wand_preview["spells"][cap_idx]].description );
+						local curr_spell_id = wand_preview["spells"][cap_idx];
+						local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
+						if s_hover then
+							spell_tooltip_id = curr_spell_id;
+							if not spell_tooltip_open then
+								show_spell_tooltip_gui();
+							end
+						end
+						GuiImage(gui, get_next_id(), grid_x, grid_y, actions_by_id[curr_spell_id].sprite, 1, 0.8, 0.8, 0);
 					end
 				end
 				GuiEndScrollContainer(gui);
@@ -404,9 +408,16 @@ function show_research_wands_gui()
 						local grid_x = (((wand_prev_ac_idx-1)%5) * 12);
 						local grid_y = (math.floor((wand_prev_ac_idx-1)/5) * 12);
 						GuiImage(gui, get_next_id(), x_offset + 8 + grid_x, 177 + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
-						if wand_preview["always_cast_spells"][(wand_prev_ac_idx-1)+1] ~= nil then
+						if wand_preview["always_cast_spells"][wand_prev_ac_idx] ~= nil then
 							GuiImage(gui, get_next_id(), x_offset + 8 + grid_x, 177 + grid_y, actions_by_id[curr_wand_prev_ac_id].sprite, 1, 0.8, 0.8, 0);
-							GuiTooltip(gui, actions_by_id[curr_wand_prev_ac_id].name, actions_by_id[curr_wand_prev_ac_id].description );
+							local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
+							if s_hover then
+								spell_tooltip_id = wand_preview["always_cast_spells"][wand_prev_ac_idx];
+								if not spell_tooltip_open then
+									show_spell_tooltip_gui();
+								end
+							end
+										-- GuiTooltip(gui, actions_by_id[curr_wand_prev_ac_id].name, actions_by_id[curr_wand_prev_ac_id].description );
 						end
 					end
 				end
@@ -502,6 +513,13 @@ function show_research_spells_gui()
 					end
 				end -- Colorize Button
 				GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
+				local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
+				if s_hover then
+					spell_tooltip_id = curr_spell;
+					if not spell_tooltip_open then
+						show_spell_tooltip_gui(120, 285);
+					end
+				end
 				GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
 				GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
 				line_idx = line_idx + 1;
@@ -513,6 +531,13 @@ function show_research_spells_gui()
 				if not dont_recycle_hash[d_s_e_id] then
 					local line_pos = line_idx * line_height;
 					GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 0.5, 1, 0, math.rad(0)); -- Icon
+					local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
+					if s_hover then
+						spell_tooltip_id = curr_spell;
+						if not spell_tooltip_open then
+							show_spell_tooltip_gui(120, 285);
+						end
+					end
 					GuiColorNextWidgetEnum(gui, COLORS.Dim);
 					GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
 					GuiColorNextWidgetEnum(gui, COLORS.Dark);
@@ -629,9 +654,6 @@ function show_buy_wands_gui()
 				end
 			end
 		end
-
-
-
 
 		local function toggle_select_spell(action_id)
 			local selected = false;
@@ -834,7 +856,13 @@ function show_buy_wands_gui()
 						GuiImage(gui, get_next_id(), grid_x, grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 1.1, 1.1, 0);
 						if ac_spell_id ~= nil then
 							GuiImage(gui, get_next_id(), grid_x, grid_y, actions_by_id[ac_spell_id].sprite, 1, 1, 1, 0);
-							GuiTooltip(gui, actions_by_id[ac_spell_id].name, actions_by_id[ac_spell_id].description );
+							local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
+							if s_hover then
+								spell_tooltip_id = ac_spell_id;
+								if not spell_tooltip_open then
+									show_spell_tooltip_gui(120, 285);
+								end
+							end
 						end
 					end
 				end
@@ -975,7 +1003,14 @@ function show_buy_wands_gui()
 						toggle_select_spell(curr_spell.id);
 					end	-- Button (Cost)
 					GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
-					GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
+					local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
+					if s_hover then
+						spell_tooltip_id = curr_spell.id;
+						if not spell_tooltip_open then
+							show_spell_tooltip_gui();
+						end
+					end
+						GuiText(gui, 60, 0 + line_pos, GameTextGetTranslatedOrNot(curr_spell.name)); -- Name
 					GuiText(gui, 60, 10 + line_pos, GameTextGetTranslatedOrNot(curr_spell.description)); -- Description
 					idx = idx + 1;
 				end
@@ -1040,18 +1075,17 @@ end
 
 -- SPELL TOOLTIP
 
-function show_spell_tooltip_gui(x_loc, y_loc)
-	if spell_tooltip_id~="" and buy_spells_open then
+function show_spell_tooltip_gui(in_x_loc, in_y_loc)
+	if spell_tooltip_id~="" and menu_open then
 		spell_tooltip_open = true;
+		local x_loc = in_x_loc or 120;
+		local y_loc = in_y_loc or 245;
 
 		local curr_spell = actions_by_id[spell_tooltip_id];
 		if curr_spell.metadata==nil then get_action_metadata(curr_spell.id); end
-		-- curr_spell.c = extract_action_stats(curr_spell);
 
 		active_windows["spell_tooltip"] = { true, function(get_next_id)
 
-			local x_loc = x_loc or 120;
-			local y_loc = y_loc or 245;
 
 			local col_a = x_loc + 0;
 			local col_b = x_loc + 15;
@@ -1140,7 +1174,6 @@ function show_buy_spells_gui()
 				sorted = false;
 			end
 		else
-			-- if sort==0 then
 			if GuiButton(gui, get_next_id(), sort_x, 6, "Sort: Name") then
 				sort = 1;
 				sorted = false;
@@ -1184,7 +1217,6 @@ function show_buy_spells_gui()
 		end
 
 		GuiBeginScrollContainer(gui, get_next_id(), 30, 20, 450, 200, true, gui_margin_x, gui_margin_y);
-		spell_tooltip_id = "";
 		for _, curr_spell in ipairs(spells) do
 			local show_curr_spell = true;
 			if search_for~= "" and string.find(string.lower(GameTextGetTranslatedOrNot(curr_spell.name)), string.lower(search_for), 1, true)==nil then
@@ -1231,10 +1263,6 @@ function show_buy_spells_gui()
 			end
 		end
 
-		if spell_tooltip_open and spell_tooltip_id=="" then
-			hide_spell_tooltip_gui();
-		end
-
 		GuiEndScrollContainer(gui);
 		GuiColorNextWidgetEnum(gui, COLORS.Tip);
 		GuiText(gui, 165, 225, "PURCHASED SPELLS DROP AT YOUR FEET");
@@ -1262,6 +1290,7 @@ function show_lobby_gui()
 	hide_buy_spells_gui();
 	active_windows["menu"] = { false, function(get_next_id)
 		local any_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open;
+		spell_tooltip_id = "";
 		if any_open then
 			GuiLayoutBeginHorizontal(gui, 84, 11);
 			GuiText(gui, 0, 0, "Player: $ " .. tostring(get_player_money()));
@@ -1357,13 +1386,18 @@ function hide_all_gui()
 end
 
 function gui_update()
-	if InputIsKeyJustDown(Key_TAB) or InputIsKeyJustDown(Key_SPACE) or InputIsKeyJustDown(Key_ESCAPE) then
+	if InputIsKeyJustDown(Key_TAB) or InputIsKeyJustDown(Key_ESCAPE) then
 		hide_money_gui();
 		hide_research_wands_gui();
 		hide_research_spells_gui();
 		hide_buy_wands_gui();
 		hide_buy_spells_gui();
 	end
+
+	if spell_tooltip_open and spell_tooltip_id=="" then
+		hide_spell_tooltip_gui();
+	end
+
 
 	local submenu_open = money_open or research_wands_open or research_spells_open or buy_wands_open or buy_spells_open or profile_ui_open;
 	if submenu_open then

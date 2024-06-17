@@ -20,7 +20,10 @@ if actions_by_id__init_done==false then
 	---returns nothing, directly acts on actions_by_id array
 	---@param action_id string id of action to run
 	function get_action_metadata(action_id)
+		if type(action_id)=="table" and action_id.id~=nil then action_id = action_id.id; end
 		if type(action_id)~="string" then return; end
+
+		if actions_by_id[action_id].metadata~=nil and actions_by_id[action_id].c~=nil then return; end
 
 		reflecting = true; -- This is how we tell the game not to do the things, this redirects many of the action's calls to Reflection_RegisterProjectile() which allows us to extract data
 		metadata = {};

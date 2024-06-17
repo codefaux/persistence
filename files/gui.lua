@@ -515,7 +515,7 @@ function show_research_spells_gui()
 				GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 1, 1, 0, math.rad(0)); -- Icon
 				local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
 				if s_hover then
-					spell_tooltip_id = curr_spell;
+					spell_tooltip_id = curr_spell.id;
 					if not spell_tooltip_open then
 						show_spell_tooltip_gui(120, 285);
 					end
@@ -533,7 +533,7 @@ function show_research_spells_gui()
 					GuiImage(gui, get_next_id(), 36, 0 + line_pos, curr_spell.sprite, 0.5, 1, 0, math.rad(0)); -- Icon
 					local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
 					if s_hover then
-						spell_tooltip_id = curr_spell;
+						spell_tooltip_id = curr_spell.id;
 						if not spell_tooltip_open then
 							show_spell_tooltip_gui(120, 285);
 						end

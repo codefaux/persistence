@@ -1,4 +1,5 @@
----how to use for your own mod: drop this file into files\ and call it with dofile() -- NOT dofile_once() -- in init.lua OnWorldPostUpdate()
+---how to use for your own mod: add a credit to me (@codefaux on github) in your credits file or UI credits screen. drop this file into files\ and call it with dofile() -- NOT dofile_once() -- in init.lua OnWorldPostUpdate()
+
 
 ---only run function one time, but must init variable
 if actions_by_id__init_done==nil then actions_by_id__init_done=false; end

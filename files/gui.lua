@@ -1205,7 +1205,11 @@ function show_buy_spells_gui()
 				end
 				local type_x_offset = 40 + ( (type_nr==99 and 1 or ii) * 20);
 				if GuiImageButton(gui, get_next_id(), type_x_offset, 1, "", action_type_to_slot_sprite(type_nr)) then
-					active_filter = type_nr;
+					if active_filter~=type_nr then
+						active_filter = type_nr;
+					else
+						active_filter = 99;
+					end
 				end
 				GuiTooltip(gui, type_nr==99 and "ALL" or action_type_to_string(type_nr), "");
 				if type_nr==active_filter then

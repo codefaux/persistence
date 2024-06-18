@@ -3,6 +3,10 @@
 ---only run function one time, but must init variable
 if actions_by_id__init_done==nil then actions_by_id__init_done=false; end
 if actions_by_id__init_done==false then
+	---global fill-in for missing core function
+
+	math.sign = math.sign or function (x) if x<0 then return -1; else return 1; end; end
+
 	---variables and functions run/register/initialize only once
 	actions_by_id__init_done = true;
 	actions_bt_id__notify_when_finished = true;
@@ -18,8 +22,14 @@ if actions_by_id__init_done==false then
 	actions_by_id = actions_by_id or {};
 
 	---returns nothing, directly acts on actions_by_id array
-	---@param action_id string id of action to run
+	---@param action_id string|table id of action to run OR entire action
 	function get_action_metadata(action_id)
+		if type(action_id)=="table" and action_id.id~=nil then action_id = action_id.id; end ---if passed action, switch to action_id string instead
+		if type(action_id)~="string" then return; end ---if still not string, exit
+
+		if actions_by_id[action_id].metadata~=nil and actions_by_id[action_id].c~=nil then return; end ---ensure action has not been simulated prior
+
+		reflecting = true; -- This is how we tell the game not to do the things, this redirects many of the action's calls to Reflection_RegisterProjectile() which allows us to extract data
 		metadata = {};
 
 		---override Reflection_RegisterProjectile(xml) -in this context only-
@@ -103,9 +113,9 @@ if actions_by_id__init_done==false then
 				-- projectile_type = true,
 				-- damage_poison = true,
 				damage_game_effect_entities = true,
-				-- speed_min = true,
 				attach_to_parent_trigger = true,
-				-- speed_max = true,
+				speed_min = true,
+				speed_max = true,
 				on_death_gfx_leave_sprite = true,
 				ground_penetration_max_durability_to_destroy = true,
 				mLastFrameDamaged = true,
@@ -133,20 +143,22 @@ if actions_by_id__init_done==false then
 				-- direction_nonrandom_rad = true,
 				direction_random_rad = true
 			};
-
 			-- if metadata.projectiles[projectile_xml]~=nil then ---check if projectile data already exists
 			-- 	metadata.projectiles[projectile_xml].projectiles = metadata.projectiles[projectile_xml].projectiles + 1 ---data for this projectile_xml already exists, add one to count
 			-- else ---projectile doesn't exist, create it
-			local xml_entity_id = EntityLoad(projectile_xml, -20000, -20000); ---load projectile entity
-			if xml_entity_id~=nil and xml_entity_id~=0 then
-				local xml_component_pool = EntityGetAllComponents(xml_entity_id);
-				if xml_component_pool~=nil then
-					for _, xml_comp_id in pairs(xml_component_pool) do
-						if xml_comp_id~=nil and xml_comp_id~=0 then ---ensure component loaded properly
-							local xml_comp_name = ComponentGetTypeName(xml_comp_id);
-							if xml_comp_name=="ProjectileComponent" or xml_comp_name=="LightningComponent" or xml_comp_name=="ExplodeOnDamageComponent" or xml_comp_name=="ExplosionComponent" then
-								local xml_comp_field_pool = ComponentGetMembers(xml_comp_id);
-								if xml_comp_field_pool~=nil then
+			local xml_entity_id = EntityCreateNew(); ---create new entity (not using EntityLoad intentionally)
+			EntityApplyTransform(xml_entity_id, -2000, -2000);  ---move new entity really far away
+			EntityLoadToEntity(projectile_xml, xml_entity_id); ---load projectile entity with EntityLoadToEntity because "Does not load tags and other stuff." is better for smooth gameplay
+			if xml_entity_id~=nil and xml_entity_id~=0 then ---ensure loaded entity is 'valid'
+				local xml_component_pool = EntityGetAllComponents(xml_entity_id); ---gather components into pool for inspection
+				if xml_component_pool~=nil then ---if pool is valid
+					for _, xml_comp_id in pairs(xml_component_pool) do ---iterate pool for component ids
+						if xml_comp_id~=nil and xml_comp_id~=0 then ---ensure component is valid
+							EntitySetComponentIsEnabled(xml_entity_id, xml_comp_id, false); ---disable component for smoother gameplay
+							local xml_comp_name = ComponentGetTypeName(xml_comp_id); ---store component name, partially for reflection/debugging
+							if xml_comp_name=="ProjectileComponent" or xml_comp_name=="LightningComponent" or xml_comp_name=="ExplodeOnDamageComponent" or xml_comp_name=="ExplosionComponent" then ---only iterate on relevant components
+								local xml_comp_field_pool = ComponentGetMembers(xml_comp_id); ---gather components to pool for inspection
+								if xml_comp_field_pool~=nil then ---if pool is valid
 									metadata[projectile_xml] = metadata[projectile_xml] or {}; ---create empty table for incoming data if doesn't exist
 									metadata[projectile_xml][xml_comp_name] = metadata[projectile_xml][xml_comp_name] or {}; ---create empty table for incoming data if doesn't exist
 									for xml_comp_field, _ in pairs(xml_comp_field_pool) do ---iterate thru component members if they exist
@@ -155,12 +167,12 @@ if actions_by_id__init_done==false then
 										elseif xml_comp_field=="damage" then ---specific processing for "damage"
 											metadata[projectile_xml][xml_comp_name]["damage_basic"] = 25 * (ComponentGetValue2(xml_comp_id, xml_comp_field) or 0);
 										elseif xml_comp_field=="damage_by_type" then ---specific processing for "damage_by_type"
-											local dmg_type_pool = ComponentObjectGetMembers(xml_comp_id, xml_comp_field);
-											if dmg_type_pool~=nil then
+											local dmg_type_pool = ComponentObjectGetMembers(xml_comp_id, xml_comp_field); ---gather damage_by_type members to pool for inspection
+											if dmg_type_pool~=nil then ---if pool is valid
 												for dmg_type, _ in pairs(dmg_type_pool) do ---break open damage_by_type table
-													metadata[projectile_xml][xml_comp_name]["damage_" .. dmg_type] = 25 * (ComponentObjectGetValue2(xml_comp_id, xml_comp_field, dmg_type) or 0); ---store it in singles
+													metadata[projectile_xml][xml_comp_name]["damage_" .. dmg_type] = 25 * (ComponentObjectGetValue2(xml_comp_id, xml_comp_field, dmg_type) or 0); ---store in singles
 												end ---for dmg_type in damage_by_type
-											end
+											end--if damage_type_pool~-nil
 										elseif xml_comp_field=="config_explosion" then ---specific processing for "config_explosion"
 											metadata[projectile_xml][xml_comp_name]["damage_explosion"] = 25 * (ComponentObjectGetValue2(xml_comp_id, xml_comp_field, "damage") or 0); ---stored separately, standardise
 											metadata[projectile_xml][xml_comp_name]["explosion_radius"] = 25 * (ComponentObjectGetValue2(xml_comp_id, xml_comp_field, "explosion_radius") or 0); ---stored separately, standardise
@@ -168,18 +180,52 @@ if actions_by_id__init_done==false then
 											metadata[projectile_xml][xml_comp_name]["lifetime"] = ComponentGetValue2(xml_comp_id, xml_comp_field); ---save with more typical name
 										elseif xml_comp_field=="direction_random_rad" then ---specific processing for "direction_random_rad"
 											metadata[projectile_xml][xml_comp_name]["spread_degrees"] = math.deg(ComponentGetValue2(xml_comp_id, xml_comp_field));
+										elseif xml_comp_field=="speed_min" then ---specific processing for "speed_min"
+											local in_speed = ComponentGetValue2(xml_comp_id, xml_comp_field); ---read speed_min value
+											metadata[projectile_xml][xml_comp_name]["speed_min"] = in_speed; ---save speed_min value
+											metadata[projectile_xml][xml_comp_name]["speed"] = (metadata[projectile_xml][xml_comp_name]["speed"]==nil) and in_speed or ((metadata[projectile_xml][xml_comp_name]["speed"] + in_speed) / 2); ---if speed exists, average against it. Else, store speed_min as speed.
+										elseif xml_comp_field=="speed_max" then ---specific processing for "speed_max"
+											local in_speed = ComponentGetValue2(xml_comp_id, xml_comp_field); -- read speed_max value
+											metadata[projectile_xml][xml_comp_name]["speed_max"] = in_speed; -- save speed_max value
+											metadata[projectile_xml][xml_comp_name]["speed"] = (metadata[projectile_xml][xml_comp_name]["speed"]==nil) and in_speed or ((metadata[projectile_xml][xml_comp_name]["speed"] + in_speed) / 2); ---if speed exists, average against it. Else, store speed_max as speed.
 										end ---if skip_or_modify_hash[proj_member] block
 									end ---for proj_member in ComponentGetMembers(proj_comp); ---iterate thru component members if they exist
 									metadata[projectile_xml][xml_comp_name].projectiles = 1; ---start with one projectile
-								end
-							end
+								end ---if xml_comp_field_pool~=nil
+							end ---if xml_comp_name=={relevant values}
 							EntityRemoveComponent(xml_entity_id, xml_comp_id); ---remove the projectile component before we kill it to avoid issues
-						end
-					end
-				end
+						end ---if xml_comp_id!=nil|0
+					end ---for xml_comp_id in xml_component_pool[]
+				end ---if xml_component_pool~=nil
 				EntityKill(xml_entity_id); ---kill the projectile entity since we're done with it
-			end
+			end ---if xml_entity_id~=nil|0
 		end -- function override Reflection_RegisterProjectile();
+
+		---KEEP for later stubbing if required;
+		-- function draw_actions(_, _) end
+		-- function add_projectile(x) Reflection_RegisterProjectile(x); end
+		-- function add_projectile_trigger_hit_world(x, _) Reflection_RegisterProjectile(x); end
+		-- function add_projectile_trigger_timer(x, _, _) Reflection_RegisterProjectile(x); end
+		-- function add_projectile_trigger_death(x, _) Reflection_RegisterProjectile(x); end
+		-- function check_recursion(_, x) return x or 0; end
+		-- function move_discarded_to_deck() end
+		-- function order_deck() end
+		-- function StartReload() end
+		-- -- function EntityGetWithTag(_) return {} end
+		-- function GameGetFrameNum() return 5431289; end
+		-- function SetRandomSeed() end
+		-- function Random() return 1; end
+		-- -- function GetUpdatedEntityID() return 0; end
+		-- -- function EntityGetComponent(_) return {}; end
+		-- -- function EntityGetFirstComponent(_, _) return {}; end
+		-- -- function ComponentGetValue2(_) return 0; end
+		-- -- function EntityGetTransform(_) return {}; end
+		-- -- function EntityGetAllChildren(_) return {}; end
+		-- -- function EntityGetInRadiusWithTag(_, _) return {}; end
+		-- -- function GlobalsGetValue(_) return 0; end
+		-- function GlobalsSetValue(_) end
+		-- function find_the_wand_held() return nil; end
+		-- -- function EntityGetFirstComponentIncludingDisabled(_) end
 
 		---strip values from c which we don't care about, modify others inline, return updated c table
 		---@param in_c table incoming c table
@@ -258,17 +304,17 @@ if actions_by_id__init_done==false then
 			for membername, _ in pairs(in_c) do ---iterate through members in incoming table
 				if skip_or_modify_hash[membername]~=true then ---check against skip_hash to only store desired info
 					out_c[membername] = in_c[membername]; ---copy member to output table
-				elseif	membername=="damage_electricity_add" or
+				elseif	membername=="damage_electricity_add" or ---specific processing for "damage_[...]_add"
 								membername=="damage_melee_add" or
 								membername=="damage_explosion_add" or
 								membername=="damage_projectile_add" or
 								membername=="damage_fire_add" then
-					out_c[membername] = in_c[membername] * 25;
-				elseif 	membername=="reload_time" or
+					out_c[membername] = in_c[membername] * 25; ---engine shows value*25 for damages/health
+				elseif 	membername=="reload_time" or ---specific processing for "reload_time" | "fire_rate_wait"
 								membername=="fire_rate_wait" then
-					out_c[membername] = in_c[membername] / 60;
+					out_c[membername] = in_c[membername] / 60; ---engine shows times in 60th of second
 				elseif  membername=="direction_random_rad" then ---specific processing for "direction_random_rad"
-					out_c["spread_degrees"] = math.deg(in_c[membername]);
+					out_c["spread_degrees"] = math.deg(in_c[membername]); ---engine stores angles in radians
 				end ---if skip_hash[membername];
 			end ---for membername in in_ic
 			return out_c; ---return data table
@@ -284,9 +330,7 @@ if actions_by_id__init_done==false then
 		current_reload_time = 0; -- clear current_reload_time so we only get one action()
 		reset_modifiers( c ); -- prepare c table structure and initialize for relative operations
 		ConfigGunShotEffects_Init( shot_effects ); -- prepare shot_effects table structure and initialize for relative operations
-		reflecting = true; -- This is how we tell the game not to do the things, this redirects many of the action's calls to Reflection_RegisterProjectile() which allows us to extract data
 		actions_by_id[action_id].action(); -- call the action() function
-		reflecting = false; -- Return to normal. Likely not necessary but....
 		actions_by_id[action_id] = actions_by_id[action_id] or {}; -- new table if not already present
 		actions_by_id[action_id].c = parse_c(c); -- strip c before storing its data
 		actions_by_id[action_id].c.draw_actions = draws; -- add a few flags
@@ -294,6 +338,7 @@ if actions_by_id__init_done==false then
 		actions_by_id[action_id].c.recoil_knockback = shot_effects.recoil_knockback;
 		actions_by_id[action_id].metadata = metadata;
 		c = _c; -- restore the global c context
+		reflecting = false; -- Return to normal. Likely not necessary but....
 	end -- function get_action_metadata(action_id)
 
 	---intended to be run when new actions are found, typically by code below -- feeds information directly into actions_by_id
@@ -307,7 +352,7 @@ if actions_by_id__init_done==false then
 			if actions_by_id[curr_action.id]==nil and curr_action.id~=nil then ---only process non-nil entries
 				action_count = (action_count or 0) + 1; ---add to the action count, start at zero if un-initialized
 				actions_by_id[curr_action.id] = curr_action; ---store current action basic data
-				get_action_metadata(curr_action.id); ---process action to add metadata
+				-- get_action_metadata(curr_action.id); ---process action to add metadata
 			end ---if actions_by_id[curr_action.id]==nil and curr_action.id~=nil;
 			if action_count >= target_cnt then break; end
 		end ---for curr_action in actions;
@@ -326,7 +371,185 @@ if actions_by_id__init_done==false then
 		else
 			 return tostring(o)
 		end
- end ---function table_dump(0);
+	end ---function table_dump(0);
+
+	---convert numeric action type to translatable string
+	---@param action_type number
+	---@return string
+	function action_type_to_string(action_type)
+		if action_type == ACTION_TYPE_PROJECTILE then
+			return "$inventory_actiontype_projectile";
+		end
+		if action_type == ACTION_TYPE_STATIC_PROJECTILE then
+			return "$inventory_actiontype_staticprojectile";
+		end
+		if action_type == ACTION_TYPE_MODIFIER then
+			return "$inventory_actiontype_modifier";
+		end
+		if action_type == ACTION_TYPE_DRAW_MANY then
+			return "$inventory_actiontype_drawmany";
+		end
+		if action_type == ACTION_TYPE_MATERIAL then
+			return "$inventory_actiontype_material";
+		end
+		if action_type == ACTION_TYPE_OTHER then
+			return "$inventory_actiontype_other";
+		end
+		if action_type == ACTION_TYPE_UTILITY then
+			return "$inventory_actiontype_utility";
+		end
+		if action_type == ACTION_TYPE_PASSIVE then
+			return "$inventory_actiontype_passive";
+		end
+		return "";
+	end
+
+	---convert numeric action type to slot sprite
+	---@param action_type number
+	---@return string
+	function action_type_to_slot_sprite(action_type)
+		if action_type == ACTION_TYPE_DRAW_MANY then
+			return "data/ui_gfx/inventory/item_bg_draw_many.png";
+		end
+		if action_type == ACTION_TYPE_MATERIAL then
+			return "data/ui_gfx/inventory/item_bg_material.png";
+		end
+		if action_type == ACTION_TYPE_MODIFIER then
+			return "data/ui_gfx/inventory/item_bg_modifier.png";
+		end
+		if action_type == ACTION_TYPE_OTHER then
+			return "data/ui_gfx/inventory/item_bg_other.png";
+		end
+		if action_type == ACTION_TYPE_PASSIVE then
+			return "data/ui_gfx/inventory/item_bg_passive.png";
+		end
+		if action_type == ACTION_TYPE_PROJECTILE then
+			return "data/ui_gfx/inventory/item_bg_projectile.png";
+		end
+		if action_type == ACTION_TYPE_STATIC_PROJECTILE then
+			return "data/ui_gfx/inventory/item_bg_static_projectile.png";
+		end
+		if action_type == ACTION_TYPE_UTILITY then
+			return "data/ui_gfx/inventory/item_bg_utility.png";
+		end
+		return "data/ui_gfx/inventory/hover_info_empty_slot.png";
+	end
+
+	---these are for column 3, show_condition
+	__show_always = function(_) return true; end ---always show datum
+	__show_nz = function(value) return (value~=nil and value~=0) and true or false; end --show non-zero datum
+	__show_gz = function(value) return (value~=nil and value>0) and true or false; end --show greater than zero datum
+	__show_many = function(value) return (value~=nil and value>1) and true or false; end --show daum more than one
+
+	__val = function(value) return value; end ---return value unmodified
+	__trans = function(value) return GameTextGetTranslatedOrNot(value); end ---pass value to game translation table
+	__yesno = function(value) return value and "$menu_yes" or "$menu_no"; end ---treat value as boolean, return translatable yes/no
+	__time = function(value) return GameTextGet("$inventory_seconds", string.format("%1.2f", value)); end ---format value as locale-translated time
+	__deg = function(value) return GameTextGet("$inventory_degrees", string.format("%d", value)); end ---format value as locale-translated "degrees"
+	__pct = function(value) return GameTextGet("$menu_slider_percentage", value); end	---format value as locale-translated "percentage"
+	__round = function(value) return math.sign(value) * math.floor(math.abs(value) + 0.49999999999999994); end ---round value via math shortcut, supporting float impercision
+	__type = function(value) return action_type_to_string(value); end ---return action type as string, ie "Static Projectile"
+
+	---TODO: Learn how to properly annotate this
+	local spell_tooltip_stats_format =
+	{ ---membername_pattern 		=	{	icon, 																										gametext,															show_cond(value),			show_value_gametext(value), } -- expand w/ "is_extra" for "extra-data" tooltips/sorting/etc
+		name											=	{ nil,																											nil,																	__show_always,				__trans },
+		description								=	{ nil,																											nil,																	__show_always,				__trans },
+		sprite										=	{ __val,																										nil,																	__show_always,				nil },
+		type											= { "data/ui_gfx/inventory/icon_action_type.png",							"$inventory_actiontype",							__show_always,				__type },
+		draw_actions 							=	{ "data/ui_gfx/inventory/icon_gun_actions_per_round.png",		"$inventory_actiontype_drawmany",			__show_many,					__val },
+		max_uses 									=	{ "data/ui_gfx/inventory/icon_action_max_uses.png",					"$inventory_usesremaining",						__show_nz,						__val },
+		mana											=	{ "data/ui_gfx/inventory/icon_mana_drain.png",							"$inventory_manadrain",								__show_nz,		 				__val },
+		fire_rate_wait						=	{ "data/ui_gfx/inventory/icon_gun_reload_time.png",					"$inventory_castdelay",								__show_always, 				__time },
+		reload_time								=	{ "data/ui_gfx/inventory/icon_reload_time.png",							"$inventory_rechargetime",						__show_nz, 						__time },
+		damage_projectile_add			=	{ "data/ui_gfx/inventory/icon_damage_projectile.png",				"$inventory_damage",									__show_nz,						__round },
+		damage_basic							=	{ "data/ui_gfx/inventory/icon_damage_projectile.png",				"$inventory_mod_damage",							__show_nz,						__round },
+		damage_slice							=	{ "data/ui_gfx/inventory/icon_damage_slice.png",						"$inventory_dmg_slice",								__show_nz,						__round },
+		damage_melee_add					=	{ "data/ui_gfx/inventory/icon_damage_melee.png",						"$inventory_dmg_melee",								__show_nz,						__round	},
+		damage_melee							=	{ "data/ui_gfx/inventory/icon_damage_melee.png",						"$inventory_dmg_melee",								__show_nz,						__round },
+		damage_electricity_add		=	{ "data/ui_gfx/inventory/icon_damage_electricity.png",			"$inventory_mod_damage_electric",			__show_nz,						__round },
+		damage_electricity				=	{ "data/ui_gfx/inventory/icon_damage_electricity.png",			"$inventory_mod_damage_electric",			__show_nz,						__round },
+		damage_fire_add	 					=	{ "data/ui_gfx/inventory/icon_damage_fire.png",							"$inventory_dmg_fire",								__show_nz,						__round },
+		damage_fire								=	{ "data/ui_gfx/inventory/icon_damage_fire.png",							"$inventory_dmg_fire",								__show_nz,						__round },
+		damage_explosion_add			=	{ "data/ui_gfx/inventory/icon_damage_explosion.png",				"$inventory_dmg_explosion",						__show_nz,						__round },
+		explosion_radius					=	{ "data/ui_gfx/inventory/icon_explosion_radius.png",				"$inventory_explosion_radius",				__show_nz,						__val },
+		damage_explosion					=	{ "data/ui_gfx/inventory/icon_damage_explosion.png",				"$inventory_dmg_explosion",						__show_nz,						__round },
+		damage_curse							=	{ "data/ui_gfx/inventory/icon_damage_curse.png",						"$inventory_dmg_curse",								__show_nz,						__round },
+		damage_ice								=	{ "data/ui_gfx/inventory/icon_damage_ice.png" ,							"$inventory_dmg_ice",									__show_nz,						__round },
+		damage_drill							=	{ "data/ui_gfx/inventory/icon_damage_drill.png",						"$inventory_dmg_drill",								__show_nz,						__round },
+		damage_poison							=	{ "data/ui_gfx/inventory/icon_damage_curse.png",						"$inventory_dmg_poison",							__show_nz,						__round },
+		damage_healing						=	{ "data/ui_gfx/inventory/icon_damage_healing.png",					"$inventory_dmg_healing",							__show_nz,						__round },
+		damage_radioactive				=	{ "data/ui_gfx/inventory/icon_damage_curse.png",						"$inventory_dmg_radioactive",					__show_nz,						__round },
+		-- speed_multiplier					=	{ "data/ui_gfx/inventory/icon_speed_multiplier.png",				"$inventory_speed",										__show_many,		 				__val },
+		speed											= { "data/ui_gfx/inventory/icon_speed_multiplier.png",				"$inventory_speed",										__show_nz,						__round },
+		damage_critical_chance		=	{ "data/ui_gfx/inventory/icon_damage_critical_chance.png",	"$inventory_mod_critchance",					__show_nz,						__pct },
+		projectiles								=	{ "data/ui_gfx/inventory/icon_gun_actions_per_round.png",		"$inventory_type_projectile",					__show_many,					__val	},
+		spread_degrees						=	{ "data/ui_gfx/inventory/icon_spread_degrees.png",					"$inventory_spread",									__show_nz,						__deg },
+		-- speed_min									= { "data/ui_gfx/inventory/icon_speed_multiplier.png",				"$inventory_speed",										__show_nz,						__round },
+		-- speed_max									= { "data/ui_gfx/inventory/icon_speed_multiplier.png",				"$inventory_speed",										__show_nz,						__round },
+	}
+
+	---return formatted action structure for parsing in gui routines
+	---@param in_action table|string action or action_id to be processed
+	---@return table|nil
+	function get_action_struct(in_action)
+		if type(in_action)=="string" and actions_by_id[in_action]~=nil then in_action = actions_by_id[in_action]; end ---if passed action, switch to action_id string instead
+		if type(in_action)~="table" then return; end ---if still not string, exit
+
+		if actions_by_id[in_action].metadata~=nil and actions_by_id[in_action].c~=nil then return; end ---ensure action has not been simulated prior
+
+		get_action_metadata(in_action.id);
+
+		local struct_data = {};
+		local struct_index = 0;
+		local source_pool = {in_action, in_action.c };
+		for _, projectile_component_pool in pairs(in_action.metadata) do
+			for _, projectile_component_member_pool in pairs(projectile_component_pool) do
+				source_pool[#source_pool+1] = projectile_component_member_pool;
+			end
+		end
+
+		for _, member_pool in ipairs(source_pool) do
+			for member_name, member_value in pairs(member_pool) do
+				for datum_name, datum_formatting in pairs(spell_tooltip_stats_format) do
+					if member_name==datum_name and (datum_formatting[3](member_value)==true) then
+						local thismember_data = {}
+						if datum_formatting[1]~=nil then
+							if type(datum_formatting[1])=="function" then
+								thismember_data.icon = datum_formatting[1](member_value);
+							else
+								thismember_data.icon = datum_formatting[1];
+								thismember_data.label = GameTextGetTranslatedOrNot(datum_formatting[2]);
+							end
+						end
+						if datum_formatting[4]~=nil then
+							thismember_data.value = datum_formatting[4](member_value);
+						end
+						if thismember_data["icon"]~=nil or thismember_data["value"]~=nil then
+							struct_index = struct_index + 1;
+							thismember_data.name = member_name;
+							struct_data[struct_index] = thismember_data;
+						end
+					end
+				end
+			end
+		end
+		return struct_data;
+	end
+
+	function debug_print_action(debug_action)
+		local action_struct_pool = get_action_struct(debug_action);
+		if action_struct_pool==nil then return; end
+
+		for action_member, action_struct in pairs(action_struct_pool) do
+			print("member: " .. action_member);
+			print("- icon: " .. (action_struct.icon or " "));
+			print("- label: " .. (action_struct.label or " "));
+			print("- value: " .. (action_struct.value or " "));
+			print(" ");
+		end
+	end -- function debug_print_action();
+
 end -- if initialized
 
 ---intended to be run every world update w/ minimal impact
@@ -341,54 +564,6 @@ elseif actions_bt_id__notify_when_finished==true then
 
 	print("table = " .. table_dump(debug_action));
 	print("action: " .. GameTextGetTranslatedOrNot(debug_action.name));
-	local action_datum_pool = { "mana", "price", "type", "name", "description", "spread_degrees", "damage.*", "speed.*" }
-	for action_member, action_value in pairs(debug_action) do
-		print("- members: " .. action_member);
-		for _, datum_pattern in ipairs(action_datum_pool) do
-			if string.find(action_member, datum_pattern)~=nil and type(action_value)~="boolean" then
-				if type(action_value)=="boolean" then
-					print(".. " .. (action_value and "true" or "false") )
-				else
-					print(" .. " .. action_value);
-				end
-			end
-		end
-	end
 
-	print "c:"
-	local c_datum_pool = { "mana", "price", "action_name", "action_type", "spread_degrees", "damage.*", "speed.*" }
-	for c_member, c_value in pairs(debug_action.c) do
-		print("- members: " .. c_member);
-		for _, datum_pattern in ipairs(c_datum_pool) do
-			if string.find(c_member, datum_pattern)~=nil then
-				if type(c_value)=="boolean" then
-					print(".. " .. (c_value and "true" or "false") )
-				else
-					print(" .. " .. c_value);
-				end
-			end
-		end
-	end
-
-
-	local datum_pool = { "spread_degrees", "damage.*", "speed.*", "projectiles" }
-	print("meta:");
-	for curr_xml, xml_member_pool in pairs(debug_action.metadata) do
-		print("- xml: " .. curr_xml);
-		for xml_component_name, xml_component_value in pairs(xml_member_pool) do
-			print("-- component: " .. xml_component_name);
-			for xml_member, member_value in pairs(xml_component_value) do
-				print("--- members: " .. xml_member);
-				for _, datum_pattern in ipairs(datum_pool) do
-					if string.find(xml_member, datum_pattern)~=nil and type(member_value)~="boolean" then
-						if type(member_value)=="boolean" then
-							print(".. " .. (member_value and "true" or "false") )
-						else
-							print(" .. " .. member_value);
-						end
-					end
-				end
-			end
-		end
-	end
+	debug_print_action(debug_action);
 end

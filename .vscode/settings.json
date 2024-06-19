@@ -1,5 +1,9 @@
 {
   "Lua.diagnostics.disable": [
     "lowercase-global"
+  ],
+  "Lua.diagnostics.globals": [
+    "mod_dir",
+    "persistence_active"
   ]
 }

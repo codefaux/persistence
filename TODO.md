@@ -9,13 +9,12 @@
 -- TODO : Can't research spells when player has "unlimited spells" perk
 -- TODO : Spells bought while "unlimited spells" perk have count
 -- TODO : Mod order fixes?
-
+-- TODO : Mod setting for "allow research spells inside wands"
 -- TODO : check proximity for wands/spells, icon lower left if new
 --- store: spell tag: card_action -- component "ItemActionComponent", member action_id
 --- roaming: wand tag: item, wand, child entities: card_action, component "ItemActionComponent", members action_id
                         component "AbilityComponent" for stats, member use_gun_script, mana_max, mana_charge_speed, object gun_config ConfigGun, actions_per_round, shuffle_deck_when_empty, reload_time, deck_capacity
                         component "SpriteComponent", image_file
-
 
 -- nearby entities check rearchable, ui icon?
 
@@ -91,3 +90,49 @@
 -- 	function GlobalsSetValue(_) end
 -- 	function find_the_wand_held() return nil; end
 -- 	-- function EntityGetFirstComponentIncludingDisabled(_) end
+
+
+---Lobby detection uses lobby collider
+---workshop detection reads player/hitbox location manually per frame
+---add persistence lua to persistence_workshop entities?
+---add persistence lua to *all* workshop entities?
+
+
+-- System flow;
+OnWorldPostUpdate;
+-- dofile actions_by_id
+-- load lobby collider entity if not exist, store globally
+-- exit if no player or player is dead
+-- if player entity's TeleportComponent exists and coords are nonzero, set coords zero and disable
+-- if player post-spawn routine not run, run it ----BELOW
+-- if loaded profile invalid or zero, exit
+-- find and enable lobby collider entity components
+-- if gui_update() exists, run it
+-- if loaded profile is nil, exit
+
+-- populate workshop entity pool, store count
+-- iterate workshop list, if persistence_workshop is invalid or "distance" to nearest persistence_workshop>10 load new persistence_workshop and set coords to match.
+-- if mod setting persistence.reusable_holy_mountain then add persistence_list to workshop_list
+-- set if player was in workshop before
+-- check player coords for hitbox trigger in workshop list
+-- set player in workshop now
+
+-- show teleport ui if in workshop now but not before
+
+-- manage "in valid lobby area" with global lobby_collider_triggered, lobby_collider_triggered_edge, unset _edge, tag/untag as present, trigger/close guis
+
+
+OnPostPlayerSpawned; -- not engine event
+-- dofile_once data_store.lua, gui.lua
+-- if first few frames, set_run_created_with_mod -- intent; tag mod as active for new game, prevent running if mod added mid-game
+
+-- if selected_profile_id==nil,
+--- load or create default profile if set in modsettings, or play-without-mod -- intent, runi start with default slot
+--- if default is manual, show profile selector gui -- intent, run start with manual
+-- else if not zero, load profile -- intent, reloading mod during run
+
+OnPlayerDied;
+-- hide gui elements
+-- ensure mod is running
+-- save money to stash
+GamePrintImportant death message

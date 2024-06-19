@@ -497,7 +497,7 @@ if actions_by_id__init_done==false then
 		if type(in_action)=="string" and actions_by_id[in_action]~=nil then in_action = actions_by_id[in_action]; end ---if passed action, switch to action_id string instead
 		if type(in_action)~="table" then return; end ---if still not string, exit
 
-		if actions_by_id[in_action].metadata~=nil and actions_by_id[in_action].c~=nil then return; end ---ensure action has not been simulated prior
+		if actions_by_id[in_action]~=nil and actions_by_id[in_action].metadata~=nil and actions_by_id[in_action].c~=nil then return; end ---ensure action has not been simulated prior
 
 		get_action_metadata(in_action.id);
 

@@ -1,8 +1,8 @@
 <Entity name="persistence_lobby" tags="teleportable_NOT">
 	<CollisionTriggerComponent
-		width="100"
-		height="100"
-		radius="100"
+		width="150"
+		height="150"
+		radius="300"
 		destroy_this_entity_when_triggered="0"
 		required_tag="player_unit"
 		_enabled="1">

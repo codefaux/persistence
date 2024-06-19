@@ -5,8 +5,9 @@
 if actions_by_id__init_done==nil then actions_by_id__init_done=false; end
 if actions_by_id__init_done==false then
 	---global fill-in for missing core function
-
 	math.sign = math.sign or function (x) if x<0 then return -1; else return 1; end; end
+
+	actions = actions or {};
 
 	---variables and functions run/register/initialize only once
 	actions_by_id__init_done = true;
@@ -566,5 +567,5 @@ elseif actions_bt_id__notify_when_finished==true then
 	print("table = " .. table_dump(debug_action));
 	print("action: " .. GameTextGetTranslatedOrNot(debug_action.name));
 
-	debug_print_action(debug_action);
+	-- debug_print_action(debug_action);
 end

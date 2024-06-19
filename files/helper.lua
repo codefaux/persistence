@@ -72,9 +72,7 @@ function read_wand_entity(entity_id)
 
 	local comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent");
 
-	if comp == nil then
-		return wand_data;
-	end
+	if comp == nil then return {}; end
 
 	wand_data["shuffle"] = ComponentObjectGetValue2(comp, "gun_config", "shuffle_deck_when_empty") == 1 and true or false;
 	wand_data["spells_per_cast"] = ComponentObjectGetValue2(comp, "gun_config", "actions_per_round");
@@ -94,7 +92,7 @@ function read_wand_entity(entity_id)
 			local item_action_comp = EntityGetFirstComponentIncludingDisabled(child_id, "ItemActionComponent");
 			if item_action_comp ~= nil and item_action_comp ~= 0 then
 				local action_id = ComponentGetValue2(item_action_comp, "action_id");
-				if ComponentGetValue2(EntityGetFirstComponentIncludingDisabled(child_id, "ItemComponent"), "permanently_attached") == true then
+				if ComponentGetValue2(EntityGetFirstComponentIncludingDisabled(child_id, "ItemComponent") or 0, "permanently_attached") == true then
 					table.insert(wand_data["always_cast_spells"], action_id);
 				else
 					table.insert(wand_data["spells"], action_id);
@@ -107,20 +105,16 @@ function read_wand_entity(entity_id)
 end
 
 function get_spell_entity_action_id(entity_id)
-	return ComponentGetValue2( EntityGetFirstComponentIncludingDisabled(entity_id, "ItemActionComponent"), "action_id");
+	return ComponentGetValue2( EntityGetFirstComponentIncludingDisabled(entity_id, "ItemActionComponent") or 0, "action_id");
 end
 
 function delete_wand_entity(entity_id)
-	if not EntityHasTag(entity_id, "wand") then
-		return;
-	end
+	if not EntityHasTag(entity_id, "wand") then return; end
 	EntityKill(entity_id);
 end
 
 function delete_spell_entity(entity_id)
-	if not EntityHasTag(entity_id, "card_action") then
-		return;
-	end
+	if not EntityHasTag(entity_id, "card_action") then return; end
 	EntityKill(entity_id);
 end
 
@@ -146,18 +140,15 @@ end
 
 function create_wand(wand_data)
 	local price = create_wand_price(wand_data);
-	if get_player_money() < price then
-		return false;
-	end
+	if get_player_money() < price then return false; end
 
-	local x, y = EntityGetTransform(get_player_entity_id());
-	local entity_id = EntityLoad("mods/persistence/files/wand_empty.xml", x, y);
-	local ability_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent");
+	local x, y = EntityGetTransform(player_e_id);
+	local entity_id = EntityLoad(mod_dir .. "files/wand_empty.xml", x, y);
+	local ability_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent") or 0;
+
 	local wand = wand_type_to_base_wand(wand_data["wand_type"]);
 
-	if wand == nil then
-		return false;
-	end
+	if wand==nil then return false; end
 
 	ComponentSetValue2(ability_comp, "ui_name", wand.name);
 	ComponentObjectSetValue2(ability_comp, "gun_config", "shuffle_deck_when_empty", wand_data["shuffle"] and true or false);
@@ -188,11 +179,9 @@ end
 
 function create_spell(action_id)
 	local price = create_spell_price(action_id);
-	if get_player_money() < price then
-		return false;
-	end
+	if get_player_money() < price then return false; end
 
-	local x, y = EntityGetTransform(get_player_entity_id());
+	local x, y = EntityGetTransform(player_e_id);
 	CreateItemActionEntity(action_id, x, y);
 
 	set_player_money(get_player_money() - price);
@@ -202,14 +191,12 @@ end
 function get_player_wands()
 	local wands = {};
 	local inv_quick = EntityGetWithName("inventory_quick");
-	if inv_quick == nil then
-		return wands;
-	end
+	if inv_quick == nil then return {}; end
 	local inventory_quick_childs = EntityGetAllChildren(inv_quick);
 	if inventory_quick_childs ~=nil then
 		for _, item in ipairs(inventory_quick_childs) do
 			if EntityHasTag(item, "wand") then
-				local inventory_comp = EntityGetFirstComponentIncludingDisabled(item, "ItemComponent");
+				local inventory_comp = EntityGetFirstComponentIncludingDisabled(item, "ItemComponent") or 0;
 				local x, _ = ComponentGetValue2(inventory_comp, "inventory_slot");
 				wands[x] = item;
 			end
@@ -220,9 +207,7 @@ end
 
 function get_player_inv_spells()
 	local spells = {};
-	if EntityGetWithName("inventory_full") == nil then
-		return spells;
-	end
+	if EntityGetWithName("inventory_full") == nil then return {}; end
 	local inventory_full_childs = EntityGetAllChildren(EntityGetWithName("inventory_full"));
 	if inventory_full_childs ~=nil then
 		for _, item in ipairs(inventory_full_childs) do
@@ -232,66 +217,30 @@ function get_player_inv_spells()
 	return spells;
 end
 
-function pad_number(number, length)
-	local output = tostring(number);
-	for i = 1, length - #output do
-		output = " " .. output;
-	end
-	return number;
-end
-
--- function get_player_entity_id()
--- 	return EntityGetWithTag("player_unit")[1];
--- end
-
 function get_world_state_entity_id()
 	return EntityGetWithTag("world_state")[1];
 end
 
 function get_player_stats_component()
-	local world_state_children = EntityGetAllChildren(get_world_state_entity_id());
-	if world_state_children ~= nil then
-		for _, w_s_child_id in ipairs(world_state_children) do
-			local player_stats_comp = EntityGetFirstComponentIncludingDisabled(w_s_child_id, "PlayerStatsComponent");
-			if player_stats_comp ~= nil and player_stats_comp ~= 0 then
-				return player_stats_comp;
-			end
-		end
+	for _, w_s_child_id in ipairs(EntityGetAllChildren(get_world_state_entity_id()) or {}) do
+		if w_s_child_id~=0 then return EntityGetFirstComponentIncludingDisabled(w_s_child_id, "PlayerStatsComponent"); end
 	end
 end
 
 function get_player_gamestats_component()
-	local gamestats_stats_comp = EntityGetFirstComponentIncludingDisabled(get_player_entity_id(), "GameStatsComponent");
-	if gamestats_stats_comp ~= nil and gamestats_stats_comp ~= 0 then
-		return gamestats_stats_comp;
-	end
-end
-
-function get_wallet()
-	return EntityGetFirstComponentIncludingDisabled(get_player_entity_id(), "WalletComponent");
+	return EntityGetFirstComponentIncludingDisabled(player_e_id, "GameStatsComponent");
 end
 
 function get_inventory_gui()
-	return EntityGetFirstComponentIncludingDisabled(get_player_entity_id(), "InventoryGuiComponent");
+	return EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent");
 end
 
 function get_inventory2()
-	return EntityGetFirstComponentIncludingDisabled(get_player_entity_id(), "Inventory2Component");
+	return EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component");
 end
 
 function get_controls_component()
-	return EntityGetFirstComponentIncludingDisabled(get_player_entity_id(), "ControlsComponent");
-end
-
-function enable_edit_wands_in_lobby()
-	EntityAddChild(get_player_entity_id(), EntityLoad("mods/persistence/files/edit_wands_in_lobby.xml", 0, 0));
-end
-
-function disable_edit_wands_in_lobby()
-	local entity_id = EntityGetWithName("persistence_edit_wands_in_lobby");
-	if entity_id ~= nil and entity_id ~= 0 then
-		EntityKill(entity_id);
-	end
+	return EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent");
 end
 
 function simple_string_hash(text) --don't use it for storing passwords...
@@ -300,8 +249,4 @@ function simple_string_hash(text) --don't use it for storing passwords...
 		sum = sum + string.byte(text, i) * i * 2999;
 	end
 	return sum;
-end
-
-function aabb_check(x, y, min_x, min_y, max_x, max_y)
-	return x > min_x and x < max_x and y > min_y and y < max_y;
 end

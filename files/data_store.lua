@@ -5,11 +5,6 @@ if persistence_data_store_loaded==false then	-- On load only
 
 	dofile_once(mod_dir .. "files/helper.lua");
 
-	local spells_per_cast_min = 1;
-	local mana_max_min = 1;
-	local mana_charge_speed_min = 1;
-	local capacity_min = 1;
-
 	local data_store = {};
 	local flag_prefix = "persistence";
 	local selected_profile_id;
@@ -260,12 +255,12 @@ if persistence_data_store_loaded==false then	-- On load only
 	end
 
 	function get_player_money()
-		local money = ComponentGetValue2(get_wallet(), "money");
+		local money = ComponentGetValue2(wallet_e_id, "money");
 		return money == nil and 0 or money;
 	end
 
 	function set_player_money(value)
-		ComponentSetValue2(get_wallet(), "money", value);
+		ComponentSetValue2(wallet_e_id, "money", value);
 	end
 
 
@@ -426,7 +421,7 @@ if persistence_data_store_loaded==false then	-- On load only
 
 	-- spells per cast
 	function get_spells_per_cast(profile_id)
-		return data_store[profile_id]["spells_per_cast"] == nil and spells_per_cast_min or data_store[profile_id]["spells_per_cast"];
+		return data_store[profile_id]["spells_per_cast"] == nil and 1 or data_store[profile_id]["spells_per_cast"];
 	end
 
 	local function set_spells_per_cast(profile_id, value)
@@ -476,7 +471,7 @@ if persistence_data_store_loaded==false then	-- On load only
 
 	-- mana max
 	function get_mana_max(profile_id)
-		return data_store[profile_id]["mana_max"] == nil and mana_max_min or data_store[profile_id]["mana_max"];
+		return data_store[profile_id]["mana_max"] == nil and 2 or data_store[profile_id]["mana_max"];
 	end
 
 	local function set_mana_max(profile_id, value)
@@ -486,7 +481,7 @@ if persistence_data_store_loaded==false then	-- On load only
 
 	-- mana charge speed
 	function get_mana_charge_speed(profile_id)
-		return data_store[profile_id]["mana_charge_speed"] == nil and mana_charge_speed_min or data_store[profile_id]["mana_charge_speed"];
+		return data_store[profile_id]["mana_charge_speed"] == nil and 2 or data_store[profile_id]["mana_charge_speed"];
 	end
 
 	local function set_mana_charge_speed(profile_id, value)
@@ -496,7 +491,7 @@ if persistence_data_store_loaded==false then	-- On load only
 
 	-- capacity
 	function get_capacity(profile_id)
-		return data_store[profile_id]["capacity"] == nil and capacity_min or data_store[profile_id]["capacity"];
+		return data_store[profile_id]["capacity"] == nil and 1 or data_store[profile_id]["capacity"];
 	end
 
 	local function set_capacity(profile_id, value)

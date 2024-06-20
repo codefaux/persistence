@@ -1,5 +1,4 @@
 
-print("lobby_effect tick");
 local _e_id = GlobalsGetValue("persistence_lobby_effect_entity", "0");
 
 if _e_id~=0 then

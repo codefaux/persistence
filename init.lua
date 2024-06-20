@@ -1,6 +1,7 @@
 -- dofile_once( "data/scripts/lib/utilities.lua" )
 ---mod files dir. ALSO UPDATE IN XMLs
 mod_dir = "mods/persistence_staging/";
+mod_flag_name = "persistence";
 
 ---Player entity ID, populated by OnPlayerSpawned(_)
 player_e_id=0;
@@ -24,30 +25,32 @@ function OnWorldPostUpdate()
 	dofile(mod_dir .. "files/entity_mgr.lua");
 
 	persistence_active = GlobalsGetValue("persistence_active", "false")=="true";
+
 	if persistence_active then dofile(mod_dir .. "files/gui.lua"); end
 
 	GamePrint( "Post-update hook " .. tostring(GameGetFrameNum()) );
-	OnEndFrame();
+	OnModEndFrame();
 end
 
 
 local spawn_run_once=true;
+
 function OnPlayerSpawned(entity_id)
 	if player_e_id~=0 then print("Persistence: init.lua: OnPlayerSpawned(entity_id) and player_e_id~=nil"); return; end
 	player_e_id = entity_id;
 	wallet_e_id = EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent");
 
 	if GameGetFrameNum() < 60 and spawn_run_once then
-		once=false;
-		GlobalsSetValue("persistence_active", "true");
+		---Player spawned within 60 frames, this is a new game
+		GlobalsSetValue("persistence_active", "true"); persistence_active=true; ---latter is mostly for ide annotations
 
-		if ModSettingGet("persistence.enable_edit_wands_in_lobby")==true then
-			do_lobby_effect_entities();
-		end
-	
+		if ModSettingGet("persistence.enable_edit_wands_in_lobby")==true then do_lobby_effect_entities(); end
+
 		x_loc, y_loc = EntityGetTransform(player_e_id);
 		GlobalsSetValue("first_spawn_x", tostring(x_loc));
 		GlobalsSetValue("first_spawn_y", tostring(y_loc));
+
+		once=false;  ---set late so function repeats if not successful aka early exit
 	end
 end
 

@@ -5,7 +5,7 @@ if entity_mgr_loaded==false then
 	lobby_e_id = 0;
 
 	---close out frame by disabling triggers
-	function OnEndFrame()
+	function OnModEndFrame()
 		if GlobalsGetValue("lobby_collider_triggered", "x")=="1" then GlobalsSetValue("lobby_collider_triggered", "0"); end	---disable trigger every frame; re-enabled by collider entity
 		if GlobalsGetValue("workshop_collider_triggered", "x")=="1" then GlobalsSetValue("workshop_collider_triggered", "0"); end	---disable trigger every frame; re-enabled by collider entity
 	end

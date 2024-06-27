@@ -4,6 +4,7 @@
   ],
   "Lua.diagnostics.globals": [
     "mod_dir",
-    "persistence_active"
+    "persistence_active",
+    "_nid"
   ]
 }

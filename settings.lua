@@ -1,6 +1,5 @@
 dofile_once("data/scripts/lib/mod_settings.lua");
-dofile_once("mods/persistence/files/helper.lua");
-dofile_once("data/scripts/debug/keycodes.lua");
+-- dofile_once("data/scripts/debug/keycodes.lua");
 
 -- This file can't access other files from this or other mods in all circumstances.
 -- Settings will be automatically saved.
@@ -31,7 +30,7 @@ mod_settings =
 	{
 		category_id = "liteness_settings",
 		ui_name = "LITENESS",
-		ui_description = "'Lite-ness' settings (Keep gold, etc)",
+		ui_description = "'Lite-ness' settings (Keep money, etc)",
 		settings = {
 			{
 				id = "money_saved_on_death",
@@ -141,7 +140,7 @@ mod_settings =
 			{
 				id = "enable_menu_in_holy_mountain",
 				ui_name = "Allow Persistence menu in Holy Mountain",
-				ui_description = "Allow access to menu for gold deposit/withdraw, research, buy, etc in Holy Mountain",
+				ui_description = "Allow access to menu for money deposit/withdraw, research, buy, etc in Holy Mountain",
 				value_default = false,
 				scope = MOD_SETTING_SCOPE_NEW_GAME,
 			},

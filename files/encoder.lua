@@ -70,20 +70,20 @@ if persistence_encoder_loaded~=true then
 	---decode number value of named tag from disk
 	---@param name string name of pseudo-variable (mod_flag_name will be prepended)
 	---@return number
-	function load_decode_number(name)
-		return hex_to_number(load_decode_hex(name) or "0");
+	function load_decode_integer(name)
+		return hex_to_number(load_decode_hex(name));
 	end
 
 	---write encoded number value of named tag to disk
 	---@param name string name of pseudo-variable (mod_flag_name will be prepended)
 	---@param value integer value of pseudo-variable
-	function write_encode_number(name, value)
+	function write_encode_integer(name, value)
 		write_encode_hex(name, number_to_hex(value));
 	end
 
 	---write encoded number value of named tag to disk
 	---@param name string name of pseudo-variable (mod_flag_name will be prepended)
-	function clear_encode_number(name)
+	function clear_encode_integer(name)
 		write_encode_hex(name, nil);
 	end
 	---end function declarations, run code here;

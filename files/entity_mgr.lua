@@ -6,9 +6,37 @@ if entity_mgr_loaded==false then
 
 	---close out frame by disabling triggers
 	function OnModEndFrame()
-		if GlobalsGetValue("lobby_collider_triggered", "x")=="1" then GlobalsSetValue("lobby_collider_triggered", "0"); end	---disable trigger every frame; re-enabled by collider entity
-		if GlobalsGetValue("workshop_collider_triggered", "x")=="1" then GlobalsSetValue("workshop_collider_triggered", "0"); end	---disable trigger every frame; re-enabled by collider entity
+		local _lobby = tonumber(GlobalsGetValue("lobby_collider_triggered", "0"));
+		local _workshop = tonumber(GlobalsGetValue("workshop_collider_triggered", "0"));
+
+		if _lobby>0 then
+			GlobalsSetValue("lobby_collider_triggered", tostring(_lobby-1));
+		end	---disable trigger every frame; re-enabled by collider entity
+		if _workshop>0 then
+			GlobalsSetValue("workshop_collider_triggered", tostring(_workshop-1));
+		end	---disable trigger every frame; re-enabled by collider entity
 	end
+
+	function LockPlayer()
+		EntitySetComponentIsEnabled(player_e_id, inventorygui_c_id, false);
+		EntitySetComponentIsEnabled(player_e_id, inventory2_c_id, false);
+		EntitySetComponentIsEnabled(player_e_id, controls_c_id, false);
+	end
+
+	function UnlockPlayer()
+		EntitySetComponentIsEnabled(player_e_id, controls_c_id, true);
+		EntitySetComponentIsEnabled(player_e_id, inventory2_c_id, true);
+		EntitySetComponentIsEnabled(player_e_id, inventorygui_c_id, true);
+	end
+
+	function isLocked()
+		return not (ComponentGetIsEnabled(controls_c_id) and ComponentGetIsEnabled(inventory2_c_id) and ComponentGetIsEnabled(inventorygui_c_id));
+	end
+
+	---end function declarations, run code here;
+
+
+
 end
 
 

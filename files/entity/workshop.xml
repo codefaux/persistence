@@ -9,7 +9,7 @@
 	</CollisionTriggerComponent> -->
 	<LuaComponent
 		script_collision_trigger_hit="mods/persistence_staging/files/entity/workshop_collider.lua"
-		execute_every_n_frame="1"
+		execute_every_n_frame="4"
 		_enabled="1">
 	</LuaComponent>
 	<!-- is HitboxComponent still necessary? Seems unlikely -->

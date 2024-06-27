@@ -16,6 +16,10 @@
                         component "AbilityComponent" for stats, member use_gun_script, mana_max, mana_charge_speed, object gun_config ConfigGun, actions_per_round, shuffle_deck_when_empty, reload_time, deck_capacity
                         component "SpriteComponent", image_file
 
+
+-- TODO : Translation table for translation mods, translation helper Mod Options setting for tooltips indicating strings and meanings
+
+
 -- nearby entities check rearchable, ui icon?
 
 --- V3 notes;

@@ -21,6 +21,8 @@ if persistence_gui_loaded~=true then
 	purchase_spells_open=false;
 	modify_wand_open=false;
 	template_open=false;
+	scan_nearby_entities_open=false;
+	window_open=false;
 
 	function _nil(...) return; end
 	function _layer(n) return 1000 - ((n+1) * 50); end
@@ -48,17 +50,26 @@ if persistence_gui_loaded~=true then
 					end
 				end
 				slot_data.price = math.ceil(_price * ModSettingGet("persistence.buy_wand_price_multiplier"));
-				if slot_data.origin_cost~=nil and slot_data.origin_cost~=0 then GuiText(gui, x_base + x_offset, y_base + row2_y_offset, string.format(" - $ %1.0f (PAID) ", slot_data.origin_cost )); end
+
+				local _tmp_price = slot_data.price;
+				if slot_data.origin_e_id~=nil and slot_data.origin_e_id~=0 then
+					local _var_comp = EntityGetFirstComponentIncludingDisabled(slot_data.origin_e_id, "VariableStorageComponent", "persistence_wand_price") or 0;
+					local _origin_price = ComponentGetValue(_var_comp, "value_int");
+					_tmp_price = _tmp_price - _origin_price;
+				end	
+
 				GuiZSetForNextWidget(gui, _layer(layer));
-				GuiColorNextWidgetBool(gui, last_known_money >= slot_data.price);
-				if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, string.format("Purchase: $ %1.0f", slot_data.price)) and slot_data.price <= get_player_money() then 
-					slot_data.wand.price = slot_data.price - slot_data.origin_cost;
-					local _create_success = create_wand(slot_data.wand);
-					if _create_success and slot_data.origin_entity~=nil and slot_data.origin_entity~=0 then
-						EntityKill(slot_data.origin_entity);
+				GuiColorNextWidgetBool(gui, last_known_money >= _tmp_price);
+				if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, string.format("Purchase: $ %1.0f", _tmp_price)) and _tmp_price <= get_player_money() then
+					if slot_data.origin_e_id~=nil and slot_data.origin_e_id~=0 then
+						modify_wand_entity(slot_data);
+						GamePrintImportant("Wand Modified");
+					else
+						slot_data.wand.price = _tmp_price;
+						create_wand(slot_data.wand);
+						GamePrintImportant("Wand Purchased");
 					end
-					close_modify_wand();
-					GamePrintImportant("Wand Purchased");
+					close_open_windows();
 					return true;
 				end
 			end,
@@ -97,18 +108,18 @@ if persistence_gui_loaded~=true then
 		local datum_sort_funcs = {
 			_index = {[0]=4, [1]="sort_name", [2]="sort_cost_name", [3]="sort_type_name", [4]="sort_type_cost" },
 			sort_name				= { "Name", 			function (a, b)
-				return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name));
+				return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name)));
 				end },
 			sort_cost_name	= {"Cost,Name",				function (a, b)
-				if (a.price==b.price) then return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name)); end
+				if (a.price==b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
 				return a.price<b.price;
 				end },
 			sort_type_name	= {"Type,Name",		function (a, b)
-				if (a.type==b.type) then return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name)); end
+				if (a.type==b.type) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
 				return a.type<b.type;
 				end },
 			sort_type_cost	= {"Type,Cost,Name",		function (a, b)
-				if (a.type==b.type) and (a.price)==(b.price) then return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name)); end
+				if (a.type==b.type) and (a.price)==(b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
 				if (a.type==b.type) then return (a.price<b.price); end
 				return a.type<b.type;
 				end },
@@ -248,10 +259,12 @@ if persistence_gui_loaded~=true then
 
 				GuiZSetForNextWidget(gui, _layer(2));
 				GuiText(gui, 240, 6, "Search:", 1);
+				GuiZSetForNextWidget(gui, _layer(2));
 				_search_for = GuiTextInput(gui, _nid(), 270, 5, _search_for, 100, 20);
 				if select(2, GuiGetPreviousWidgetInfo(gui))  then _search_for = ""; end
 
 				local _f_idx = 1;
+				GuiZSetForNextWidget(gui, _layer(2));
 				GuiText(gui, 26, 6, "Filter:");
 				for _type_nr, _type_bool in pairs(modify_wand_table.slot_data.ac_spells._index.type_hash) do
 					if _type_bool then
@@ -259,6 +272,7 @@ if persistence_gui_loaded~=true then
 							_f_idx = _f_idx + 1;
 						end
 						local _filter_x_offset = 40 + ( (_type_nr==99 and 1 or _f_idx) * 20);
+						GuiZSetForNextWidget(gui, _layer(2));
 						if GuiImageButton(gui, _nid(), _filter_x_offset, 1, "", action_type_to_slot_sprite(_type_nr)) then
 							if _active_filter~=_type_nr then
 								_active_filter = _type_nr;
@@ -266,10 +280,12 @@ if persistence_gui_loaded~=true then
 								_active_filter = 99;
 							end
 						end
+						GuiZSetForNextWidget(gui, _layer(2));
 						GuiTooltip(gui, _type_nr==99 and "ALL" or action_type_to_string(_type_nr), "");
 						if _type_nr==_active_filter then
 							local _mark_offset_x = 10;
 							local _mark_offset_y = 8;
+							GuiZSetForNextWidget(gui, _layer(3));
 							GuiImage(gui, _nid(), _filter_x_offset + _mark_offset_x, _mark_offset_y, "data/ui_gfx/damage_indicators/explosion.png", 0.5, 1, 1, math.rad(45)); -- radians are annoying
 						end
 					end
@@ -344,7 +360,7 @@ if persistence_gui_loaded~=true then
 			end
 			if GuiButton(gui, _nid(), icon_x_base, icon_y_base, "[WAND TYPE]", small_text_scale) then
 				_window_display = _window_display~=1 and 1 or 0;
-				GamePrint("Pick wand type");
+				-- GamePrint("Pick wand type");
 			end 
 			local sel_ac_x_base = x_base + 54;
 			local sel_ac_y_base = slot_y_pos + panel_sub_height - 10;
@@ -359,8 +375,8 @@ if persistence_gui_loaded~=true then
 			end
 			if GuiButton(gui, _nid(), sel_ac_x_base, sel_ac_y_base, "[ALWAYS CASTS]", small_text_scale) then
 				_window_display = _window_display~=2 and 2 or 0;
-				GamePrint("Pick wand type");
-			end 
+				-- GamePrint("Pick always casts");
+			end
 
 			if (modify_wand_table.render_header_func or _gui_nop)(header_x_pos, header_y_pos, margin, panel_sub_width, panel_sub_height, 2, modify_wand_table.slot_data, _nid) then
         _reload_data = true;
@@ -390,8 +406,10 @@ if persistence_gui_loaded~=true then
 		local _reload_data = true;
 		local template_previews = {};
 		local delete_template_confirmation = 0;
+		local template_hover = 0;
 
 		active_windows["template"] = function (_nid)
+			local function _gui_nop(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid) return; end
 			local margin=5;
 			local x_base = 485;
 			local y_base = 150;
@@ -403,46 +421,89 @@ if persistence_gui_loaded~=true then
 
 			GuiZSetForNextWidget(gui, _layer(0));
 			GuiImageNinePiece(gui, _nid(), x_base, y_base, width, height);
-
+			template_hover = 0;
 			for i = 1, get_template_count() do
 				local x_offset = x_base + margin;
 				local y_offset = y_base + margin + ((i - 1) * block_height);
 				local col_a = 25;
-				-- GuiLayoutBeginVertical(gui, 80, 44 + ((i-1) * 11));
+				GuiZSetForNextWidget(gui, _layer(1));
 				GuiText(gui, x_offset, y_offset, "Template Slot " .. i .. ":");
 				if template_previews[i]==nil or template_previews[i].capacity==nil then	-- Template empty
+					GuiZSetForNextWidget(gui, _layer(1));
 					GuiColorNextWidgetEnum(gui, COLORS.Green);
 					if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 1), "Save template") then
 						set_template(i, modify_wand_table.slot_data.wand);
+						_reload_data = true;
 					end
 				else -- Template exists
-					-- GuiLayoutBeginHorizontal(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+					GuiZSetForNextWidget(gui, _layer(1));
 					GuiImage(gui, _nid(), x_offset, y_offset + 23, wand_type_to_sprite_file(template_previews[i]["wand_type"]), 1, 1, 1, math.rad(-45)); -- radians are annoying
 
-					-- GuiLayoutBeginVertical(gui, 0, 0, false, gui_margin_x, gui_margin_y);
+					GuiZSetForNextWidget(gui, _layer(1));
 					GuiColorNextWidgetEnum(gui, COLORS.Green);
 					if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 1), "Load template") then
-						GamePrint("Load Template");
+						-- GamePrint("Load Template");
 						modify_wand_table.slot_data.wand = get_template(i);
 					end
 					if delete_template_confirmation == i then
+						GuiZSetForNextWidget(gui, _layer(1));
 						GuiColorNextWidgetEnum(gui, COLORS.Yellow);
 						if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 2), "Press again to delete") then
 							delete_template_confirmation = 0;
 							delete_template(i);
-							GamePrint("Delete Template");
+							_reload_data = true;
+							-- GamePrint("Delete Template");
 						end
 					else
+						GuiZSetForNextWidget(gui, _layer(1));
 						GuiColorNextWidgetEnum(gui, COLORS.Yellow);
 						if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 2), "Delete template") then
 							delete_template_confirmation = i;
 						end
 					end
-					-- -- GuiLayoutEnd(gui);
-					-- -- GuiLayoutEnd(gui);
+					local _x_mouse, _y_mouse = InputGetMousePosOnScreen();
+					local _x_min = x_base;
+					local _width = width;
+					local _y_min = y_offset;
+					local _height = line_height * 3;
+
+					if _x_mouse/2>_x_min and _x_mouse/2<_x_min+_width then
+						if _y_mouse/2>_y_min and _y_mouse/2<_y_min+_height then
+							template_hover = i;
+						end
+					end
 				end
-				-- GuiLayoutEnd(gui);
+
+				if template_hover == i then
+					local gui_margin_x = 4;
+					local gui_margin_y = 2;
+					local _preview_datum_x_pos = 2;
+					local _preview_datum_y_pos = 2;
+					local _preview_x_loc = 375;
+					local _preview_y_loc = 240;
+					local _preview_panel_width = 90;
+					local _preview_panel_height = 105;
+					GuiZSetForNextWidget(gui, _layer(2));
+					GuiBeginScrollContainer(gui, _nid(), _preview_x_loc, _preview_y_loc, _preview_panel_width, _preview_panel_height);
+					for ii = 2, modify_wand_table.datum_translation._index[0] do
+						local _member = modify_wand_table.datum_translation._index[ii];
+						local _value = template_previews[i][_member];
+						local _valfunc = modify_wand_table.datum_translation[_member][2];
+						local _height = modify_wand_table.datum_translation[_member][3] or 0;
+						modify_wand_table.slot_data.value = _valfunc(_value);
+						modify_wand_table.slot_data.member = _member;
+						modify_wand_table.slot_data.label = (modify_wand_table.datum_translation[_member][1]~=nil and modify_wand_table.datum_translation[_member][1]~="") and GameTextGetTranslatedOrNot(modify_wand_table.datum_translation[_member][1]) or "";
+						modify_wand_table.slot_data.cost[_member] = (modify_wand_table.datum_translation[_member][6]~=nil and modify_wand_table.datum_translation[_member][6](_value) or 0) * ModSettingGet("persistence.buy_wand_price_multiplier");
+						modify_wand_table.slot_data.render_slots_override = get_always_cast_count();
+						local _renderfunc = modify_wand_table.datum_translation[_member][4] or _gui_nop;
+						_renderfunc(_preview_datum_x_pos, _preview_datum_y_pos, margin, _preview_panel_width - margin, _preview_panel_height, 3, modify_wand_table.slot_data, _nid);
+						_preview_datum_y_pos = _preview_datum_y_pos + _height;
+					end
+					GuiEndScrollContainer(gui);
+				end
 			end
+
+
 		end
 	end
 
@@ -471,18 +532,21 @@ if persistence_gui_loaded~=true then
 				GuiZSetForNextWidget(gui, _layer(2));
 				GuiBeginAutoBox(gui);
 
-				GuiZSetForNextWidget(gui, _layer(3));
 				local action_struct_pool = get_action_struct(curr_spell);
 				for _, action_struct in ipairs(action_struct_pool) do
 					if action_struct.name=="name" then
+						GuiZSetForNextWidget(gui, _layer(3));
 						GuiText(gui, col_a, y_loc, action_struct.value);			-- NAME
 					elseif action_struct.name=="description" then
+						GuiZSetForNextWidget(gui, _layer(3));
 						GuiText(gui, col_a, y_loc + 3 + line_h, action_struct.value);			-- Description
 					elseif action_struct.name=="sprite" then
+						GuiZSetForNextWidget(gui, _layer(3));
 						GuiImage(gui, _nid(), col_d, y_loc + 28, action_struct.icon, 1, 1.5, 1.5, 0);		-- ICON
 					else
 						line_cnt = line_cnt + 1;
 						line_y = base_y + (line_h * line_cnt);
+						GuiZSetForNextWidget(gui, _layer(3));
 						GuiImage(gui, _nid(), col_a, line_y + 2, action_struct.icon, 1, 1, 1, 0);
 						GuiZSetForNextWidget(gui, _layer(3));
 						GuiText(gui, col_b, line_y, action_struct.label);
@@ -492,17 +556,17 @@ if persistence_gui_loaded~=true then
 				end
 
 				GuiZSetForNextWidget(gui, _layer(2));
-				GuiZSet(gui, _layer(2));
 				GuiEndAutoBoxNinePiece(gui, 4, 100, 25);
 				-- GuiLayoutEndLayer(gui);
 			end;
-		elseif spell_tooltip_id~="" and spell_tooltip_open==true then
+		elseif spell_tooltip_id=="" and spell_tooltip_open==true then
 			close_spell_tooltip_gui();
 		end
 	end
 
 	function close_spell_tooltip_gui()
 		spell_tooltip_open = false
+		spell_tooltip_id="";
 		active_windows["spell_tooltip"] = nil;
 	end
 
@@ -680,49 +744,118 @@ if persistence_gui_loaded~=true then
 		money_open = false;
 	end
 
+	function present_scan_nearby_entities()
+		if scan_nearby_entities_open~=true then
+			scan_nearby_entities_open=true;
+			local x_base = 320;
+			local x_offset = 40;
+			local y_base = 300;
+			local _frame_skip=5;
+			local _frame_num=5;
+			local search_radius = 20;
+			local nearby_spell_old = false;
+			local nearby_spell_new = false;
+			local nearby_wand_old = false;
+			local nearby_wand_new = false;
+
+			active_windows["scan_nearby_entities"] = function(_nid)
+				if GameGetFrameNum()%_frame_skip==0 then
+					nearby_spell_old = false;
+					nearby_spell_new = false;
+					nearby_wand_old = false;
+					nearby_wand_new = false;
+					local plr_x, plr_y = EntityGetTransform(player_e_id);
+					local _nearby_cards = EntityGetInRadiusWithTag(plr_x, plr_y, search_radius, "card_action");
+					for _, _card_e_id in pairs(_nearby_cards) do
+						local _tmp_e_id = get_root_entity(_card_e_id);
+						local _tmp_c_id = EntityGetFirstComponentIncludingDisabled(_card_e_id, "ItemComponent");
+						-- local _vals = ComponentGetMembers(_tmp_c_id);
+						local _is_permanent = ComponentGetValueBool(_tmp_c_id or 0, "permanently_attached");
+						if _tmp_e_id~=player_e_id and _is_permanent==false then
+							local _action_c_id = EntityGetFirstComponentIncludingDisabled(_card_e_id, "ItemActionComponent") or 0;
+							local _action_id = ComponentGetValue(_action_c_id, "action_id");
+							if does_profile_know_spell(_action_id) then
+								nearby_spell_old = true;
+							else
+								nearby_spell_new = true;
+							end
+							_frame_num = 10;
+						end
+					end
+
+					local _nearby_wands = EntityGetInRadiusWithTag(plr_x, plr_y, search_radius, "wand");
+					for _, _wand_e_id in pairs(_nearby_wands) do
+						local _tmp_e_id = get_root_entity(_wand_e_id);
+						if _tmp_e_id~=player_e_id then
+							local _result = research_wand_is_new(_tmp_e_id);
+							if _result.is_new then
+								nearby_wand_new = true;
+							else
+								nearby_wand_old = true;
+							end
+							_frame_num = 10;
+						end
+					end
+				elseif _frame_num>0 then
+					_frame_num = _frame_num - 1;
+				-- else
+				end
+
+				if _frame_num>0 then
+					if nearby_spell_new or nearby_spell_old then
+						local _color = nearby_spell_new and COLORS.Tip or COLORS.Yellow;
+						GuiZSet(gui, _layer(1));
+						GuiColorNextWidgetEnum(gui, _color);
+						GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+						GuiText(gui, x_base - x_offset, y_base - 10, nearby_spell_new and "unresearched" or "researched", 1);
+						GuiZSet(gui, _layer(1));
+						GuiColorNextWidgetEnum(gui, _color);
+						GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+						GuiText(gui, x_base - x_offset, y_base, "spell", 1);
+					end
+
+					if nearby_wand_new or nearby_wand_old then
+						local _color = nearby_wand_new and COLORS.Tip or COLORS.Yellow;
+						GuiZSet(gui, _layer(1));
+						GuiColorNextWidgetEnum(gui, _color);
+						GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+						GuiText(gui, x_base + x_offset, y_base - 10, nearby_wand_new and "unresearched" or "researched", 1);
+						GuiZSet(gui, _layer(1));
+						GuiColorNextWidgetEnum(gui, _color);
+						GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+						GuiText(gui, x_base + x_offset, y_base, "wand", 1);
+					end
+				end
+			end
+		end
+	end
+
+	function close_open_windows()
+		close_money();
+		close_wands();
+		close_purchase_spells();
+		close_inventory_spells();
+		close_modify_wand();
+	end
+
 	function present_persistence_menu()
 		if persistence_visible==true then return; end
 
 		persistence_expanded = false;
 		active_windows["persistence"] = function (_nid)
-			local function scanEntities_for_persistence_color()
-				local player_owned = false;
-				local nearby_known = false;
-				local plr_x, plr_y = EntityGetTransform(player_e_id);
-				local _nearby_cards = EntityGetInRadiusWithTag(plr_x, plr_y, 20, "card_action");
-				for _, _card_e_id in pairs(_nearby_cards) do
-					local _tmp_e_id = _card_e_id;
-					while _tmp_e_id~=0 and _tmp_e_id~=nil do
-						_tmp_e_id = EntityGetParent(_tmp_e_id);
-						if _tmp_e_id==player_e_id then player_owned=true; end
-					end
-					if not player_owned then
-						local _action_c_id = EntityGetFirstComponentIncludingDisabled(_card_e_id, "ItemActionComponent") or 0;
-						local _action_id = ComponentGetValue(_action_c_id, "action_id");
-						local _known = does_profile_know_spell(_action_id)
-						if not _known then
-							return COLORS.Tip;
-						else
-							nearby_known = true;
-						end
-					end
-				end
-				return nearby_known and COLORS.Yellow or COLORS.White;
-			end
-
 			local x_base = 2;
 			local x_offset = 25;
 			local y_base = 348;
 			local y_expand = 40;
 			if persistence_expanded==false then
+
 				GuiZSet(gui, _layer(0)); ---gui frame
 				GuiImageNinePiece(gui, _nid(), x_base, y_base, 50, 10);
 				GuiZSet(gui, _layer(1));
 
-				local _btn_color = scanEntities_for_persistence_color();
-				GuiColorNextWidgetEnum(gui, _btn_color);
+				GuiColorNextWidgetEnum(gui, COLORS.Tip);
 				GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-				if GuiButton(gui, _nid(), x_base + x_offset, y_base, "persistence", 1) then
+				if GuiButton(gui, _nid(), x_base + x_offset, y_base, "persistence", 1) or InputIsKeyJustDown(Key_GRAVE) then
 					persistence_expanded = true;
 					present_money();
 					present_wands();
@@ -781,12 +914,8 @@ if persistence_gui_loaded~=true then
 				GuiZSet(gui, _layer(1));
 				GuiColorNextWidgetEnum(gui, COLORS.Yellow);
 				GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-				if GuiButton(gui, _nid(), x_base + x_offset, y_base, "-close-", 1) then
-					close_money();
-					close_wands();
-					close_purchase_spells();
-					close_inventory_spells();
-					close_modify_wand();
+				if GuiButton(gui, _nid(), x_base + x_offset, y_base, "-close-", 1) or InputIsKeyJustDown(Key_GRAVE) then
+					close_open_windows();
 					persistence_expanded=false;
 				end
 			end
@@ -811,6 +940,8 @@ local _workshop = GlobalsGetValue("workshop_collider_triggered", "0")~="0";
 local _persistence_area = _lobby==true or _workshop==true;
 
 data_store_everyframe();
+if spell_tooltip_id=="" then close_spell_tooltip_gui(); end
+spell_tooltip_id="";
 
 if loaded_profile_id>0 then
 	---profile loaded, proceed as normal
@@ -818,13 +949,19 @@ if loaded_profile_id>0 then
 
 	if isLocked() then UnlockPlayer(); end
 
+	present_scan_nearby_entities();
+
 	if InputIsKeyJustDown(Key_TAB) then
 		close_money();
 		close_wands();
 		close_modify_wand();
 		close_purchase_spells();
 		close_inventory_spells();
+		close_spell_tooltip_gui();
+		-- close_persistence_menu();
+		close_template_window();
 	end
+
 	if _workshop then
 		present_teleport_gui();
 	else
@@ -840,10 +977,10 @@ else
 	present_profile_ui();
 end
 
-local window_open = profile_open or money_open or wands_open or inventory_spells_open;
+window_open = profile_open or money_open or wands_open or inventory_spells_open or modify_wand_open;
+-- if window_open and spell_tooltip_id~="" then show_spell_tooltip_gui(); end
 
 if gui~=nil and active_windows~=nil and (window_open or persistence_visible) and EntityGetIsAlive(player_e_id) then
-	-- if not isLocked() then LockPlayer(); end
 	GuiStartFrame(gui);
 	local start_gui_id = 319585;
 	if window_open then

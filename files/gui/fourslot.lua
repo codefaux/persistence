@@ -49,7 +49,6 @@ profile_fourslot = {
   slots_data = {};
 };
 
-
 wands_fourslot = {
   id = "wand_select",
   centertext = "WANDS ARE DESTROYED WHEN RESEARCHED",
@@ -74,18 +73,21 @@ wands_fourslot = {
             return true;
           end
         else
-          if EntityHasTag(slot_data.e_id, "persistence") then
+          if fourslot_confirmation~=slot_data.id and EntityHasTag(slot_data.e_id, "persistence") then
             GuiZSetForNextWidget(gui, _layer(layer));
             GuiColorNextWidgetEnum(gui, COLORS.Green);
             if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "- Modify wand") then
               GamePrint("Modify Wand");
               present_modify_wand(slot_data.e_id or 0, slot_data.id);
             end
+            if select(2, GuiGetPreviousWidgetInfo(gui))==true then
+              fourslot_confirmation = slot_data.id;
+            end
           else
             if fourslot_confirmation == slot_data.id then
               GuiZSetForNextWidget(gui, _layer(layer));
               GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-              if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "- Press again to recycle") then
+              if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "- Click to recycle") then
                 fourslot_confirmation = 0;
                 delete_wand_entity(slot_data.e_id);
                 slot_data = {};
@@ -101,13 +103,22 @@ wands_fourslot = {
             end
           end
         end
-        if #slot_data.wand["spells"] then
-          GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-          GuiZSetForNextWidget(gui, _layer(layer));
-          GuiText(gui, x_base + 0 + x_offset, y_base + row2_y_offset, "Wand contains spells which", small_text_scale);
-          GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-          GuiZSetForNextWidget(gui, _layer(layer));
-          GuiText(gui, x_base + 2 + x_offset, y_base + row3_y_offset, "will be lost on research", small_text_scale);
+        if #slot_data.wand["spells"]>0 then
+          if slot_data.research.b_spells then
+            GuiColorNextWidgetEnum(gui, COLORS.Red);
+            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiText(gui, x_base + 0 + x_offset, y_base + row2_y_offset, "WAND CONTAINS", small_text_scale);
+            GuiColorNextWidgetEnum(gui, COLORS.Red);
+            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiText(gui, x_base + 2 + x_offset, y_base + row3_y_offset, "UNRESEARCHED SPELLS", small_text_scale);
+          else
+            GuiColorNextWidgetEnum(gui, COLORS.Yellow);
+            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiText(gui, x_base + 0 + x_offset, y_base + row2_y_offset, "Wand contains spells which", small_text_scale);
+            GuiColorNextWidgetEnum(gui, COLORS.Yellow);
+            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiText(gui, x_base + 2 + x_offset, y_base + row3_y_offset, "will be lost on research", small_text_scale);
+          end
         end
       else
         GuiZSetForNextWidget(gui, _layer(layer));
@@ -129,7 +140,7 @@ wands_fourslot = {
       cast_delay					= {"$inventory_castdelay",				__ctime,		9,			__render_gen_stat,			"b_cast_delay"	},
       recharge_time				= {"$inventory_rechargetime",			__ctime,		9,			__render_gen_stat,			"b_recharge_time"	},
       mana_max						= {"$inventory_manamax",					__round,		9,			__render_gen_stat,			"b_mana_max"	},
-      mana_charge_speed		= {"$inventory_manachargespeed",	__val,			9,			__render_gen_stat,			"b_mana_charge_speed"	},
+      mana_charge_speed		= {"$inventory_manachargespeed",  __round,		9,			__render_gen_stat,			"b_mana_charge_speed"	},
       capacity						=	{"$inventory_capacity",					__val,			9,			__render_gen_stat,			"b_capacity"	},
       spread							= {"$inventory_spread",						__deg,			9,			__render_gen_stat,			"b_spread"	},
       always_cast_spells	= {"$inventory_alwayscasts",			__val,			9,			__render_wand_spells,		"b_always_cast_spells"	},

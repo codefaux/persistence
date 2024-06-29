@@ -30,9 +30,17 @@ if persistence_encoder_loaded~=true then
 	---@param hex string|nil
 	local function write_encode_hex(name, hex)
 		if hex == nil then
-			for j = 1, #hex_chars do
-				RemoveFlagPersistent(mod_flag_name .. "_" .. name .. "_" .. 1 .. "_" .. hex_chars[j]);
-			end
+			local i=1;
+			repeat
+				local hex_found = false;
+				for j = 1, #hex_chars do
+					if HasFlagPersistent(mod_flag_name .. "_" .. name .. "_" .. i .. "_" .. hex_chars[j]) then
+						RemoveFlagPersistent(mod_flag_name .. "_" .. name .. "_" .. i .. "_" .. hex_chars[j]);
+						hex_found = true;
+					end
+				end
+				i = i + 1;
+			until not hex_found
 			return;
 		end
 

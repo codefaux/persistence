@@ -12,14 +12,14 @@ inventory_spell_list_table= {
       if (b.researchable and not a.researchable) then return false; end
       if (b.recyclable and not a.recyclable) then return true; end
       if (a.recyclable and not b.recyclable) then return false; end
-      return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name));
+      return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name)));
       end },
     sort_inv_cost_name	= {"Cost,Name",				function (a, b)
       if (a.researchable and not b.researchable) then return true; end
       if (b.researchable and not a.researchable) then return false; end
       if (b.recyclable and not a.recyclable) then return true; end
       if (a.recyclable and not b.recyclable) then return false; end
-      if (a.price==b.price) then return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name)); end
+      if (a.price==b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
       return a.price<b.price;
       end },
     sort_inv_type_name	= {"Type,Name",		function (a, b)
@@ -27,7 +27,7 @@ inventory_spell_list_table= {
       if (b.researchable and not a.researchable) then return false; end
       if (b.recyclable and not a.recyclable) then return true; end
       if (a.recyclable and not b.recyclable) then return false; end
-      if (a.type==b.type) then return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name)); end
+      if (a.type==b.type) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
       return a.type<b.type;
       end },
     sort_inv_type_cost	= {"Type,Cost,Name",		function (a, b)
@@ -35,7 +35,7 @@ inventory_spell_list_table= {
       if (b.researchable and not a.researchable) then return false; end
       if (b.recyclable and not a.recyclable) then return true; end
       if (a.recyclable and not b.recyclable) then return false; end
-      if (a.type==b.type) and (a.price)==(b.price) then return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name)); end
+      if (a.type==b.type) and (a.price)==(b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
       if (a.type==b.type) then return (a.price<b.price); end
       return a.type<b.type;
       end },
@@ -93,18 +93,18 @@ purchase_spell_list_table= {
   datum_sort_funcs = {
     _index = {[0]=4, [1]="sort_name", [2]="sort_cost_name", [3]="sort_type_name", [4]="sort_type_cost" },
     sort_name				= { "Name", 			function (a, b)
-      return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name));
+      return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name)));
       end },
     sort_cost_name	= {"Cost,Name",				function (a, b)
-      if (a.price==b.price) then return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name)); end
+      if (a.price==b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
       return a.price<b.price;
       end },
     sort_type_name	= {"Type,Name",		function (a, b)
-      if (a.type==b.type) then return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name)); end
+      if (a.type==b.type) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
       return a.type<b.type;
       end },
     sort_type_cost	= {"Type,Cost,Name",		function (a, b)
-      if (a.type==b.type) and (a.price)==(b.price) then return (GameTextGetTranslatedOrNot(a.name)<GameTextGetTranslatedOrNot(b.name)); end
+      if (a.type==b.type) and (a.price)==(b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
       if (a.type==b.type) then return (a.price<b.price); end
       return a.type<b.type;
       end },
@@ -154,6 +154,7 @@ function draw_spell_list_ui(spell_list_table)
     local panel_height = height - (margin * 2);
     local entry_height = 26;
 
+    GuiZSetForNextWidget(gui, _layer(2));
     if GuiButton(gui, _nid(), 400, 6, "Sort: " .. spell_list_table.datum_sort_funcs[_active_sort_name][1] ) then
       _active_sort_idx = (_active_sort_idx<spell_list_table.datum_sort_funcs._index[0]) and (_active_sort_idx + 1) or 1;
       _active_sort_name = spell_list_table.datum_sort_funcs._index[_active_sort_idx];
@@ -162,11 +163,14 @@ function draw_spell_list_ui(spell_list_table)
 
     if _sorted~=true then table.sort(spell_list_table.slots_data, spell_list_table.datum_sort_funcs[_active_sort_name][2]); _sorted=true;	end
 
+    GuiZSetForNextWidget(gui, _layer(2));
     GuiText(gui, 240, 6, "Search:", 1);
+    GuiZSetForNextWidget(gui, _layer(2));
     _search_for = GuiTextInput(gui, _nid(), 270, 5, _search_for, 100, 20);
     if select(2, GuiGetPreviousWidgetInfo(gui))  then _search_for = ""; end
 
     local _f_idx = 1;
+    GuiZSetForNextWidget(gui, _layer(2));
     GuiText(gui, 26, 6, "Filter:");
     for _type_nr, _type_bool in pairs(spell_list_table.slots_data._index.type_hash) do
       if _type_bool then
@@ -174,6 +178,7 @@ function draw_spell_list_ui(spell_list_table)
           _f_idx = _f_idx + 1;
         end
         local _filter_x_offset = 40 + ( (_type_nr==99 and 1 or _f_idx) * 20);
+        GuiZSetForNextWidget(gui, _layer(2));
         if GuiImageButton(gui, _nid(), _filter_x_offset, 1, "", action_type_to_slot_sprite(_type_nr)) then
           if _active_filter~=_type_nr then
             _active_filter = _type_nr;
@@ -185,6 +190,7 @@ function draw_spell_list_ui(spell_list_table)
         if _type_nr==_active_filter then
           local _mark_offset_x = 10;
           local _mark_offset_y = 8;
+          GuiZSetForNextWidget(gui, _layer(2));
           GuiImage(gui, _nid(), _filter_x_offset + _mark_offset_x, _mark_offset_y, "data/ui_gfx/damage_indicators/explosion.png", 0.5, 1, 1, math.rad(45)); -- radians are annoying
         end
       end

@@ -156,19 +156,68 @@ if persistence_helper_loaded~=true then
 		return math.ceil(price * ModSettingGet("persistence.buy_wand_price_multiplier"));
 	end
 
+	function modify_wand_entity(slot_data)
+		local _var_comp = EntityGetFirstComponentIncludingDisabled(slot_data.origin_e_id, "VariableStorageComponent", "persistence_wand_price") or 0;
+		local _origin_price = ComponentGetValue2(_var_comp, "value_int") or 0;
+
+		local _price = slot_data.price - _origin_price;
+		if get_player_money() < _price then return false; end
+
+		local ability_comp = EntityGetFirstComponentIncludingDisabled(slot_data.origin_e_id, "AbilityComponent") or 0;
+		local basewand = wand_type_to_base_wand(slot_data.wand["wand_type"]);
+
+		if basewand==nil then return false; end
+
+		ComponentSetValue2(ability_comp, "ui_name", basewand.name);
+		ComponentObjectSetValue2(ability_comp, "gun_config", "shuffle_deck_when_empty", slot_data.wand["shuffle"] and true or false);
+		ComponentObjectSetValue2(ability_comp, "gun_config", "actions_per_round", slot_data.wand["spells_per_cast"]);
+		ComponentObjectSetValue2(ability_comp, "gunaction_config", "fire_rate_wait", slot_data.wand["cast_delay"]);
+		ComponentObjectSetValue2(ability_comp, "gun_config", "reload_time", slot_data.wand["recharge_time"]);
+		ComponentSetValue2(ability_comp, "mana_max", slot_data.wand["mana_max"]);
+		ComponentSetValue2(ability_comp, "mana", slot_data.wand["mana_max"]);
+		ComponentSetValue2(ability_comp, "mana_charge_speed", slot_data.wand["mana_charge_speed"]);
+		ComponentObjectSetValue2(ability_comp, "gun_config", "deck_capacity", slot_data.wand["capacity"]);
+		ComponentObjectSetValue2(ability_comp, "gunaction_config", "spread_degrees", slot_data.wand["spread"]);
+		ComponentObjectSetValue2(ability_comp, "gunaction_config", "speed_multiplier", 1);
+		ComponentSetValue2(ability_comp, "item_recoil_recovery_speed", 15);
+
+
+		local childs = EntityGetAllChildren(slot_data.origin_e_id);
+		if childs ~= nil then
+			for _, child_id in ipairs(childs) do
+				local item_action_comp = EntityGetFirstComponentIncludingDisabled(child_id, "ItemActionComponent");
+				if item_action_comp ~= nil and item_action_comp ~= 0 then
+					local action_id = ComponentGetValue2(item_action_comp, "action_id");
+					if ComponentGetValue2(EntityGetFirstComponentIncludingDisabled(child_id, "ItemComponent") or 0, "permanently_attached") == true then
+						EntityKill(child_id);
+					end
+				end
+			end
+		end
+
+		if #slot_data.wand["always_cast_spells"] > 0 then
+			for _, curr_a_c_action_id in ipairs(slot_data.wand["always_cast_spells"]) do
+				AddGunActionPermanent(slot_data.origin_e_id, curr_a_c_action_id);
+			end
+		end
+		SetWandSprite(slot_data.origin_e_id, ability_comp, basewand.file, basewand.grip_x, basewand.grip_y, (basewand.tip_x - basewand.grip_x), (basewand.tip_y - basewand.grip_y));
+
+		set_player_money(get_player_money() - _price);
+	end
+
 	function create_wand(wand_data)
 		local _price = wand_data.price;
 		if get_player_money() < _price then return false; end
 
 		local x, y = EntityGetTransform(player_e_id);
-		local entity_id = EntityLoad(mod_dir .. "files/entity/wand_empty.xml", x, y);
+		local _new_wand_e_id = EntityLoad(mod_dir .. "files/entity/wand_empty.xml", x, y);
 
-		if entity_id==nil or entity_id==0 then return false; end
+		if _new_wand_e_id==nil or _new_wand_e_id==0 then return false; end
+		EntityAddTag(_new_wand_e_id, "persistence");
+		local _wand_var_c_id = EntityAddComponent(_new_wand_e_id, "VariableStorageComponent", {name = "persistence_wand_price", value_int=_price});
+		ComponentAddTag(_wand_var_c_id, "persistence_wand_price");
 
-		EntityAddTag(entity_id, "persistence");
-		EntityAddComponent(entity_id, "VariableStorageComponent", {name = "persistence_wand_cost", value_int=_price});
-
-		local ability_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent") or 0;
+		local ability_comp = EntityGetFirstComponentIncludingDisabled(_new_wand_e_id, "AbilityComponent") or 0;
 		local wand = wand_type_to_base_wand(wand_data["wand_type"]);
 
 		if wand==nil then return false; end
@@ -188,10 +237,12 @@ if persistence_helper_loaded~=true then
 
 		if #wand_data["always_cast_spells"] > 0 then
 			for _, curr_a_c_action_id in ipairs(wand_data["always_cast_spells"]) do
-				AddGunActionPermanent(entity_id, curr_a_c_action_id);
+				AddGunActionPermanent(_new_wand_e_id, curr_a_c_action_id);
 			end
 		end
-		SetWandSprite(entity_id, ability_comp, wand.file, wand.grip_x, wand.grip_y, (wand.tip_x - wand.grip_x), (wand.tip_y - wand.grip_y));
+		SetWandSprite(_new_wand_e_id, ability_comp, wand.file, wand.grip_x, wand.grip_y, (wand.tip_x - wand.grip_x), (wand.tip_y - wand.grip_y));
+
+		GamePickUpInventoryItem(player_e_id, _new_wand_e_id, true);
 
 		set_player_money(get_player_money() - _price);
 		return true;
@@ -206,9 +257,13 @@ if persistence_helper_loaded~=true then
 		if get_player_money() < price then return false; end
 
 		local x, y = EntityGetTransform(player_e_id);
-		CreateItemActionEntity(action_id, x, y);
-
-		set_player_money(get_player_money() - price);
+		local _spell_e_id = CreateItemActionEntity(action_id, x, y);
+		if _spell_e_id~=0 then
+			local _inv_full_e_id = EntityGetWithName("inventory_full");
+			EntitySetComponentsWithTagEnabled(_spell_e_id, "enabled_in_world", false);
+			EntityAddChild(_inv_full_e_id, _spell_e_id);
+			set_player_money(get_player_money() - price);
+		end
 		return true;
 	end
 
@@ -235,7 +290,7 @@ if persistence_helper_loaded~=true then
 					wands[inv_slot] = {};
 					wands[inv_slot].e_id = item;
 					wands[inv_slot].wand = read_wand_entity(item);
-					wands[inv_slot].research = research_wand_is_new(loaded_profile_id, item);
+					wands[inv_slot].research = research_wand_is_new(item);
 					wands[inv_slot].price = create_wand_price(wands[inv_slot].wand);
 				end
 			end
@@ -400,13 +455,22 @@ if persistence_helper_loaded~=true then
 	end
 
 	function get_player_money()
-		return ComponentGetValue2(wallet_c_id, "money") or -1;
+		return ComponentGetValue2(EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0, "money") or -1;
 	end
 
 	function set_player_money(value)
-		ComponentSetValue2(wallet_c_id, "money", value);
+		ComponentSetValue2(EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0, "money", value);
 	end
 
+	function get_root_entity(entity_id)
+		local _tmp_e_id = entity_id;
+		local _prev_e_id = entity_id;
+		while _tmp_e_id~=0 and _tmp_e_id~=nil do
+			_prev_e_id = _tmp_e_id;
+			_tmp_e_id = EntityGetParent(_tmp_e_id);
+		end
+		return _prev_e_id;
+	end
 	---end function declarations, run code here;
 
 

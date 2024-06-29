@@ -1,16 +1,28 @@
+-- Raise difficulty ceiling on configurables
+-- Spell per-purchase options; per-spell, per-copy
+-- Add linear/expo scaling option to above
+-- Configurable cap on gold recovered (or damping factor?)
+-- Wand Icons don't line up
+-- Price very wrong during wand creation/editing
+-- Add cost to template list
+-- Add quick-buy buttons for template wands to Persistence menu fly-off
+-- Narrow spell list when >8(?) spells to show
+-- Condense spell list, other modes?
+-- Proximity scan new spells on wands?
+-- Proximity scan not report new types?
+-- Proximity Wand scanner should iterate spells
+-- Proximity scan should work everywhere
+-- Character moves when menu loaded
+
 
 -- TODO : function EntityGetInRadius(pos_x, pos_y, radius) to auto close menu? -- EntityGetHerdRelationSafe( entity_a:int, entity_b:int )
 -- TODO : amount of money (from stash) for player on new run
 -- TODO : alt. scaling of costs (nonlinear)
 -- TODO : persistence tokens
--- TODO : find code which runs every frame and reduce
--- TODO : Push IDs / Z order
--- TODO : Fix bypassing "no wand tinkering"
--- TODO : Can't research spells when player has "unlimited spells" perk
--- TODO : Spells bought while "unlimited spells" perk have count
+-- TODO : Can't research spells when player has "unlimited spells" perk?
+-- TODO : Spells bought while "unlimited spells" perk have count?
 -- TODO : Mod order fixes?
--- TODO : Mod setting for "allow research spells inside wands"
--- TODO : check proximity for wands/spells, icon lower left if new
+-- TODO : Mod setting for "allow research spells inside wands"?
 --- store: spell tag: card_action -- component "ItemActionComponent", member action_id
 --- roaming: wand tag: item, wand, child entities: card_action, component "ItemActionComponent", members action_id
                         component "AbilityComponent" for stats, member use_gun_script, mana_max, mana_charge_speed, object gun_config ConfigGun, actions_per_round, shuffle_deck_when_empty, reload_time, deck_capacity

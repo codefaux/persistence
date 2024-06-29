@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Noita with debugger",
+      "type": "lua-local",
+      "request": "launch",
+      "program": {
+        "command": "C:/Abandon/Noita/noita_dev.exe",
+        "communication": "stdio"
+      },
+      // "args": ["-debug_lua", "-no-console", "-luadebugger"],
+      "stopOnEntry": true,
+      "cwd": "C:/Abandon/Noita/",
+      "env": {
+        "LOCAL_LUA_DEBUGGER_VSCODE": "1",
+        "DESTINATION_PATH": "mods/noita-vscode-debugger"
+      },
+      "verbose": true,
+      "pullBreakpointsSupport": true,
+      "scriptFiles": ["C:/Abandon/Noita/mods/noita-vscode-debugger/**/*.lua"],
+    }
+  ]
+}

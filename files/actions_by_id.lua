@@ -5,13 +5,14 @@
 if actions_by_id__init_done==nil then actions_by_id__init_done=false; end
 if actions_by_id__init_done==false then
 	---global fill-in for missing core function
+	actions_by_id_loaded=false;
 	math.sign = math.sign or function (x) if x<0 then return -1; else return 1; end; end
 
 	actions = actions or {};
 
 	---variables and functions run/register/initialize only once
 	actions_by_id__init_done = true;
-	actions_bt_id__notify_when_finished = true;
+	actions_by_id__notify_when_finished = true;
 
 	---kill file cache, force reload
 	__loaded = {};
@@ -558,9 +559,10 @@ end -- if initialized
 if action_count<#actions then
 	print("actions_by_id: capturing new actions, group " .. action_count .. " to (at most) " .. action_count + 100);
 	collect_action_data(100);
-	actions_bt_id__notify_when_finished = true;
-elseif actions_bt_id__notify_when_finished==true then
-	actions_bt_id__notify_when_finished = false;
+	actions_by_id__notify_when_finished = true;
+elseif actions_by_id__notify_when_finished==true then
+	actions_by_id__notify_when_finished = false;
+	actions_by_id_loaded = true;
 	print("actions_by_id: scan done, storing " .. action_count .. " actions")
 	local debug_action = actions_by_id["RUBBER_BALL"];
 

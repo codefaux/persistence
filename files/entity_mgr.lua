@@ -3,6 +3,7 @@ if entity_mgr_loaded==false then
 -- one time init
 	known_workshops = {};
 	lobby_e_id = 0;
+	local _lobby_entity_frame_skip=30;
 
 	---close out frame by disabling triggers
 	function OnModEndFrame()
@@ -15,22 +16,39 @@ if entity_mgr_loaded==false then
 		if _workshop>0 then
 			GlobalsSetValue("workshop_collider_triggered", tostring(_workshop-1));
 		end	---disable trigger every frame; re-enabled by collider entity
+
+		if GameGetFrameNum()%_lobby_entity_frame_skip==0 then
+			if ModSettingGet("persistence.enable_edit_wands_in_lobby")==true then
+				local _lobby_effect_pool = EntityGetWithName("persistence_lobby_effect_entity");
+				if _lobby_effect_pool==nil or _lobby_effect_pool==0 then
+					if type(_lobby_effect_pool)=="table" then
+						for _, _e_id in ipairs(_lobby_effect_pool) do
+							EntityKill(_e_id);
+						end
+					end
+					do_lobby_effect_entity();
+				end
+			end
+		end
 	end
 
 	function LockPlayer()
-		EntitySetComponentIsEnabled(player_e_id, inventorygui_c_id, false);
-		EntitySetComponentIsEnabled(player_e_id, inventory2_c_id, false);
-		EntitySetComponentIsEnabled(player_e_id, controls_c_id, false);
+		if player_e_id==0 or not EntityGetIsAlive(player_e_id) then return; end
+		EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent") or 0, false);
+		EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component") or 0, false);
+		EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent") or 0, false);
 	end
 
 	function UnlockPlayer()
-		EntitySetComponentIsEnabled(player_e_id, controls_c_id, true);
-		EntitySetComponentIsEnabled(player_e_id, inventory2_c_id, true);
-		EntitySetComponentIsEnabled(player_e_id, inventorygui_c_id, true);
+		if player_e_id==0 or not EntityGetIsAlive(player_e_id) then return; end
+		EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent") or 0, true);
+		EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component") or 0, true);
+		EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent") or 0, true);
 	end
 
 	function isLocked()
-		return not (ComponentGetIsEnabled(controls_c_id) and ComponentGetIsEnabled(inventory2_c_id) and ComponentGetIsEnabled(inventorygui_c_id));
+		if player_e_id==0 or not EntityGetIsAlive(player_e_id) then return false; end
+		return not (ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent") or 0) and ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component") or 0) and ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent") or 0));
 	end
 
 	---end function declarations, run code here;

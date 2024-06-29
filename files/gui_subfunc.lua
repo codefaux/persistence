@@ -1,3 +1,4 @@
+dofile_once("data/scripts/debug/keycodes.lua");
 
 ---@enum colors
 	COLORS = {
@@ -55,7 +56,7 @@
 	__ctime = function(value) return GameTextGet("$inventory_seconds", string.format("%1.2f", math.floor((value / 60) * 100 + 0.5) / 100)); end
 	__deg = function(value) return GameTextGet("$inventory_degrees", string.format("%d", value)); end
 	__pct = function(value) return GameTextGet("$menu_slider_percentage", value); end
-	__round = function(value) return math.floor(value + 0.49999999999999994); end
+	__round = function(value) return math.floor(value + 0.5); end
 	__nil = function(_) return nil; end
 	__type = function(value) return action_type_to_string(value); end
 	__cntarr = function(value) if type(value)=="table" then return #value; end return -1; end
@@ -102,10 +103,10 @@
 	end
 
 	function __render_wand_spells(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
-		local grid_y_offset = 0;
+		local _capacity = _data.wand["capacity"] or _data["capacity"];
+		local grid_y_offset = _capacity>10 and -5 or 0;
 		local grid_x_offset = 34;
 		local grid_columns = 5;
-		local _capacity = _data.wand["capacity"] or _data["capacity"];
 		if _data.label~=nil and _data.label~="" then
 			GuiZSetForNextWidget(gui, _layer(layer));
 			GuiText(gui, x_base + margin, y_base, _data.label, small_text_scale);
@@ -135,9 +136,7 @@
 				local s_hover = select(3, GuiGetPreviousWidgetInfo(gui));
 				if s_hover then
 					spell_tooltip_id = curr_spell_id;
-					-- if not spell_tooltip_open then
-					-- 	show_spell_tooltip_gui();
-					-- end
+					show_spell_tooltip_gui();
 				end
 				GuiZSetForNextWidget(gui, _layer(layer + 1));
 				GuiImage(gui, _nid(), x_base + grid_x_offset + grid_x, y_base + grid_y_offset + grid_y, actions_by_id[curr_spell_id].sprite, 1, 0.8, 0.8, 0);
@@ -163,6 +162,7 @@
 	function __render_inv_spell_single(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
 		local _offset_x = x_base + 45;
 		local _after_icon_x = _offset_x + 20;
+
 		GuiZSetForNextWidget(gui, _layer(layer));
 		GuiImage(gui, _nid(), _offset_x-4, y_base -3, _data.type_sprite, 1, 1.2, 1.2); -- background type slot
 
@@ -170,10 +170,8 @@
 		GuiImage(gui, _nid(), _offset_x, y_base + 1, _data.sprite, (_data.recyclable~=nil and _data.recyclable==true) and 0.5 or 1, 1, 1, 0); -- Icon
 		-- local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
 		-- if s_hover then
-		-- 	spell_tooltip_id = curr_spell.id;
-		-- 	if not spell_tooltip_open then
-		-- 		show_spell_tooltip_gui(120, 285);
-		-- 	end
+		-- 	spell_tooltip_id = _data.a_id;
+		-- 	show_spell_tooltip_gui();
 		-- end
 		if _data.recyclable~=nil and _data.recyclable==true then
 			GuiColorNextWidgetEnum(gui, COLORS.Dim);
@@ -182,6 +180,7 @@
 		end
 		GuiZSetForNextWidget(gui, _layer(layer));
 		GuiText(gui, _after_icon_x, y_base + 0, GameTextGetTranslatedOrNot(_data.name)); -- Name
+		local _edge_x, _edge_y1 = select(8, GuiGetPreviousWidgetInfo(gui));
 		if _data.max_uses ~= nil then
 			local _x_text_width = select(6, GuiGetPreviousWidgetInfo(gui))
 			GuiColorNextWidgetEnum(gui, COLORS.Tip);
@@ -198,6 +197,16 @@
 		end
 		GuiZSetForNextWidget(gui, _layer(layer));
 		GuiText(gui, _after_icon_x, y_base + 10, GameTextGetTranslatedOrNot(_data.description)); -- Description
+		local _edge_y2, _, _line_height = select(9, GuiGetPreviousWidgetInfo(gui));
+
+		local _x_mouse, _y_mouse = InputGetMousePosOnScreen();
+		if _x_mouse/2>_edge_x-60 and _x_mouse/2<475 then
+			if _y_mouse/2>math.max(20, _edge_y1) and _y_mouse/2<math.min(_edge_y2+_line_height, 225) then
+				spell_tooltip_id = _data.a_id;
+				show_spell_tooltip_gui();
+			end
+		end
+
 	end
 
 
@@ -225,21 +234,46 @@
 	end
 
 	function __widget_slider(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
+		local _x_mouse, _y_mouse = InputGetMousePosOnScreen();
+		local _mouse_hover = false;
+		local _height = 20;
+		local _mouse_scroll = (InputIsMouseButtonJustDown(Mouse_wheel_up) and 1 or 0) + (InputIsMouseButtonJustDown(Mouse_wheel_down) and -1 or 0);
+		local _bounds_min = slot_data.bounds[slot_data.member][1];
+		local _bounds_max = slot_data.bounds[slot_data.member][2];
+
 		GuiZSetForNextWidget(gui, _layer(layer));
 		GuiColorNextWidgetEnum(gui, COLORS.White);
-		GuiText(gui, x_base + margin, y_base, slot_data.label, small_text_scale);
-
-		GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-		GuiZSetForNextWidget(gui, _layer(layer));
-		GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-		GuiText(gui, x_base + (panel_width / 2), y_base, slot_data.value, small_text_scale);
-
-		GuiZSetForNextWidget(gui, _layer(layer));
-		local _ret = GuiSlider(gui, _nid(), x_base + margin, y_base + 10, "", slot_data.wand[slot_data.member], slot_data.bounds[slot_data.member][1], slot_data.bounds[slot_data.member][2], 0, 1, " ", panel_width );
+		GuiText(gui, x_base + margin, y_base, slot_data.label, small_text_scale); ---- LABEL
+		local _x_min, _y_min = select(8, GuiGetPreviousWidgetInfo(gui));
 
 		GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
 		GuiColorNextWidgetEnum(gui, COLORS.Tip);
 		GuiZSetForNextWidget(gui, _layer(layer));
-		GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", slot_data.cost[slot_data.member]), small_text_scale);
+		GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", slot_data.cost[slot_data.member]), small_text_scale); ---- COST
+		local _x_offset, _, _width = select(8, GuiGetPreviousWidgetInfo(gui));
+
+		if _x_mouse/2>_x_min and _x_mouse/2<_x_offset+_width+15 then
+			if _y_mouse/2>_y_min-2 and _y_mouse/2<_y_min+_height then
+				_mouse_hover = true;
+			end
+		end
+
+		GuiZSetForNextWidget(gui, _layer(layer));  ---- SLIDER
+		local _ret = math.floor(GuiSlider(gui, _nid(), x_base + margin, y_base + 10, "", slot_data.wand[slot_data.member], _bounds_min, _bounds_max, 0, 1, " ", panel_width ) + 0.5);
+
+		GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+		GuiZSetForNextWidget(gui, _layer(layer));
+		GuiColorNextWidgetEnum(gui,  _mouse_hover and COLORS.Green or COLORS.Yellow);
+		GuiText(gui, x_base + (panel_width / 2), y_base, slot_data.value, small_text_scale); ---- VALUE
+		-- _ret = tonumber(GuiTextInput(gui, _nid(), x_base + (panel_width / 2), y_base, slot_data.value, 20, 4, "1234567890." )) or _ret;
+
+		if _mouse_hover and _mouse_scroll~=0 then
+			local _factor = 1;
+			if InputIsKeyDown(Key_LSHIFT) then _factor = _factor * 5; end
+			if InputIsKeyDown(Key_LCTRL) then _factor = _factor * 10; end
+
+			_ret =  math.min(math.max( _ret + (_factor * _mouse_scroll), _bounds_min), _bounds_max);
+		end
+
 		return math.floor(_ret);
 	end

@@ -136,7 +136,7 @@ dofile_once("data/scripts/debug/keycodes.lua");
 				local s_hover = select(3, GuiGetPreviousWidgetInfo(gui));
 				if s_hover then
 					spell_tooltip_id = curr_spell_id;
-					show_spell_tooltip_gui();
+					present_spell_tooltip();
 				end
 				GuiZSetForNextWidget(gui, _layer(layer + 1));
 				GuiImage(gui, _nid(), x_base + grid_x_offset + grid_x, y_base + grid_y_offset + grid_y, actions_by_id[curr_spell_id].sprite, 1, 0.8, 0.8, 0);
@@ -159,7 +159,7 @@ dofile_once("data/scripts/debug/keycodes.lua");
 		GuiText(gui, x_base + panel_width - margin, y_base, _data.value, small_text_scale);
 	end
 
-	function __render_inv_spell_single(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
+	function __render_spell_listentry(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
 		local _offset_x = x_base + 45;
 		local _after_icon_x = _offset_x + 20;
 
@@ -203,7 +203,7 @@ dofile_once("data/scripts/debug/keycodes.lua");
 		if _x_mouse/2>_edge_x-60 and _x_mouse/2<475 then
 			if _y_mouse/2>math.max(20, _edge_y1) and _y_mouse/2<math.min(_edge_y2+_line_height, 225) then
 				spell_tooltip_id = _data.a_id;
-				show_spell_tooltip_gui();
+				present_spell_tooltip();
 			end
 		end
 

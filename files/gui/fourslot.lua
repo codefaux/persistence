@@ -1,3 +1,4 @@
+
 profile_fourslot = {
   id = "profile_select",
   centertext = "SELECT A PROFILE",
@@ -150,7 +151,7 @@ wands_fourslot = {
   slots_data = {};
 };
 
-function draw_fourslot_ui(fourslot_table)
+local function draw_fourslot_ui(fourslot_table)
   local _reload_data=true;
   fourslot_confirmation=0;
 
@@ -224,4 +225,32 @@ function draw_fourslot_ui(fourslot_table)
     end
     __render_tricolor_footer(x_base, y_base, width, height, fourslot_table);
   end
+end
+
+function present_profile_ui()
+  if profile_open==true then return; end
+
+  draw_fourslot_ui(profile_fourslot);
+  profile_open = true;
+end
+
+function close_profile_ui()
+  if profile_open==false then return; end
+
+  active_windows[profile_fourslot.id] = nil;
+  profile_open = false;
+end
+
+function present_wands()
+  if wands_open==true then return; end
+
+  draw_fourslot_ui(wands_fourslot);
+  wands_open = true;
+end
+
+function close_wands()
+  if wands_open==false then return; end
+
+  active_windows[wands_fourslot.id] = nil;
+  wands_open = false;
 end

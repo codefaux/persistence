@@ -252,7 +252,7 @@ if persistence_helper_loaded~=true then
 		return math.ceil(actions_by_id[action_id].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
 	end
 
-	function create_spell(action_id)
+	function purchase_spell(action_id)
 		local price = create_spell_price(action_id);
 		if get_player_money() < price then return false; end
 

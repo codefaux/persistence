@@ -1,3 +1,4 @@
+
 inventory_spell_list_table= {
   id = "inventory_spells",
   centertext = "SPELLS ARE DESTROYED WHEN RESEARCHED",
@@ -40,7 +41,7 @@ inventory_spell_list_table= {
       return a.type<b.type;
       end },
   },
-  datum_render_func = __render_inv_spell_single,
+  datum_render_func = __render_spell_listentry,
   action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
       if slot_data.researchable~=nil and slot_data.researchable==true then
         local _price = math.ceil(slot_data.price * ModSettingGet("persistence.research_spell_price_multiplier"));
@@ -109,7 +110,7 @@ purchase_spell_list_table= {
       return a.type<b.type;
       end },
   },
-  datum_render_func = __render_inv_spell_single,
+  datum_render_func = __render_spell_listentry,
   action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
       local _price = math.ceil(slot_data.price * ModSettingGet("persistence.buy_spell_price_multiplier"));
       if last_known_money < _price then
@@ -129,7 +130,7 @@ purchase_spell_list_table= {
     end
 }
 
-function draw_spell_list_ui(spell_list_table)
+local function draw_spell_list_ui(spell_list_table)
   local _active_sort_idx = 1;
   local _active_sort_name = spell_list_table.datum_sort_funcs._index[_active_sort_idx];
   local _sorted = false;
@@ -146,7 +147,7 @@ function draw_spell_list_ui(spell_list_table)
     local x_base = 30;
     local y_base = 20;
     local margin = 4;
-    local width = 448;
+    local width = spell_list_table.slots_data._index.count>8 and 440 or 448;
     local height = 200;
     local x_offset = margin;
     local y_offset = margin;
@@ -225,4 +226,32 @@ function draw_spell_list_ui(spell_list_table)
     GuiEndScrollContainer(gui);
     __render_tricolor_footer(x_base, y_base, width, height, spell_list_table);
   end
+end
+
+function present_inventory_spells()
+  if inventory_spells_open==true then return; end
+
+  draw_spell_list_ui(inventory_spell_list_table);
+  inventory_spells_open = true;
+end
+
+function close_inventory_spells()
+  if inventory_spells_open==false then return; end
+
+  active_windows[inventory_spell_list_table.id] = nil;
+  inventory_spells_open = false;
+end
+
+function present_purchase_spells()
+  if purchase_spells_open==true then return; end
+
+  draw_spell_list_ui(purchase_spell_list_table);
+  purchase_spells_open = true;
+end
+
+function close_purchase_spells()
+  if purchase_spells_open==false then return; end
+
+  active_windows[purchase_spell_list_table.id] = nil;
+  purchase_spells_open = false;
 end

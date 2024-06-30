@@ -128,7 +128,7 @@ if scan_nearby_entities_loaded~=true then
   function close_scan_nearby_entities()
     if scan_nearby_entities_open == false then return; end
 
-    active_windows["scan_nearby_entities"] = {};
+    active_windows["scan_nearby_entities"] = nil;
     scan_nearby_entities_open = false;
   end
 

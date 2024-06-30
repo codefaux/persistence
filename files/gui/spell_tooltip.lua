@@ -1,11 +1,12 @@
 if spell_tooltip_loaded~=true then
   spell_tooltip_open=false;
+  local curr_spell = {};
 
   local function draw_spell_tooltip(in_x_loc, in_y_loc)
       local x_loc = in_x_loc or 120;
       local y_loc = in_y_loc or 245;
 
-      local curr_spell = actions_by_id[spell_tooltip_id];
+      curr_spell = actions_by_id[spell_tooltip_id];
       if curr_spell.metadata==nil then get_action_metadata(curr_spell.id); end
 
       active_windows["spell_tooltip"] = function(_nid)
@@ -55,7 +56,7 @@ if spell_tooltip_loaded~=true then
   end
 
   function present_spell_tooltip(in_x_loc, in_y_loc)
-    if spell_tooltip_id~="" and spell_tooltip_open==false then
+    if spell_tooltip_id~="" and (spell_tooltip_id~=curr_spell.id or spell_tooltip_open==false) then
       draw_spell_tooltip(in_x_loc, in_y_loc);
     elseif spell_tooltip_id=="" and spell_tooltip_open==true then
       close_spell_tooltip();

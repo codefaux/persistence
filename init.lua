@@ -113,8 +113,15 @@ function OnPlayerDied(entity_id)
   if mod_disabled then return; end
   -- if entity_id~=player_e_id then return; end
 
-  local money_to_save = math.floor(last_known_money * ModSettingGet("persistence.money_saved_on_death") );
-  GamePrintImportant("You died", " $ " .. money_to_save .. " was saved.");
-  set_stash_money(math.abs(get_stash_money() + money_to_save));
+  local _money_to_save = math.floor(last_known_money * ModSettingGet("persistence.money_saved_on_death") );
+  local _mod_cap = ModSettingGet("persistence.cap_money_saved_on_death");
+  local _pain = 0;
+  if _mod_cap>0 then
+    _pain = _money_to_save - math.min(_money_to_save, _mod_cap*1000);
+    _money_to_save = _money_to_save - _pain;      
+  end
+  GamePrintImportant("You died", " $ " .. _money_to_save .. " was saved.");
+  if _pain>0 then GamePrintImportant("You died", " $ " .. _pain .. " evaporated, and you asked for it."); end
+  set_stash_money(math.abs(get_stash_money() + _money_to_save));
   -- player_e_id = 0;
 end

@@ -43,6 +43,17 @@ mod_settings =
         value_display_formatting = " $0 %",
         scope = MOD_SETTING_SCOPE_NEW_GAME,
       },
+      {
+        id = "cap_money_saved_on_death",
+        ui_name = "MAX Money Saved on Death",
+        ui_description = "If you think you're earning too quickly (0 is no limit)",
+        value_default = 0,
+        value_min = 0,
+        value_max = 20,
+        value_display_multiplier = 50,
+        value_display_formatting = " $0 k",
+        scope = MOD_SETTING_SCOPE_NEW_GAME,
+      },
     },
   },
   {

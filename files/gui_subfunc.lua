@@ -180,13 +180,13 @@ if gui_subfunc_loaded~=true then
       GuiColorNextWidgetEnum(gui, _data.name_color);
     end
     GuiZSetForNextWidget(gui, _layer(layer));
-    GuiText(gui, _after_icon_x, y_base + 0, GameTextGetTranslatedOrNot(_data.name)); -- Name
+    GuiText(gui, _after_icon_x, y_base - 1, GameTextGetTranslatedOrNot(_data.name)); -- Name
     local _edge_x, _edge_y1 = select(8, GuiGetPreviousWidgetInfo(gui));
     if _data.max_uses ~= nil then
       local _x_text_width = select(6, GuiGetPreviousWidgetInfo(gui))
       GuiColorNextWidgetEnum(gui, COLORS.Tip);
       GuiZSetForNextWidget(gui, _layer(layer));
-      GuiText(gui, _after_icon_x + _x_text_width + 3, y_base + 0, "(" .. _data.max_uses .. ")"); -- uses
+      GuiText(gui, _after_icon_x + _x_text_width + 3, y_base - 1, "(" .. _data.max_uses .. ")"); -- uses
     end
 
     if _data.recyclable~=nil and _data.recyclable==true then
@@ -194,10 +194,10 @@ if gui_subfunc_loaded~=true then
     elseif _data.description_color~=nil then
       GuiColorNextWidgetEnum(gui, _data.description_color);
     else
-      GuiColorNextWidgetEnum(gui, COLORS.Tip);
+      GuiColorNextWidgetEnum(gui, COLORS.Dim);
     end
     GuiZSetForNextWidget(gui, _layer(layer));
-    GuiText(gui, _after_icon_x, y_base + 10, GameTextGetTranslatedOrNot(_data.description)); -- Description
+    GuiText(gui, _after_icon_x, y_base + 8, GameTextGetTranslatedOrNot(_data.description), small_text_scale); -- Description
     local _edge_y2, _, _line_height = select(9, GuiGetPreviousWidgetInfo(gui));
 
     local _x_mouse, _y_mouse = InputGetMousePosOnScreen();

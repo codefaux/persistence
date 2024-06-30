@@ -153,10 +153,10 @@ if spell_list_loaded~=true then
       local width = spell_list_table.slots_data._index.count>8 and 440 or 448;
       local height = 200;
       local x_offset = margin;
-      local y_offset = margin;
+      local y_offset = 3;
       local panel_width = 104;
       local panel_height = height - (margin * 2);
-      local entry_height = 26;
+      local entry_height = 20;
 
       GuiZSetForNextWidget(gui, _layer(2));
       if GuiButton(gui, _nid(), 400, 6, "Sort: " .. spell_list_table.datum_sort_funcs[_active_sort_name][1] ) then

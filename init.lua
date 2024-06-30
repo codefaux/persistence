@@ -117,7 +117,7 @@ function OnPlayerDied(entity_id)
   local _mod_cap = ModSettingGet("persistence.cap_money_saved_on_death");
   local _pain = 0;
   if _mod_cap>0 then
-    _pain = _money_to_save - math.min(_money_to_save, _mod_cap*1000);
+    _pain = _money_to_save - math.min(_money_to_save, _mod_cap*50);
     _money_to_save = _money_to_save - _pain;      
   end
   GamePrintImportant("You died", " $ " .. _money_to_save .. " was saved.");

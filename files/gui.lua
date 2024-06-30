@@ -68,14 +68,7 @@ if loaded_profile_id>0 then
   present_scan_nearby_entities();
 
   if InputIsKeyJustDown(Key_TAB) then
-    close_money();
-    close_wands();
-    close_modify_wand();
-    close_purchase_spells();
-    close_inventory_spells();
-    close_spell_tooltip();
-    -- close_persistence_menu();
-    close_wand_template();
+    close_open_windows();
   end
 
   if _workshop then

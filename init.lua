@@ -14,107 +14,107 @@ last_known_money=0;
 
 
 function do_lobby_effect_entity()
-	local _e_id = EntityGetWithTag("player_unit")[1];
-	if _e_id~=nil and _e_id~=0 then
-		player_e_id = _e_id;
-	else
-		return;
-	end
+  local _e_id = EntityGetWithTag("player_unit")[1];
+  if _e_id~=nil and _e_id~=0 then
+    player_e_id = _e_id;
+  else
+    return;
+  end
 
-	local lobby_effect_e_id=EntityCreateNew("persistence_lobby_effect_entity");
-	local lobby_effect_gameeffect_c_id = EntityAddComponent2(lobby_effect_e_id, "GameEffectComponent", { effect="EDIT_WANDS_EVERYWHERE", _enabled=false });
-	local lobby_effect_lua_c_id = EntityAddComponent2(lobby_effect_e_id, "LuaComponent", {script_source_file=mod_dir .. "files/entity/lobby_effect.lua", execute_every_n_frame=10, _enabled=true });
-	EntityAddChild(player_e_id, lobby_effect_e_id);
+  local lobby_effect_e_id=EntityCreateNew("persistence_lobby_effect_entity");
+  local lobby_effect_gameeffect_c_id = EntityAddComponent2(lobby_effect_e_id, "GameEffectComponent", { effect="EDIT_WANDS_EVERYWHERE", _enabled=false });
+  local lobby_effect_lua_c_id = EntityAddComponent2(lobby_effect_e_id, "LuaComponent", {script_source_file=mod_dir .. "files/entity/lobby_effect.lua", execute_every_n_frame=10, _enabled=true });
+  EntityAddChild(player_e_id, lobby_effect_e_id);
 end
 
 function teleport_back_to_lobby()
-	local lobby_x = tonumber(GlobalsGetValue("first_spawn_x", "0")) or 0;
-	local lobby_y = tonumber(GlobalsGetValue("first_spawn_y", "0")) or 0;
+  local lobby_x = tonumber(GlobalsGetValue("first_spawn_x", "0")) or 0;
+  local lobby_y = tonumber(GlobalsGetValue("first_spawn_y", "0")) or 0;
 
-	EntitySetTransform(player_e_id, lobby_x, lobby_y);
+  EntitySetTransform(player_e_id, lobby_x, lobby_y);
 end
 
 function OnModPreInit()
-	mod_disabled = ModSettingGet("persistence.always_choose_save_id")==0;
+  mod_disabled = ModSettingGet("persistence.always_choose_save_id")==0;
 end
 
 
 local _frame_skip = 5;
 function OnWorldPostUpdate()
-	if mod_disabled then return; end
+  if mod_disabled then return; end
 
-	dofile(mod_dir .. "files/actions_by_id.lua");
-	dofile(mod_dir .. "files/entity_mgr.lua");
+  dofile(mod_dir .. "files/actions_by_id.lua");
+  dofile(mod_dir .. "files/entity_mgr.lua");
 
-	if not actions_by_id_loaded then return; end
+  if not actions_by_id_loaded then return; end
 
-	persistence_active = GlobalsGetValue("persistence_active", "false")=="true";
+  persistence_active = GlobalsGetValue("persistence_active", "false")=="true";
 
-	if GameGetFrameNum()%_frame_skip==0 then
-		local _e_id = EntityGetWithTag("player_unit")[1];
-		if _e_id~=nil and _e_id~=0 then
-			player_e_id = _e_id;
-		else
-			player_e_id = 0;
-		end
-	end
-	-- if persistence_active and (wallet_c_id==0 or inventorygui_c_id==0 or inventory2_c_id==0 or controls_c_id==0) then
-	-- 	if wallet_c_id==0 then wallet_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0; end
-	-- 	if inventorygui_c_id==0 then inventorygui_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent") or 0; end
-	-- 	if inventory2_c_id==0 then inventory2_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component") or 0; end
-	-- 	if controls_c_id==0 then controls_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent") or 0; end
-	-- 	return;
-	-- end
+  if GameGetFrameNum()%_frame_skip==0 then
+    local _e_id = EntityGetWithTag("player_unit")[1];
+    if _e_id~=nil and _e_id~=0 then
+      player_e_id = _e_id;
+    else
+      player_e_id = 0;
+    end
+  end
+  -- if persistence_active and (wallet_c_id==0 or inventorygui_c_id==0 or inventory2_c_id==0 or controls_c_id==0) then
+  --   if wallet_c_id==0 then wallet_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0; end
+  --   if inventorygui_c_id==0 then inventorygui_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent") or 0; end
+  --   if inventory2_c_id==0 then inventory2_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component") or 0; end
+  --   if controls_c_id==0 then controls_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent") or 0; end
+  --   return;
+  -- end
 
-	if persistence_active and player_e_id~=0 then
-		local _c_id = EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0;
-		if _c_id~=0 then
-			local _money = ComponentGetValue2(_c_id, "money")
-			if _money~=nil and _money>0 then last_known_money=_money; end
-		end
+  if persistence_active and player_e_id~=0 then
+    local _c_id = EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0;
+    if _c_id~=0 then
+      local _money = ComponentGetValue2(_c_id, "money")
+      if _money~=nil and _money>0 then last_known_money=_money; end
+    end
 
-		dofile(mod_dir .. "files/gui.lua");
-	end
+    dofile(mod_dir .. "files/gui.lua");
+  end
 
-	-- GamePrint( "Post-update hook " .. tostring(GameGetFrameNum()) );
-	OnModEndFrame();
+  -- GamePrint( "Post-update hook " .. tostring(GameGetFrameNum()) );
+  OnModEndFrame();
 end
 
 
 local spawn_run_once=true;
 
 function OnPlayerSpawned(entity_id)
-	if mod_disabled then return; end
+  if mod_disabled then return; end
 
-	-- if player_e_id~=0 then print("Persistence: init.lua: OnPlayerSpawned(entity_id) and player_e_id~=nil"); return; end
-	if entity_id==0 then print("Persistence: init.lua: OnPlayerSpawned(entity_id) and entity_id==0"); return; end
-	-- player_e_id = entity_id;
+  -- if player_e_id~=0 then print("Persistence: init.lua: OnPlayerSpawned(entity_id) and player_e_id~=nil"); return; end
+  if entity_id==0 then print("Persistence: init.lua: OnPlayerSpawned(entity_id) and entity_id==0"); return; end
+  -- player_e_id = entity_id;
 
-	if GameGetFrameNum() < 60 and spawn_run_once then
-		---Player spawned within 60 frames, this is a new game
+  if GameGetFrameNum() < 60 and spawn_run_once then
+    ---Player spawned within 60 frames, this is a new game
 
-		-- wallet_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent");
-		-- inventorygui_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent");
-		-- inventory2_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component");
-		-- controls_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent");
+    -- wallet_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent");
+    -- inventorygui_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent");
+    -- inventory2_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component");
+    -- controls_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent");
 
-		GlobalsSetValue("persistence_active", "true"); persistence_active=true; ---latter is mostly for ide annotations
+    GlobalsSetValue("persistence_active", "true"); persistence_active=true; ---latter is mostly for ide annotations
 
-		x_loc, y_loc = EntityGetTransform(entity_id);
-		GlobalsSetValue("first_spawn_x", tostring(x_loc));
-		GlobalsSetValue("first_spawn_y", tostring(y_loc));
+    x_loc, y_loc = EntityGetTransform(entity_id);
+    GlobalsSetValue("first_spawn_x", tostring(x_loc));
+    GlobalsSetValue("first_spawn_y", tostring(y_loc));
 
-		once=false;  ---set late so function repeats if not successful aka early exit
-	end
+    once=false;  ---set late so function repeats if not successful aka early exit
+  end
 end
 
 
 function OnPlayerDied(entity_id)
-	if mod_disabled then return; end
-	-- if entity_id~=player_e_id then return; end
+  if mod_disabled then return; end
+  -- if entity_id~=player_e_id then return; end
 
-	local money_to_save = math.floor(last_known_money * ModSettingGet("persistence.money_saved_on_death") );
-	GamePrintImportant("You died", " $ " .. money_to_save .. " was saved.");
-	set_stash_money(math.abs(get_stash_money() + money_to_save));
-	-- player_e_id = 0;
+  local money_to_save = math.floor(last_known_money * ModSettingGet("persistence.money_saved_on_death") );
+  GamePrintImportant("You died", " $ " .. money_to_save .. " was saved.");
+  set_stash_money(math.abs(get_stash_money() + money_to_save));
+  -- player_e_id = 0;
 end

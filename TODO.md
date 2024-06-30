@@ -1,18 +1,10 @@
--- Raise difficulty ceiling on configurables
 -- Spell per-purchase options; per-spell, per-copy
 -- Add linear/expo scaling option to above
 -- Configurable cap on gold recovered (or damping factor?)
 -- Wand Icons don't line up
 -- Price very wrong during wand creation/editing
--- Add cost to template list
--- Add quick-buy buttons for template wands to Persistence menu fly-off
--- Narrow spell list when >8(?) spells to show
 -- Condense spell list, other modes?
--- Proximity scan new spells on wands?
 -- Proximity scan not report new types?
--- Proximity Wand scanner should iterate spells
--- Proximity scan should work everywhere
--- Character moves when menu loaded
 
 
 -- TODO : function EntityGetInRadius(pos_x, pos_y, radius) to auto close menu? -- EntityGetHerdRelationSafe( entity_a:int, entity_b:int )
@@ -82,30 +74,30 @@
 
 -- for archival
 -- function extract_action_stats(action)
--- 	function draw_actions(_, _) end
--- 	function add_projectile(x) proc_projectiles(x); end
--- 	function add_projectile_trigger_hit_world(x, _) proc_projectiles(x); end
--- 	function add_projectile_trigger_timer(x, _, _) proc_projectiles(x); end
--- 	function add_projectile_trigger_death(x, _) proc_projectiles(x); end
--- 	function check_recursion(_, x) return x or 0; end
--- 	function move_discarded_to_deck() end
--- 	function order_deck() end
--- 	function StartReload() end
--- 	function EntityGetWithTag(_) return {} end
--- 	function GameGetFrameNum() return 5431289; end
--- 	function SetRandomSeed() end
--- 	function Random() return 1; end
--- 	-- function GetUpdatedEntityID() return 0; end
--- 	-- function EntityGetComponent(_) return {}; end
--- 	-- function EntityGetFirstComponent(_, _) return {}; end
--- 	-- function ComponentGetValue2(_) return 0; end
--- 	-- function EntityGetTransform(_) return {}; end
--- 	-- function EntityGetAllChildren(_) return {}; end
--- 	-- function EntityGetInRadiusWithTag(_, _) return {}; end
--- 	-- function GlobalsGetValue(_) return 0; end
--- 	function GlobalsSetValue(_) end
--- 	function find_the_wand_held() return nil; end
--- 	-- function EntityGetFirstComponentIncludingDisabled(_) end
+--   function draw_actions(_, _) end
+--   function add_projectile(x) proc_projectiles(x); end
+--   function add_projectile_trigger_hit_world(x, _) proc_projectiles(x); end
+--   function add_projectile_trigger_timer(x, _, _) proc_projectiles(x); end
+--   function add_projectile_trigger_death(x, _) proc_projectiles(x); end
+--   function check_recursion(_, x) return x or 0; end
+--   function move_discarded_to_deck() end
+--   function order_deck() end
+--   function StartReload() end
+--   function EntityGetWithTag(_) return {} end
+--   function GameGetFrameNum() return 5431289; end
+--   function SetRandomSeed() end
+--   function Random() return 1; end
+--   -- function GetUpdatedEntityID() return 0; end
+--   -- function EntityGetComponent(_) return {}; end
+--   -- function EntityGetFirstComponent(_, _) return {}; end
+--   -- function ComponentGetValue2(_) return 0; end
+--   -- function EntityGetTransform(_) return {}; end
+--   -- function EntityGetAllChildren(_) return {}; end
+--   -- function EntityGetInRadiusWithTag(_, _) return {}; end
+--   -- function GlobalsGetValue(_) return 0; end
+--   function GlobalsSetValue(_) end
+--   function find_the_wand_held() return nil; end
+--   -- function EntityGetFirstComponentIncludingDisabled(_) end
 
 
 ---Lobby detection uses lobby collider

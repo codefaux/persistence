@@ -39,9 +39,13 @@ if scan_nearby_entities_loaded~=true then
               end
             else
               if _parent_is_wand then
-                local _card_item_c_id = EntityGetFirstComponentIncludingDisabled(_card_e_id, "ItemComponent");
-                local _is_permanent = ComponentGetValueBool(_card_item_c_id or 0, "permanently_attached");
-                _nearby_wand_spell_new = _is_permanent==false;
+                local _wand_parent_e_id = EntityGetParent(_card_parent_e_id);
+                local _parent_is_quick_inv = EntityGetName(_wand_parent_e_id)=="inventory_quick";
+                if not _parent_is_quick_inv then
+                  local _card_item_c_id = EntityGetFirstComponentIncludingDisabled(_card_e_id, "ItemComponent");
+                  local _is_permanent = ComponentGetValueBool(_card_item_c_id or 0, "permanently_attached");
+                  _nearby_wand_spell_new = _is_permanent==false;
+                end
               else
                 _nearby_spell_new = true;
               end

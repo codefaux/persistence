@@ -3,7 +3,7 @@ if scan_nearby_entities_loaded~=true then
 
   local function draw_scan_nearby_entities()
     local x_base = 320;
-    local x_offset = 40;
+    local x_offset = 45;
     local y_base = 300;
     local _frame_skip=5;
     local _frame_num=5;
@@ -74,11 +74,11 @@ if scan_nearby_entities_loaded~=true then
           GuiZSet(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-          GuiText(gui, x_base - x_offset, y_base - 10, nearby_spell_new and "unresearched" or "researched", 1);
+          GuiText(gui, x_base - x_offset, y_base - 10, nearby_spell_new and "unresearched" or "researched", nearby_spell_new and 1 or small_text_scale);
           GuiZSet(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-          GuiText(gui, x_base - x_offset, y_base, "spell", 1);
+          GuiText(gui, x_base - x_offset, y_base, "spell", nearby_spell_new and 1 or small_text_scale);
         end
 
         if nearby_wand_new or nearby_wand_old then
@@ -86,11 +86,11 @@ if scan_nearby_entities_loaded~=true then
           GuiZSet(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-          GuiText(gui, x_base + x_offset, y_base - 10, nearby_wand_new and "unresearched" or "researched", 1);
+          GuiText(gui, x_base + x_offset, y_base - 10, nearby_wand_new and "unresearched" or "researched", nearby_wand_new and 1 or small_text_scale);
           GuiZSet(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-          GuiText(gui, x_base + x_offset, y_base, "wand", 1);
+          GuiText(gui, x_base + x_offset, y_base, "wand", nearby_wand_new and 1 or small_text_scale);
         end
 
         if nearby_wand_spell_new then
@@ -102,7 +102,7 @@ if scan_nearby_entities_loaded~=true then
           GuiZSet(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-          GuiText(gui, x_base, y_base, "spell on wand", 1);
+          GuiText(gui, x_base, y_base, "spell ON wand", 1);
         end
       end
     end

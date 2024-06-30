@@ -89,7 +89,7 @@ if spell_list_loaded~=true then
 
   purchase_spell_list_table= {
     id = "purchase_spells",
-    centertext = "PURCHASES DROP AT YOUR FEET",
+    centertext = "PURCHASES CAN SAFELY OVERFILL INVENTORY",
     greentext = "Click a spell to purchase it",
     redtext = "No refunds",
     slots_data = {},

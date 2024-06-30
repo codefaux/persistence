@@ -545,6 +545,7 @@ if persistence_data_store_loaded~=true then
   ---@return table _ {is_new, improves_spells_per_cast, improves_cast_delay_min, improves_cast_delay_max, improves_recharge_time_min, improves_recharge_time_max, improves_mana_max, improves_mana_charge_speed, improves_capacity, improves_spread_min, improves_spread_max, improves_always_cast_spells, improves_wand_types, count_new_always_cast_spells}
   local function _research_wand_is_new(profile_id, entity_id)
     local is_new = false;
+    local b_new_is_only_type = false;
     local b_spells_per_cast = false;
     local b_cast_delay_min = false;
     local b_cast_delay_max = false;
@@ -662,11 +663,11 @@ if persistence_data_store_loaded~=true then
         end
       end
 
-
       if _profile_wand_types == nil or _profile_wand_types[_in_wand_data["wand_type"]] == nil then
         if wand_type_to_base_wand(_in_wand_data["wand_type"]) ~= nil then
-          is_new = true;
+          b_new_is_only_type = not is_new;
           b_wand_types = true;
+          is_new = true;
         end
       end
     end -- if entity_id~=nil|0
@@ -692,6 +693,7 @@ if persistence_data_store_loaded~=true then
       i_always_cast_spells = i_always_cast_spells,
       b_always_cast_count = b_always_cast_count,
       b_wand_types = b_wand_types,
+      b_new_is_only_type = b_new_is_only_type
     };
   end
 

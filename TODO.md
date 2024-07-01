@@ -1,24 +1,26 @@
 -- Spell per-purchase options; per-spell, per-copy
 -- Add linear/expo scaling option to above
--- Configurable cap on gold recovered (or damping factor?)
--- Wand Icons don't line up
--- Price very wrong during wand creation/editing
+-- Wand Icons don't line up consistently
 -- Condense spell list, other modes?
--- Proximity scan not report new types?
 -- Fancy search functions?
+-- Unique wands (minigun, ocarina, kantele) don't research correctly
+-- Spells/wands "stuffing" inventory
+
+-- function EntityGetInRadius(pos_x, pos_y, radius) to auto close menu? -- EntityGetHerdRelationSafe( entity_a:int, entity_b:int )
+-- amount of money (from stash) for player on new run
+-- persistence tokens
+
+-- Mod order fixes?
+-- Mod setting for "allow research spells inside wands"?
+-- Translation table for translation mods, translation helper Mod Options setting for tooltips indicating strings and meanings
 
 
--- TODO : function EntityGetInRadius(pos_x, pos_y, radius) to auto close menu? -- EntityGetHerdRelationSafe( entity_a:int, entity_b:int )
--- TODO : amount of money (from stash) for player on new run
--- TODO : alt. scaling of costs (nonlinear)
--- TODO : persistence tokens
--- TODO : Can't research spells when player has "unlimited spells" perk?
--- TODO : Spells bought while "unlimited spells" perk have count?
--- TODO : Mod order fixes?
--- TODO : Mod setting for "allow research spells inside wands"?
+--- DONE? NEEDS VERIFY:
 
-
--- TODO : Translation table for translation mods, translation helper Mod Options setting for tooltips indicating strings and meanings
+-- Configurable cap on gold recovered (or damping factor?)
+-- Proximity scan report new types
+-- Can't research spells when player has "unlimited spells" perk?
+-- Spells bought while "unlimited spells" perk have count?
 
 
 

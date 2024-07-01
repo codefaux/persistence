@@ -23,7 +23,7 @@ if scan_nearby_entities_loaded~=true then
         _nearby_wand_new = false;
         _nearby_wand_spell_new = false;
         local _plr_x, _plr_y = EntityGetTransform(player_e_id);
-        local _nearby_cards = EntityGetInRadiusWithTag(_plr_x, _plr_y, _search_radius, "card_action");
+        local _nearby_cards = EntityGetInRadiusWithTag(_plr_x, _plr_y + 5, _search_radius, "card_action");
         for _, _card_e_id in pairs(_nearby_cards) do
           local _card_parent_e_id = EntityGetParent(_card_e_id);
           local _parent_is_full_inv = EntityGetName(_card_parent_e_id)=="inventory_full";

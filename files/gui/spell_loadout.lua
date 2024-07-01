@@ -1,4 +1,6 @@
--- if spell_loadouts_loaded~=true then
+if spell_loadouts_loaded~=true then
+  dofile("data/scripts/debug/keycodes.lua");
+
   spell_loadouts_open=false;
   local _saved_spell_loadouts;
   reload_ui_data = true;
@@ -67,16 +69,6 @@
     local _saved_spell_loadouts = {};
 
     active_windows["spell_loadout"] = function(_nid)
-      -- GuiZSetForNextWidget(gui, _layer(5));
-      -- x_base        = math.floor(GuiSlider(gui, _nid(),  50, 275, "x", x_base,          1, 500, x_base,         1,  " $0",  100));
-      -- GuiZSetForNextWidget(gui, _layer(5));
-      -- y_base        = math.floor(GuiSlider(gui, _nid(), 160, 275, "y", y_base,          1, 500, y_base,         1,  " $0",  100));
-      -- GuiZSetForNextWidget(gui, _layer(5));
-      -- _panel_width  = math.floor(GuiSlider(gui, _nid(), 270, 275, "w", _panel_width,    1, 500, _panel_width,   1,  " $0",  100));
-      -- GuiZSetForNextWidget(gui, _layer(5));
-      -- _panel_height = math.floor(GuiSlider(gui, _nid(), 380, 275, "h", _panel_height,   1, 500, _panel_height,  1,  " $0",  100));
-      -- GuiZSetForNextWidget(gui, _layer(5));
-      -- _unit_height = math.floor(GuiSlider(gui, _nid(), 380, 275, "h", _unit_height,   1, 500, _unit_height,  1,  " $0",  100));
       local _y_offset = 0;
 
       if _reload_data==true then _wands = get_player_wands(); _saved_spell_loadouts = _get_stored_loadouts(); _reload_data=false; end;
@@ -84,17 +76,13 @@
 
       GuiZSetForNextWidget(gui, _layer(2));
       GuiBeginScrollContainer(gui, _nid(), x_base, y_base, _panel_width, _panel_height);
-      -- GuiImageNinePiece(gui, _nid(), x_base, y_base, _panel_width, _panel_height);
 
-      -- GuiLayoutEndLayer(gui);
-      -- for _loadout_idx, _loadout_data in pairs(_saved_spell_loadouts) do
       for _loadout_idx = 1, 10 do
         if _saved_spell_loadouts[_loadout_idx]~=nil and _saved_spell_loadouts[_loadout_idx].name~=nil then
           _loadout_data = _saved_spell_loadouts[_loadout_idx];
           GuiZSetForNextWidget(gui, _layer(2));
           GuiText(gui, 0, _y_offset, string.format("Loadout %i: %s ($ %i)", _loadout_idx, _loadout_data.name, _loadout_data.price), 1);
           _y_offset = _y_offset + 10;
-          -- render name from _loadout_data.name
           GuiZSetForNextWidget(gui, _layer(3));
           GuiColorNextWidgetEnum(gui, COLORS.Yellow);
           if _list_confirm==-_loadout_idx then
@@ -145,16 +133,15 @@
                   _list_confirm = _loadout_idx;
                   _name_temp = "";
                   _new_loadout_spells = _wands[_slot_idx].wand.spells;
-                  -- GamePrint("Save from slot " .. _slot_idx);
                 end
               end
             end
           else
             _y_offset = _y_offset + 2;
             GuiZSetForNextWidget(gui, _layer(3));
-            _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 16, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 ");
+            _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 16, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 -/+");
             GuiZSetForNextWidget(gui, _layer(4));
-            if GuiButton(gui, _nid(), 86, _y_offset, "Save", 1) then
+            if GuiButton(gui, _nid(), 86, _y_offset, "Save", 1) or InputIsKeyJustDown(Key_RETURN) then
               save_spell_loadout(_loadout_idx, {name = _name_temp, spells = _new_loadout_spells});
               _list_confirm = 0;
               _reload_data = true;
@@ -193,4 +180,4 @@
   print("=========================");
   print("persistence: Spell loadouts loaded.");
   spell_loadouts_loaded=true;
--- end
+end

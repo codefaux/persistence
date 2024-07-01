@@ -12,7 +12,8 @@ if gui_subfunc_loaded~=true then
     Tip = {0.666, 0.666, 0.80, 1},
     Bright = {0.85, 0.9, 1, 1},
     Purple = {1, 0.25, 1, 1},
-    White = {1, 1, 1, 1}
+    White = {1, 1, 1, 1},
+    Black = {0, 0, 0, 1}
   }
 
   table.unpack=table.unpack or unpack;
@@ -222,8 +223,28 @@ if gui_subfunc_loaded~=true then
 
     if _data.max_uses ~= nil then
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-      GuiColorNextWidgetEnum(gui, COLORS.Tip);
+      GuiColorNextWidgetEnum(gui, COLORS.Black);
       GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiText(gui, x_base + 12, y_base + 12, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+      GuiColorNextWidgetEnum(gui, COLORS.Black);
+      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiText(gui, x_base + 11, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+      GuiColorNextWidgetEnum(gui, COLORS.Black);
+      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiText(gui, x_base + 12, y_base + 14, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+      GuiColorNextWidgetEnum(gui, COLORS.Black);
+      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiText(gui, x_base + 13, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+      GuiColorNextWidgetEnum(gui, COLORS.White);
+      GuiZSetForNextWidget(gui, _layer(layer+3));
       GuiText(gui, x_base + 12, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
     end
   end

@@ -1,5 +1,6 @@
 if money_loaded~=true then
   money_open=false;
+  dofile("data/scripts/debug/keycodes.lua");
 
   local function draw_money()
     active_windows["money"] = function (_nid)
@@ -10,8 +11,11 @@ if money_loaded~=true then
       local base_y = 30;
       local offset_y = base_y + 3;
       local idx = 0;
-      local col_a = base_x + 9;
-      local col_b = base_x + 69;
+      local col_a = base_x + 5;
+      local col_b = base_x + 70;
+      local _multiplier = 1;
+      if InputIsKeyDown(Key_LSHIFT) then _multiplier = _multiplier * 5; end
+      if InputIsKeyDown(Key_LCTRL) then _multiplier = _multiplier * 10; end
 
       GuiZSetForNextWidget(gui, _layer(0));
       GuiImageNinePiece(gui, _nid(), base_x, base_y, 140, 75);
@@ -20,28 +24,29 @@ if money_loaded~=true then
       GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Player: $ %1.0f", player_money));
       idx = idx + 1;
 
-      for _, money_amt in ipairs(money_amts) do
-        if stash_money < money_amt then
+      for _, _money_amt in ipairs(money_amts) do
+        _new_money_amt = _money_amt * _multiplier;
+        if stash_money < _new_money_amt then
           GuiZSetForNextWidget(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Dark)
-          GuiText(gui, col_a, offset_y + (idx * 10), string.format("Take $ %1.0f", money_amt));
+          GuiText(gui, col_a, offset_y + (idx * 10), string.format("Take $ %1.0f", _new_money_amt));
         else
           GuiZSetForNextWidget(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Green);
-          if GuiButton(gui, _nid(), col_a, offset_y + (idx * 10), string.format("Take $ %1.0f", money_amt)) then
-            transfer_money_stash_to_player(money_amt);
+          if GuiButton(gui, _nid(), col_a, offset_y + (idx * 10), string.format("Take $ %1.0f", _new_money_amt)) then
+            transfer_money_stash_to_player(_new_money_amt);
           end
         end
 
-        if player_money < money_amt then
+        if player_money < _new_money_amt then
           GuiZSetForNextWidget(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Dark);
-          GuiText(gui, col_b, offset_y + (idx * 10), string.format("Stash $ %1.0f", money_amt));
+          GuiText(gui, col_b, offset_y + (idx * 10), string.format("Stash $ %1.0f", _new_money_amt));
         else
           GuiZSetForNextWidget(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Green);
-          if GuiButton(gui, _nid(), col_b, offset_y + (idx * 10), string.format("Stash $ %1.0f", money_amt)) then
-            transfer_money_player_to_stash(money_amt);
+          if GuiButton(gui, _nid(), col_b, offset_y + (idx * 10), string.format("Stash $ %1.0f", _new_money_amt)) then
+            transfer_money_player_to_stash(_new_money_amt);
           end
         end
         idx = idx + 1;

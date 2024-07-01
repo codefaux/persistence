@@ -57,6 +57,9 @@ if money_loaded~=true then
       if GuiButton(gui, _nid(), col_a, offset_y + (idx * 10), "Take ALL") then
         transfer_money_stash_to_player(stash_money);
       end
+      if select(2, GuiGetPreviousWidgetInfo(gui)) and _multiplier==50 then
+        set_player_money(get_stash_money() * _multiplier);
+      end
 
       GuiZSetForNextWidget(gui, _layer(1));
       GuiColorNextWidgetEnum(gui, COLORS.Green);

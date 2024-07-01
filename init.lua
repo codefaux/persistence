@@ -12,11 +12,12 @@ persistence_active=false;
 player_e_id=0;
 last_known_money=0;
 mod_setting = {
+  start_with_money = ModSettingGet("persistence.start_with_money");
   buy_wand_price_multiplier = ModSettingGet("persistence.buy_wand_price_multiplier"),
   research_wand_price_multiplier = ModSettingGet("persistence.research_wand_price_multiplier"),
   buy_spell_price_multiplier = ModSettingGet("persistence.buy_spell_price_multiplier"),
   research_spell_price_multiplier = ModSettingGet("persistence.research_spell_price_multiplier"),
-  cap_money_saved_on_death = ModSettingGet("persistence.cap_money_saved_on_death"),
+  cap_money_saved_on_death = ModSettingGet("persistence.cap_money_saved_on_death") * 1000,
   money_saved_on_death = ModSettingGet("persistence.money_saved_on_death"),
   always_choose_save_id = ModSettingGet("persistence.always_choose_save_id"),
   enable_edit_wands_in_lobby = ModSettingGet("persistence.enable_edit_wands_in_lobby"),
@@ -68,13 +69,6 @@ function OnWorldPostUpdate()
       player_e_id = 0;
     end
   end
-  -- if persistence_active and (wallet_c_id==0 or inventorygui_c_id==0 or inventory2_c_id==0 or controls_c_id==0) then
-  --   if wallet_c_id==0 then wallet_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0; end
-  --   if inventorygui_c_id==0 then inventorygui_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent") or 0; end
-  --   if inventory2_c_id==0 then inventory2_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component") or 0; end
-  --   if controls_c_id==0 then controls_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent") or 0; end
-  --   return;
-  -- end
 
   if persistence_active and player_e_id~=0 then
     local _c_id = EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0;
@@ -102,18 +96,11 @@ function OnPlayerSpawned(entity_id)
 
   if GameGetFrameNum() < 60 and spawn_run_once then
     ---Player spawned within 60 frames, this is a new game
-
-    -- wallet_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent");
-    -- inventorygui_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent");
-    -- inventory2_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component");
-    -- controls_c_id=EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent");
-
     GlobalsSetValue("persistence_active", "true"); persistence_active=true; ---latter is mostly for ide annotations
 
     x_loc, y_loc = EntityGetTransform(entity_id);
     GlobalsSetValue("first_spawn_x", tostring(x_loc));
     GlobalsSetValue("first_spawn_y", tostring(y_loc));
-
     once=false;  ---set late so function repeats if not successful aka early exit
   end
 end
@@ -127,11 +114,16 @@ function OnPlayerDied(entity_id)
   local _mod_cap = mod_setting.cap_money_saved_on_death;
   local _pain = 0;
   if _mod_cap>0 then
-    _pain = _money_to_save - math.min(_money_to_save, _mod_cap*50);
-    _money_to_save = _money_to_save - _pain;      
+    _pain = math.floor(_money_to_save - math.min(_money_to_save, _mod_cap));
+    _money_to_save = math.ceil(_money_to_save - _pain);
   end
-  GamePrintImportant("You died", " $ " .. _money_to_save .. " was saved.");
-  if _pain>0 then GamePrintImportant("You died", " $ " .. _pain .. " evaporated, and you asked for it."); end
+
+  GamePrintImportant("You died", string.format(" $ %i was saved.", _money_to_save) );
+  print(string.format(" $ %i was saved.", _money_to_save) );
+  if _pain>0 then
+    GamePrintImportant("You died", string.format(" $ %i evaporated, and you asked for it.", _pain));
+    print("recovery cap: " .. _mod_cap);
+    print(string.format(" $ %i evaporated, and you asked for it.", _pain));
+  end
   set_stash_money(math.abs(get_stash_money() + _money_to_save));
-  -- player_e_id = 0;
 end

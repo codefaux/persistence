@@ -1,26 +1,24 @@
--- Spell per-purchase options; per-spell, per-copy
--- Add linear/expo scaling option to above
--- Wand Icons don't line up consistently
--- Condense spell list, other modes?
--- Fancy search functions?
--- Unique wands (minigun, ocarina, kantele) don't research correctly
--- Spells/wands "stuffing" inventory
+-- persistence tokens
+-- Wand Icons don't line up consistently (best-effort, needs better fix)
+-- Mod order fixes?
 
 -- function EntityGetInRadius(pos_x, pos_y, radius) to auto close menu? -- EntityGetHerdRelationSafe( entity_a:int, entity_b:int )
--- amount of money (from stash) for player on new run
--- persistence tokens
 
--- Mod order fixes?
+-- Spell per-purchase options; per-spell, per-copy
+
+-- Add linear/expo scaling option to above
+-- Condense spell list, other modes?
 -- Mod setting for "allow research spells inside wands"?
+-- Fancy search functions?
+
+
+
 -- Translation table for translation mods, translation helper Mod Options setting for tooltips indicating strings and meanings
 
 
 --- DONE? NEEDS VERIFY:
 
--- Configurable cap on gold recovered (or damping factor?)
 -- Proximity scan report new types
--- Can't research spells when player has "unlimited spells" perk?
--- Spells bought while "unlimited spells" perk have count?
 
 
 

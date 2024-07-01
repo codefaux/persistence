@@ -13,8 +13,35 @@ dofile_once("data/scripts/lib/mod_settings.lua");
 -- until the player starts a new game.
 -- ModSettingSetNextValue() will set the buffered value, that will later become visible via ModSettingGet(), unless the setting scope is MOD_SETTING_SCOPE_RUNTIME.
 
-function mod_setting_change_callback( mod_id, gui, in_main_menu, setting, old_value, new_value  )
-  print( tostring(new_value) )
+function mod_setting_integer(mod_id, gui, in_main_menu, im_id, setting)
+	local value = ModSettingGetNextValue(mod_setting_get_id(mod_id,setting));
+	if type(value) ~= "number" then value = setting.value_default or 0; end
+
+	local value_new = GuiSlider(gui, im_id, mod_setting_group_x_offset, 0, setting.ui_name, value, setting.value_min, setting.value_max, setting.value_default, setting.value_display_multiplier or 1, setting.value_display_formatting or "", 64);
+  value_new = math.floor(value_new);
+
+  if value ~= value_new then
+		ModSettingSetNextValue(mod_setting_get_id(mod_id,setting), value_new, false);
+		mod_setting_handle_change_callback(mod_id, gui, in_main_menu, setting, value, value_new);
+	end
+
+	mod_setting_tooltip(mod_id, gui, in_main_menu, setting);
+end
+
+function mod_setting_number_multiple(mod_id, gui, in_main_menu, im_id, setting)
+  local _round_to = setting.round_to or 1;
+
+  local value = ModSettingGetNextValue(mod_setting_get_id(mod_id,setting)) or setting.value_default;
+
+	local value_new = value;
+  value_new = math.floor( (GuiSlider(gui, im_id, mod_setting_group_x_offset, 0, setting.ui_name, value_new, setting.value_min, setting.value_max, setting.value_default, setting.value_display_multiplier or 1, setting.value_display_formatting or "", 64) / _round_to) + 0.5 ) * _round_to;
+
+  if value ~= value_new then
+    ModSettingSetNextValue(mod_setting_get_id(mod_id,setting), value_new, false);
+		mod_setting_handle_change_callback(mod_id, gui, in_main_menu, setting, value, value_new);
+	end
+
+	mod_setting_tooltip(mod_id, gui, in_main_menu, setting);
 end
 
 mod_id = "persistence" -- This should match the name of your mod's folder.
@@ -24,8 +51,8 @@ mod_settings =
 {
   {
     category_id = "encoded_settings",
-    -- ui_name = "",
-    -- ui_description = "",
+    ui_name = "",
+    ui_description = "",
     settings = {
       { hidden = true,  id = "loadout_1",   ui_name = "Wand loadout 1",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
         allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
@@ -63,6 +90,8 @@ mod_settings =
         id = "money_saved_on_death",
         ui_name = "Money Saved on Death",
         ui_description = "How much money persists after you do not",
+        ui_fn = mod_setting_number_multiple,
+        round_to = 0.01,
         value_default = 0.25,
         value_min = 0,
         value_max = 1,
@@ -74,11 +103,13 @@ mod_settings =
         id = "cap_money_saved_on_death",
         ui_name = "MAX Money Saved on Death",
         ui_description = "If you think you're earning too quickly (0 is no limit)",
+        ui_fn = mod_setting_number_multiple,
+        round_to = 5,
         value_default = 0,
         value_min = 0,
-        value_max = 20,
-        value_display_multiplier = 50,
-        value_display_formatting = " $0 k",
+        value_max = 500,
+        value_display_multiplier = 1,
+        value_display_formatting = " $ $0 k",
         scope = MOD_SETTING_SCOPE_NEW_GAME,
       },
     },
@@ -86,7 +117,7 @@ mod_settings =
   {
     category_id = "default_settings",
     ui_name = "DEFAULTS",
-    ui_description = "Mod defaults",
+    ui_description = "Run defaults",
     settings = {
       {
         id = "always_choose_save_id",
@@ -95,6 +126,19 @@ mod_settings =
         value_default = "-1",
         values = { {"-1","Manual"}, {"0","Disable mod"}, {"1","Use Slot 1"}, {"2","Use Slot 2"}, {"3","Use Slot 3"}, {"4","Use Slot 4"}, {"5","Use Slot 5"} },
         scope = MOD_SETTING_SCOPE_RUNTIME_RESTART,
+      },
+      {
+        id = "start_with_money",
+        ui_name = "Start with money",
+        ui_description = "Money to withdraw from your Stash at run start",
+        ui_fn = mod_setting_number_multiple,
+        round_to = 100,
+        value_default = 0,
+        value_min = 0,
+        value_max = 5000,
+        value_display_multiplier = 1,
+        value_display_formatting = " $ $0",
+        scope = MOD_SETTING_SCOPE_NEW_GAME,
       }
     },
   },
@@ -107,6 +151,8 @@ mod_settings =
         id = "research_wand_price_multiplier",
         ui_name = "Wand Research Price Multiplier",
         ui_description = "Price Multiplier to Research a Wand",
+        ui_fn = mod_setting_number_multiple,
+        round_to = 0.01,
         value_default = 1,
         value_min = .1,
         value_max = 3,
@@ -118,6 +164,8 @@ mod_settings =
         id = "research_spell_price_multiplier",
         ui_name = "Spell Research Price Multiplier",
         ui_description = "Price Multiplier to Research a Spell",
+        ui_fn = mod_setting_number_multiple,
+        round_to = 0.1,
         value_default = 10,
         value_min = 1,
         value_max = 30,
@@ -129,6 +177,8 @@ mod_settings =
         id = "buy_wand_price_multiplier",
         ui_name = "Buy Wand Price Multiplier",
         ui_description = "Price Multiplier to Buy a Wand",
+        ui_fn = mod_setting_number_multiple,
+        round_to = 0.01,
         value_default = 1,
         value_min = .1,
         value_max = 3,
@@ -140,6 +190,8 @@ mod_settings =
         id = "buy_spell_price_multiplier",
         ui_name = "Buy Spell Price Multiplier",
         ui_description = "Price Multiplier to Buy a Spell",
+        ui_fn = mod_setting_number_multiple,
+        round_to = 0.01,
         value_default = 1,
         value_min = .1,
         value_max = 3,
@@ -199,9 +251,9 @@ mod_settings =
 --     - before mod initialization when starting a new game (init_scope will be MOD_SETTING_SCOPE_NEW_GAME)
 --    - when entering the game after a restart (init_scope will be MOD_SETTING_SCOPE_RESTART)
 --    - at the end of an update when mod settings have been changed via ModSettingsSetNextValue() and the game is unpaused (init_scope will be MOD_SETTINGS_SCOPE_RUNTIME)
-function ModSettingsUpdate( init_scope )
-  local old_version = mod_settings_get_version( mod_id ) -- This can be used to migrate some settings between mod versions.
-  mod_settings_update( mod_id, mod_settings, init_scope )
+function ModSettingsUpdate(init_scope)
+  local old_version = mod_settings_get_version(mod_id) -- This can be used to migrate some settings between mod versions.
+  mod_settings_update(mod_id, mod_settings, init_scope)
 end
 
 -- This function should return the number of visible setting UI elements.
@@ -211,52 +263,10 @@ end
 -- At the moment it is fine to simply return 0 or 1 in a custom implementation, but we don't guarantee that will be the case in the future.
 -- This function is called every frame when in the settings menu.
 function ModSettingsGuiCount()
-  return mod_settings_gui_count( mod_id, mod_settings )
+  return mod_settings_gui_count(mod_id, mod_settings)
 end
 
 -- This function is called to display the settings UI for this mod. Your mod's settings wont be visible in the mod settings menu if this function isn't defined correctly.
-function ModSettingsGui( gui, in_main_menu )
-  mod_settings_gui( mod_id, mod_settings, gui, in_main_menu )
-
-  --example usage:
-  --[[
-  local im_id = 124662 -- NOTE: ids should not be reused like we do below
-  GuiLayoutBeginLayer( gui )
-
-  GuiLayoutBeginHorizontal( gui, 10, 50 )
-    GuiImage( gui, im_id + 12312535, 0, 0, "data/particles/shine_07.xml", 1, 1, 1, 0, GUI_RECT_ANIMATION_PLAYBACK.PlayToEndAndPause )
-    GuiImage( gui, im_id + 123125351, 0, 0, "data/particles/shine_04.xml", 1, 1, 1, 0, GUI_RECT_ANIMATION_PLAYBACK.PlayToEndAndPause )
-    GuiLayoutEnd( gui )
-
-  GuiBeginAutoBox( gui )
-
-  GuiZSet( gui, 10 )
-  GuiZSetForNextWidget( gui, 11 )
-  GuiText( gui, 50, 50, "Gui*AutoBox*")
-  GuiImage( gui, im_id, 50, 60, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-  GuiZSetForNextWidget( gui, 13 )
-  GuiImage( gui, im_id, 60, 150, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-
-  GuiZSetForNextWidget( gui, 12 )
-  GuiEndAutoBoxNinePiece( gui )
-
-  GuiZSetForNextWidget( gui, 11 )
-  GuiImageNinePiece( gui, 12368912341, 10, 10, 80, 20 )
-  GuiText( gui, 15, 15, "GuiImageNinePiece")
-
-  GuiBeginScrollContainer( gui, 1233451, 500, 100, 100, 100 )
-  GuiLayoutBeginVertical( gui, 0, 0 )
-  GuiText( gui, 10, 0, "GuiScrollContainer")
-  GuiImage( gui, im_id, 10, 0, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-  GuiImage( gui, im_id, 10, 0, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-  GuiImage( gui, im_id, 10, 0, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-  GuiImage( gui, im_id, 10, 0, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-  GuiLayoutEnd( gui )
-  GuiEndScrollContainer( gui )
-
-  local c,rc,hov,x,y,w,h = GuiGetPreviousWidgetInfo( gui )
-  print( tostring(c) .. " " .. tostring(rc) .." " .. tostring(hov) .." " .. tostring(x) .." " .. tostring(y) .." " .. tostring(w) .." ".. tostring(h) )
-
-  GuiLayoutEndLayer( gui )
-  ]]--
+function ModSettingsGui(gui, in_main_menu)
+  mod_settings_gui(mod_id, mod_settings, gui, in_main_menu)
 end

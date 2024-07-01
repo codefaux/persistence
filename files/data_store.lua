@@ -1,7 +1,5 @@
 if persistence_data_store_loaded~=true then
   -- On load only
-  -- dofile_once("data/scripts/gun/gun_actions.lua");
-  -- dofile_once("data/scripts/gun/procedural/wands.lua");
   wands=wands or {};
 
   dofile_once(mod_dir .. "files/helper.lua");
@@ -390,7 +388,6 @@ if persistence_data_store_loaded~=true then
 
   function _get_template(profile_id, template_id)
     return _load_template(profile_id, template_id);
-    -- return data_store[profile_id]["templates"][template_id];
   end
 
   function _get_templates(profile_id)
@@ -399,7 +396,6 @@ if persistence_data_store_loaded~=true then
       table.insert(_templates, _load_template(profile_id, _idx));
     end
     return _templates;
-    -- return data_store[profile_id]["templates"];
   end
 
   function _set_template(profile_id, template_id, wand_data)
@@ -427,7 +423,6 @@ if persistence_data_store_loaded~=true then
     AddFlagPersistent(template_flag_prefix .. "_wand_type_" .. string.lower(wand_data["wand_type"]));
 
     AddFlagPersistent(template_flag_prefix);
-    -- data_store[profile_id]["templates"][template_id] = wand_data;
   end
 
   function _delete_template(profile_id, template_id)
@@ -454,9 +449,6 @@ if persistence_data_store_loaded~=true then
     end
 
     RemoveFlagPersistent(template_flag_prefix);
-    -- if data_store[profile_id] ~= nil and data_store[profile_id]["templates"] ~= nil then
-    --   data_store[profile_id]["templates"][template_id] = nil;
-    -- end
   end
 
   local function _research_wand(profile_id, entity_id)
@@ -852,18 +844,9 @@ if persistence_data_store_loaded~=true then
     end
     data_store[profile_id]["spread_max"] = spread_max;
 
-    -- data_store[profile_id]["money"],
-    -- data_store[profile_id]["always_cast_spells_known"],
-    -- data_store[profile_id]["spells_known"],
-    -- data_store[profile_id]["wand_types_known"] = _load_profile_quick(profile_id);
 
     _load_profile_spells(profile_id);
     _load_wand_types(profile_id);
-
-    -- data_store[profile_id]["templates"] = {};
-    -- for i = 1, get_template_count() do
-      -- _load_template(profile_id, i);
-    -- end
 
     data_store[profile_id]["loaded"] = true;
 
@@ -875,6 +858,12 @@ if persistence_data_store_loaded~=true then
     print("wand_types_known: " .. data_store[profile_id]["wand_types_known"]);
     loaded_profile_id = profile_id;
     GlobalsSetValue("persistence_profile", tostring(profile_id));
+
+    if mod_setting.start_with_money>0 and get_player_money()==0 then
+      local _withdraw = math.min(mod_setting.start_with_money, get_stash_money());
+      transfer_money_stash_to_player(_withdraw);
+      GamePrint(string.format("Persistence: Starting run with $ %i from Stash", _withdraw));
+    end
   end
 
   function can_create_wand(profile_id)

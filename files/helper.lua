@@ -253,7 +253,9 @@ if persistence_helper_loaded~=true then
     end
     SetWandSprite(_new_wand_e_id, ability_comp, wand.file, wand.grip_x, wand.grip_y, (wand.tip_x - wand.grip_x), (wand.tip_y - wand.grip_y));
 
-    GamePickUpInventoryItem(player_e_id, _new_wand_e_id, true);
+    -- UnlockPlayer();
+    -- GamePickUpInventoryItem(player_e_id, _new_wand_e_id, true);
+    -- LockPlayer();
 
     set_player_money(get_player_money() - _price);
     return true;
@@ -310,30 +312,44 @@ if persistence_helper_loaded~=true then
     return wands;
   end
 
-  function get_player_inv_spells()
-    local _spells = {};
+  function get_player_inv_spell_entities()
+    local _spell_entities = {};
     if EntityGetWithName("inventory_full") == nil then return {}; end
-    local inventory_full_childs = EntityGetAllChildren(EntityGetWithName("inventory_full"));
-    if inventory_full_childs ~=nil then
-      for _, item in ipairs(inventory_full_childs) do
-        table.insert(_spells, item);
+    local _inventory_full_children = EntityGetAllChildren(EntityGetWithName("inventory_full"));
+    if _inventory_full_children ~=nil then
+      for _, _inventory_entity in ipairs(_inventory_full_children) do
+        if EntityHasTag(_inventory_entity, "card_action") then
+          table.insert(_spell_entities, _inventory_entity);
+        end
       end
     end
-    return _spells;
+    return _spell_entities;
   end
+
+  function get_spell_entity_current_uses(entity_id)
+    local item_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "ItemComponent");
+    if item_comp ~= nil then
+      local _uses_now = ComponentGetValue2(item_comp, "uses_remaining");
+      return _uses_now;
+    end
+  end
+
 
   function get_spell_inv_research_table()
     local _spells = {};
     local _type_hash = {};
-    local _carrying = get_player_inv_spells();
+    local _carrying_e_ids = get_player_inv_spell_entities();
     local _known = get_profile_spells();
     local _researchable_hash = {}
     local _spell_idx = 0;
 
     _type_hash[99] = true; -- "all"
-    for _, _e_id in ipairs(_carrying) do
+    for _, _e_id in ipairs(_carrying_e_ids) do
       local _a_id = get_spell_entity_action_id(_e_id);
       _spell_idx = _spell_idx + 1;
+      local _uses_max = actions_by_id[_a_id].max_uses;
+      local _uses_now = get_spell_entity_current_uses(_e_id);
+
       _spells[_spell_idx] = {};
       _spells[_spell_idx].e_id = _e_id;
       _spells[_spell_idx].a_id = _a_id;
@@ -344,30 +360,29 @@ if persistence_helper_loaded~=true then
       _spells[_spell_idx].type_sprite = action_type_to_slot_sprite(actions_by_id[_a_id].type);
       _spells[_spell_idx].sprite = actions_by_id[_a_id].sprite;
       _spells[_spell_idx].price = actions_by_id[_a_id].price;
-      local _uses_max = actions_by_id[_a_id].max_uses;
       _spells[_spell_idx].max_uses = _uses_max;
+      _spells[_spell_idx].curr_uses = _uses_now;
 
       _type_hash[actions_by_id[_a_id].type] = true;
 
       local _research_eligible = true;
-      local item_comp = EntityGetComponentIncludingDisabled(_e_id, "ItemComponent");
-      if item_comp ~= nil then
-        local _uses_now = ComponentGetValue2(item_comp[0]~= nil and item_comp[0] or item_comp[1], "uses_remaining");
-        if _uses_max~=nil and _uses_max~=_uses_now and _uses_now~=-1 then
-          _research_eligible = false;
-        end
+
+      if _uses_max~=nil and _uses_max>0 and _uses_now~=nil and _uses_now~=_uses_max and _uses_now~=-1 then
+        _research_eligible = false;
       end
       -- TODO: Other disqualifying factors?
 
-      if not _known[_a_id] and _research_eligible then
+      _spells[_spell_idx].known = _known[_a_id];
+
+      if not _known[_a_id] then
         if _researchable_hash[_a_id]==nil then
-          _spells[_spell_idx].researchable = true;
-          _spells[_spell_idx].recyclable = false;
-          _researchable_hash[_a_id]=true;
+          _spells[_spell_idx].researchable = _research_eligible;
+          _spells[_spell_idx].recyclable = not _research_eligible;
+          if _research_eligible then _researchable_hash[_a_id]=true; end
         else
           _spells[_spell_idx].researchable = false;
           _spells[_spell_idx].recyclable = false;
-          end
+        end
       else
         _spells[_spell_idx].researchable = false;
         _spells[_spell_idx].recyclable = true;

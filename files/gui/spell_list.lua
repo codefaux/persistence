@@ -77,7 +77,7 @@ if spell_list_loaded~=true then
           else
             GuiColorNextWidgetEnum(gui, COLORS.Dim);
             GuiZSetForNextWidget(gui, _layer(layer));
-            if GuiButton(gui, _nid(), x_base, 0 + y_base, "-known-") then
+            if GuiButton(gui, _nid(), x_base, 0 + y_base, slot_data.known and "-known-" or "-ineligible-") then
               spell_list_confirmation = slot_data.e_id;
             end
             GuiTooltip(gui, "Recycle Spell", "No cost. No gain.")

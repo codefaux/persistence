@@ -76,7 +76,7 @@ if gui_subfunc_loaded~=true then
   function __render_wand_sprite(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
     local wand_offset_x, wand_offset_y = get_wand_rotated_offset(0, 0, -45);
     GuiZSetForNextWidget(gui, _layer(layer+1));
-    GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 6, y_base + (wand_offset_y * 1.333) + 18, slot_data.value, 1, 1.333, 1.333, math.rad(-45));
+    GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 6, y_base + (-wand_offset_y * 1.333) + 18, slot_data.value, 1, 1.333, 1.333, math.rad(-45));
 
     if slot_data.research~=nil and slot_data.research.b_wand_types then
       local new_icon = "data/ui_gfx/damage_indicators/explosion.png";
@@ -92,7 +92,7 @@ if gui_subfunc_loaded~=true then
   function __render_wand_type(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
     local wand_offset_x, wand_offset_y = get_wand_rotated_offset(0, 0, -45);
     GuiZSetForNextWidget(gui, _layer(layer+1));
-    GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 6, y_base + (wand_offset_y * 1.333) + 18, wand_type_to_sprite_file(slot_data.value), 1, 1.333, 1.333, math.rad(-45));
+    GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 6, y_base + (-wand_offset_y * 1.333) + 18, wand_type_to_sprite_file(slot_data.value), 1, 1.333, 1.333, math.rad(-45));
 
     if slot_data.research~=nil and slot_data.research.b_wand_types then
       local new_icon = "data/ui_gfx/damage_indicators/explosion.png";
@@ -185,9 +185,16 @@ if gui_subfunc_loaded~=true then
     local _edge_x, _edge_y1 = select(8, GuiGetPreviousWidgetInfo(gui));
     if _data.max_uses ~= nil then
       local _x_text_width = select(6, GuiGetPreviousWidgetInfo(gui))
-      GuiColorNextWidgetEnum(gui, COLORS.Tip);
+      local _uses_string = "";
+      if _data.curr_uses~=nil and _data.curr_uses>-1 and _data.curr_uses~=_data.max_uses then
+        _uses_string = _data.curr_uses .. "/" .. _data.max_uses;
+        GuiColorNextWidgetEnum(gui, COLORS.Yellow);
+      else
+        _uses_string = _data.max_uses;
+        GuiColorNextWidgetEnum(gui, COLORS.Tip);
+      end
       GuiZSetForNextWidget(gui, _layer(layer));
-      GuiText(gui, _after_icon_x + _x_text_width + 3, y_base - 1, "(" .. _data.max_uses .. ")"); -- uses
+      GuiText(gui, _after_icon_x + _x_text_width + 3, y_base - 1, "(" .. _uses_string .. ")"); -- uses
     end
 
     if _data.recyclable~=nil and _data.recyclable==true then

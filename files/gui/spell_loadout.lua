@@ -46,7 +46,8 @@ if spell_loadouts_loaded~=true then
         _spell_string = _spell_string .. "," .. _spell_a_id;
       end
       print("persistence.loadout_" .. idx);
-      print("{" .. _spell_string .. "}");
+      print("{" .. _spell_string .. "}[" .. #_spell_string .. "]");
+      if #_spell_string>512 then return false; end
       ModSettingSetNextValue("persistence.loadout_" .. idx, _spell_string, false);
       -- spell_loadout{name, spells[]}
     end
@@ -81,7 +82,7 @@ if spell_loadouts_loaded~=true then
         if _saved_spell_loadouts[_loadout_idx]~=nil and _saved_spell_loadouts[_loadout_idx].name~=nil then
           _loadout_data = _saved_spell_loadouts[_loadout_idx];
           GuiZSetForNextWidget(gui, _layer(2));
-          GuiText(gui, 0, _y_offset, string.format("Loadout %i: %s ($ %i)", _loadout_idx, _loadout_data.name, _loadout_data.price), 1);
+          GuiText(gui, 0, _y_offset, string.format("#%i: %s", _loadout_idx, _loadout_data.name), 1);
           _y_offset = _y_offset + 10;
           GuiZSetForNextWidget(gui, _layer(3));
           GuiColorNextWidgetEnum(gui, COLORS.Yellow);
@@ -98,7 +99,7 @@ if spell_loadouts_loaded~=true then
           end
           GuiZSetForNextWidget(gui, _layer(3));
           GuiColorNextWidgetBool(gui, _loadout_data.price<=last_known_money);
-          if GuiButton(gui, _nid(), 65, _y_offset, "Purchase", 1) and _loadout_data.price<=last_known_money then
+          if GuiButton(gui, _nid(), 60, _y_offset, string.format("Purchase: $ %i",  _loadout_data.price), 1) and _loadout_data.price<=last_known_money then
             for _, _spell in pairs(_loadout_data.spells) do
               if does_profile_know_spell(_spell) then
                 purchase_spell(_spell);
@@ -121,7 +122,7 @@ if spell_loadouts_loaded~=true then
         else
           _y_offset = _y_offset + 2 + _unit_margin;
           GuiZSetForNextWidget(gui, _layer(3));
-          GuiText(gui, 0, _y_offset, string.format("Loadout %i: Create from Wand:", _loadout_idx), 1);
+          GuiText(gui, 0, _y_offset, string.format("#%i:   Create from Wand:", _loadout_idx), 1);
           _y_offset = _y_offset + 9;
           if _list_confirm~=_loadout_idx then
             for _slot_idx = 1, 4 do -- save loadout from slot buttons
@@ -139,7 +140,7 @@ if spell_loadouts_loaded~=true then
           else
             _y_offset = _y_offset + 2;
             GuiZSetForNextWidget(gui, _layer(3));
-            _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 16, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 -/+");
+            _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 32, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 -/+");
             GuiZSetForNextWidget(gui, _layer(4));
             if GuiButton(gui, _nid(), 86, _y_offset, "Save", 1) or InputIsKeyJustDown(Key_RETURN) then
               save_spell_loadout(_loadout_idx, {name = _name_temp, spells = _new_loadout_spells});

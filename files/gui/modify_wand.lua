@@ -197,8 +197,8 @@ if modify_wand_loaded~=true then
             end
             local gui_icon = (select(3, GuiGetPreviousWidgetInfo(gui))) and "data/ui_gfx/inventory/full_inventory_box_highlight.png" or "data/ui_gfx/inventory/full_inventory_box.png";
 
-            local frame_offset_x = 9;
-            local frame_offset_y = -13;
+            local frame_offset_x = 7;
+            local frame_offset_y = -11;
 
             GuiZSetForNextWidget(gui, _layer(3))
             GuiImage(gui, _nid(), _type_x_offset, y_offset + _type_y_offset, gui_icon, 1, 1.5, 1.5, math.rad(-90)); -- radians are annoying

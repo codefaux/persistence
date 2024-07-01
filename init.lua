@@ -11,7 +11,17 @@ persistence_active=false;
 
 player_e_id=0;
 last_known_money=0;
-
+mod_setting = {
+  buy_wand_price_multiplier = ModSettingGet("persistence.buy_wand_price_multiplier"),
+  research_wand_price_multiplier = ModSettingGet("persistence.research_wand_price_multiplier"),
+  buy_spell_price_multiplier = ModSettingGet("persistence.buy_spell_price_multiplier"),
+  research_spell_price_multiplier = ModSettingGet("persistence.research_spell_price_multiplier"),
+  cap_money_saved_on_death = ModSettingGet("persistence.cap_money_saved_on_death"),
+  money_saved_on_death = ModSettingGet("persistence.money_saved_on_death"),
+  always_choose_save_id = ModSettingGet("persistence.always_choose_save_id"),
+  enable_edit_wands_in_lobby = ModSettingGet("persistence.enable_edit_wands_in_lobby"),
+  reusable_holy_mountain = ModSettingGet("persistence.reusable_holy_mountain"),
+};
 
 function do_lobby_effect_entity()
   local _e_id = EntityGetWithTag("player_unit")[1];
@@ -35,7 +45,7 @@ function teleport_back_to_lobby()
 end
 
 function OnModPreInit()
-  mod_disabled = ModSettingGet("persistence.always_choose_save_id")==0;
+  mod_disabled = mod_setting.always_choose_save_id==0;
 end
 
 
@@ -113,8 +123,8 @@ function OnPlayerDied(entity_id)
   if mod_disabled then return; end
   -- if entity_id~=player_e_id then return; end
 
-  local _money_to_save = math.floor(last_known_money * ModSettingGet("persistence.money_saved_on_death") );
-  local _mod_cap = ModSettingGet("persistence.cap_money_saved_on_death");
+  local _money_to_save = math.floor(last_known_money * mod_setting.money_saved_on_death );
+  local _mod_cap = mod_setting.cap_money_saved_on_death;
   local _pain = 0;
   if _mod_cap>0 then
     _pain = _money_to_save - math.min(_money_to_save, _mod_cap*50);

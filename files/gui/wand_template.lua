@@ -38,24 +38,24 @@ if wand_template_loaded~=true then
               _reload_data = true;
             end
           else
-            if template_confirmation == i then
+            if template_confirmation~=i then
               GuiZSetForNextWidget(gui, _layer(1));
-              GuiColorNextWidgetEnum(gui, COLORS.Green);
-              if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 1), "CONFIRM") then
-                set_template(i, modify_wand_table.slot_data.wand);
-                template_confirmation = 0;
-                _reload_data = true;
+              GuiColorNextWidgetEnum(gui, COLORS.Yellow);
+              if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 2), "Update") then
+                template_confirmation = i;
               end
             else
               GuiZSetForNextWidget(gui, _layer(1));
               GuiColorNextWidgetEnum(gui, COLORS.Green);
-              if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 1), "Update") then
-                template_confirmation = i;
+              if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 2), "CONFIRM") then
+                set_template(i, modify_wand_table.slot_data.wand);
+                template_confirmation = 0;
+                _reload_data = true;
               end
             end
             GuiZSetForNextWidget(gui, _layer(1));
             GuiColorNextWidgetEnum(gui, COLORS.Green);
-            if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 2), "Load") then
+            if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 1), "Load") then
               -- GamePrint("Load Template");
               modify_wand_table.slot_data.wand = get_template(i);
             end
@@ -132,7 +132,6 @@ if wand_template_loaded~=true then
             _data.value = _valfunc(_value);
             _data.member = _member;
             _data.label = (modify_wand_table.datum_translation[_member][1]~=nil and modify_wand_table.datum_translation[_member][1]~="") and GameTextGetTranslatedOrNot(modify_wand_table.datum_translation[_member][1]) or "";
-            _data.cost[_member] = (modify_wand_table.datum_translation[_member][6]~=nil and modify_wand_table.datum_translation[_member][6](_value) or 0) * ModSettingGet("persistence.buy_wand_price_multiplier");
             _data.render_slots_override = get_always_cast_count();
             local _renderfunc = modify_wand_table.datum_translation[_member][4] or _gui_nop;
             _renderfunc(_preview_datum_x_pos, _preview_datum_y_pos, margin, _preview_panel_width - margin, _preview_panel_height, 3, _data, _nid);

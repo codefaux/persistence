@@ -13,20 +13,17 @@ if modify_wand_loaded~=true then
         local row2_y_offset = 11;
         local row3_y_offset = 18;
         local x_offset = 6;
-        local _price = 0;
-        if slot_data.cost~=nil then
-          for _member, _cost in pairs(slot_data.cost) do
-            _price = _price + _cost;
-          end
-        end
-        slot_data.price = math.ceil(_price * ModSettingGet("persistence.buy_wand_price_multiplier"));
+        slot_data.price = get_wand_price(slot_data.wand);
 
         local _tmp_price = slot_data.price;
         if slot_data.origin_e_id~=nil and slot_data.origin_e_id~=0 then
           local _var_comp = EntityGetFirstComponentIncludingDisabled(slot_data.origin_e_id, "VariableStorageComponent", "persistence_wand_price") or 0;
           local _origin_price = ComponentGetValue(_var_comp, "value_int");
           _tmp_price = _tmp_price - _origin_price;
-        end  
+          GuiZSetForNextWidget(gui, _layer(layer));
+          GuiColorNextWidgetEnum(gui, COLORS.Dim);
+          GuiText(gui, x_base + x_offset, y_base + row2_y_offset, string.format("Paid: $ %i", _origin_price, small_text_scale));
+        end
 
         GuiZSetForNextWidget(gui, _layer(layer));
         GuiColorNextWidgetBool(gui, last_known_money >= _tmp_price);
@@ -46,24 +43,16 @@ if modify_wand_loaded~=true then
     datum_translation = {
       -- <name>              = {<label>,                        <val_func>,  <height>,  <render_func>,            <widget_func>              cost_formula_func },
       _index = {[0] = 10, [1] = "wand_type", [2] = "shuffle", [3] = "spells_per_cast", [4] = "cast_delay", [5] = "recharge_time", [6] = "mana_max", [7] = "mana_charge_speed", [8] = "capacity", [9] = "spread", [10] = "always_cast_spells"},
-      wand_type            = {"",                              __val,      34,        __render_wand_type,      nil,                      function (_) return 200; end  },
-      shuffle              = {"$inventory_shuffle",            __yesno,    9,        __render_gen_stat,      __widget_toggle,          function (_shuffle) return _shuffle and 0 or 100; end  },
-      spells_per_cast      = {"$inventory_actionspercast",      __val,      9,        __render_gen_stat,      __widget_slider,          function (a_p_c) return math.max(a_p_c-1,0)*500; end   },
-      cast_delay          = {"$inventory_castdelay",          __ctime,    9,        __render_gen_stat,      __widget_slider,          function (_castdelay) return (0.01 ^ ((_castdelay/60) - 1.8) + 200) * 0.1; end  },
-      recharge_time        = {"$inventory_rechargetime",        __ctime,    9,        __render_gen_stat,      __widget_slider,          function (_rechargetime) return (0.01 ^ ((_rechargetime/60) - 1.8) + 200) * 0.1; end  },
-      mana_max            = {"$inventory_manamax",            __round,    9,        __render_gen_stat,      __widget_slider,          function (_manamax) return _manamax; end  },
-      mana_charge_speed    = {"$inventory_manachargespeed",    __val,      9,        __render_gen_stat,      __widget_slider,          function (_manachargespeed) return _manachargespeed * 2; end  },
-      capacity            =  {"$inventory_capacity",            __val,      9,        __render_gen_stat,      __widget_slider,          function (_capacity) return (math.max(_capacity - 1, 0)) * 50; end  },
-      spread              = {"$inventory_spread",              __deg,      9,        __render_gen_stat,      __widget_slider,          function (_spread) return math.abs(10 - _spread) * 5; end  },
-      always_cast_spells  = {"$inventory_alwayscasts",        __val,      9,        __render_wand_spells,    nil,                      function (_alwayscasts)  
-        local _val = 0;
-        for _, _a_c_id in ipairs(_alwayscasts) do
-          if (_a_c_id~=nil and actions_by_id[_a_c_id]~=nil and actions_by_id[_a_c_id].price~=nil) then
-            _val = _val + get_ac_cost(_a_c_id);
-          end;
-        end;
-        return _val;
-      end  },
+      wand_type           = {"",                               __val,      34,       __render_wand_type,     nil,                       cost_func_wand_type  },
+      shuffle             = {"$inventory_shuffle",             __yesno,    9,        __render_gen_stat,      __widget_toggle,           cost_func_shuffle  },
+      spells_per_cast     = {"$inventory_actionspercast",      __val,      9,        __render_gen_stat,      __widget_slider,           cost_func_spells_per_cast  },
+      cast_delay          = {"$inventory_castdelay",           __ctime,    9,        __render_gen_stat,      __widget_slider,           cost_func_cast_delay  },
+      recharge_time       = {"$inventory_rechargetime",        __ctime,    9,        __render_gen_stat,      __widget_slider,           cost_func_recharge_time  },
+      mana_max            = {"$inventory_manamax",             __round,    9,        __render_gen_stat,      __widget_slider,           cost_func_mana_max  },
+      mana_charge_speed   = {"$inventory_manachargespeed",     __val,      9,        __render_gen_stat,      __widget_slider,           cost_func_mana_charge_speed  },
+      capacity            = {"$inventory_capacity",            __val,      9,        __render_gen_stat,      __widget_slider,           cost_func_capacity  },
+      spread              = {"$inventory_spread",              __deg,      9,        __render_gen_stat,      __widget_slider,           cost_func_spread  },
+      always_cast_spells  = {"$inventory_alwayscasts",         __val,      9,        __render_wand_spells,    nil,                      cost_func_always_cast_spells  },
     },
     slot_func = get_modify_wand_table,
     slot_data = {};
@@ -160,7 +149,7 @@ if modify_wand_loaded~=true then
         modify_wand_table.slot_data.value = _valfunc(_value);
         modify_wand_table.slot_data.member = _member;
         modify_wand_table.slot_data.label = (modify_wand_table.datum_translation[_member][1]~=nil and modify_wand_table.datum_translation[_member][1]~="") and GameTextGetTranslatedOrNot(modify_wand_table.datum_translation[_member][1]) or "";
-        modify_wand_table.slot_data.cost[_member] = (modify_wand_table.datum_translation[_member][6]~=nil and modify_wand_table.datum_translation[_member][6](_value) or 0) * ModSettingGet("persistence.buy_wand_price_multiplier");
+        modify_wand_table.slot_data.cost[_member] = modify_wand_table.datum_translation[_member][6]~=nil and math.ceil(modify_wand_table.datum_translation[_member][6](_value)) or 0;
         modify_wand_table.slot_data.render_slots_override = get_always_cast_count();
         local _renderfunc = modify_wand_table.datum_translation[_member][4] or _gui_nop;
         _renderfunc(datum_x_pos, datum_y_pos, margin, panel_width - margin, panel_height, 3, modify_wand_table.slot_data, _nid);

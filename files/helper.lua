@@ -134,26 +134,37 @@ if persistence_helper_loaded~=true then
     EntityKill(entity_id);
   end
 
-  ---@deprecated needs rewrite to use modify_wand_table cost calculations
+  function cost_func_wand_type(_) return 200; end
+  function cost_func_shuffle(_shuffle) return _shuffle and 0 or 100; end
+  function cost_func_spells_per_cast(a_p_c) return math.max(a_p_c-1,0)*500; end
+  function cost_func_cast_delay(_castdelay) return (0.01 ^ ((_castdelay/60) - 1.8) + 200) * 0.1; end
+  function cost_func_recharge_time(_rechargetime) return (0.01 ^ ((_rechargetime/60) - 1.8) + 200) * 0.1; end
+  function cost_func_mana_max(_manamax) return _manamax; end
+  function cost_func_mana_charge_speed(_manachargespeed) return _manachargespeed * 2; end
+  function cost_func_capacity(_capacity) return (math.max(_capacity - 1, 0)) * 50; end
+  function cost_func_spread(_spread) return math.abs(10 - _spread) * 5; end
+  function cost_func_always_cast_spells(_alwayscasts) local _val = 0; for _, _a_c_id in ipairs(_alwayscasts) do if (_a_c_id~=nil and actions_by_id[_a_c_id]~=nil and actions_by_id[_a_c_id].price~=nil) then _val = _val + get_ac_cost(_a_c_id); end; end; return _val; end
+
+
+
+
   function get_wand_price(wand_data)
-    print("persistence: deprecated: create_wand_price");
     local price = 0;
-    if not wand_data["shuffle"] then
-      price = price + 100;
-    end
-    price = price + math.max(wand_data["spells_per_cast"] - 1, 0) * 500;
-    price = price + (0.01 ^ (wand_data["cast_delay"] / 60 - 1.8) + 200) * 0.1;
-    price = price + (0.01 ^ (wand_data["recharge_time"] / 60 - 1.8) + 200) * 0.1;
-    price = price + wand_data["mana_max"];
-    price = price + wand_data["mana_charge_speed"] * 2;
-    price = price + math.max(wand_data["capacity"] - 1, 0) * 50;
-    price = price + math.abs(5 - wand_data["spread"]) * 5;
-    if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 then
-      for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
-          price = price + actions_by_id[always_cast_id].price * 5;
-      end
-    end
-    return math.ceil(price * ModSettingGet("persistence.buy_wand_price_multiplier"));
+    price = price + math.ceil(cost_func_wand_type(wand_data["wand_type"]));
+    price = price + math.ceil(cost_func_shuffle(wand_data["shuffle"]));
+    price = price + math.ceil(cost_func_spells_per_cast(wand_data["spells_per_cast"]));
+    price = price + math.ceil(cost_func_cast_delay(wand_data["cast_delay"]));
+    price = price + math.ceil(cost_func_recharge_time(wand_data["recharge_time"]));
+    price = price + math.ceil(cost_func_mana_max(wand_data["mana_max"]));
+    price = price + math.ceil(cost_func_mana_charge_speed(wand_data["mana_charge_speed"]));
+    price = price + math.ceil(cost_func_capacity(wand_data["capacity"]));
+    price = price + math.ceil(cost_func_spread(wand_data["spread"]));
+
+    price = math.ceil(price * mod_setting.buy_wand_price_multiplier);
+
+    price = price + cost_func_always_cast_spells(wand_data["always_cast_spells"]);
+
+    return math.ceil(price);
   end
 
   function modify_wand_entity(slot_data)
@@ -249,7 +260,7 @@ if persistence_helper_loaded~=true then
   end
 
   function get_spell_purchase_price(action_id)
-    return math.ceil(actions_by_id[action_id].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
+    return math.ceil(actions_by_id[action_id].price * mod_setting.buy_spell_price_multiplier);
   end
 
   function purchase_spell(action_id)

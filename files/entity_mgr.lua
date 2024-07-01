@@ -18,7 +18,7 @@ if entity_mgr_loaded==false then
     end  ---disable trigger every frame; re-enabled by collider entity
 
     if GameGetFrameNum()%_lobby_entity_frame_skip==0 then
-      if ModSettingGet("persistence.enable_edit_wands_in_lobby")==true then
+      if mod_setting.enable_edit_wands_in_lobby==true then
         local _lobby_effect_pool = EntityGetWithName("persistence_lobby_effect_entity");
         if _lobby_effect_pool==nil or _lobby_effect_pool==0 then
           if type(_lobby_effect_pool)=="table" then
@@ -92,7 +92,7 @@ if GameGetFrameNum()%5==0 then -- every five frames, for performance
           local new_workshop_id = EntityLoad(mod_dir .. "files/entity/workshop.xml", _xloc, _yloc);
           EntityAddComponent2(new_workshop_id, "CollisionTriggerComponent", {width=_width, height=_height, radius=1000, destroy_this_entity_when_triggered=false, required_tag="player_unit", _enabled=true});
           EntityAddTag(workshop_e_id, "persistence_cloned");
-          if ModSettingGet("persistence.reusable_holy_mountain")~=true then
+          if mod_setting.reusable_holy_mountain~=true then
             EntityAddChild(workshop_e_id, new_workshop_id);
           end
         end

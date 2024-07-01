@@ -269,7 +269,7 @@ if gui_subfunc_loaded~=true then
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
     GuiZSetForNextWidget(gui, _layer(layer));
     GuiColorNextWidgetEnum(gui, COLORS.Tip);
-    GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", slot_data.cost[slot_data.member]), small_text_scale);
+    GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", math.ceil(slot_data.cost[slot_data.member] * mod_setting.buy_wand_price_multiplier) ), small_text_scale);
     return _ret;
   end
 
@@ -289,7 +289,7 @@ if gui_subfunc_loaded~=true then
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
     GuiColorNextWidgetEnum(gui, COLORS.Tip);
     GuiZSetForNextWidget(gui, _layer(layer));
-    GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", slot_data.cost[slot_data.member]), small_text_scale); ---- COST
+    GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", math.ceil(slot_data.cost[slot_data.member] * mod_setting.buy_wand_price_multiplier)), small_text_scale); ---- COST
     local _x_offset, _, _width = select(8, GuiGetPreviousWidgetInfo(gui));
 
     if _x_mouse/2>_x_min and _x_mouse/2<_x_offset+_width+15 then

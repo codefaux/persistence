@@ -47,7 +47,7 @@ if spell_list_loaded~=true then
     datum_render_func = __render_spell_listentry,
     action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
         if slot_data.researchable~=nil and slot_data.researchable==true then
-          local _price = math.ceil(slot_data.price * ModSettingGet("persistence.research_spell_price_multiplier"));
+          local _price = math.ceil(slot_data.price * mod_setting.research_spell_price_multiplier);
           if last_known_money < _price then
             GuiColorNextWidgetEnum(gui, COLORS.Red);
             GuiZSetForNextWidget(gui, _layer(layer));
@@ -115,7 +115,7 @@ if spell_list_loaded~=true then
     },
     datum_render_func = __render_spell_listentry,
     action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
-        local _price = math.ceil(slot_data.price * ModSettingGet("persistence.buy_spell_price_multiplier"));
+        local _price = math.ceil(slot_data.price * mod_setting.buy_spell_price_multiplier);
         if last_known_money < _price then
           GuiColorNextWidgetEnum(gui, COLORS.Red);
           GuiZSetForNextWidget(gui, _layer(layer));

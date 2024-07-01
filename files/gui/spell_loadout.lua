@@ -27,7 +27,7 @@ if spell_loadouts_loaded~=true then
               _return[_stored_loadout_idx].spells = {};
             else
               if actions_by_id[_word]~=nil then
-                _return[_stored_loadout_idx].price = _return[_stored_loadout_idx].price + math.ceil(actions_by_id[_word].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
+                _return[_stored_loadout_idx].price = _return[_stored_loadout_idx].price + math.ceil(actions_by_id[_word].price * mod_setting.buy_spell_price_multiplier);
                 _return[_stored_loadout_idx].spells[_word_idx] = _word;
               end
             end

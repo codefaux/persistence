@@ -11,7 +11,6 @@ if persistence_gui_loaded~=true then
   fourslot_confirmation = 0;
   spell_list_confirmation = 0;
   small_text_scale = 0.9;
-  setting_buy_price_x = ModSettingGet("persistence.buy_wand_price_multiplier");
   spell_tooltip_id = "";
   _right_panel_id = 0;
 

@@ -10,7 +10,7 @@ if persistence_data_store_loaded~=true then
   local data_store = {};
 
   ---@type integer
-  default_profile_id =  tonumber(ModSettingGet("persistence.always_choose_save_id")) or 0;
+  default_profile_id =  tonumber(mod_setting.always_choose_save_id) or 0;
   ---@type integer
   selected_profile_id = 0;
   ---@type integer
@@ -754,7 +754,7 @@ if persistence_data_store_loaded~=true then
 
   function get_ac_cost(_a_c_id)
     if _a_c_id==nil then return 0; end
-    return actions_by_id[_a_c_id].price * 5 * ModSettingGet("persistence.buy_wand_price_multiplier");
+    return math.ceil(actions_by_id[_a_c_id].price * 5 * mod_setting.buy_spell_price_multiplier);
   end
 
   -- PROFILES
@@ -954,7 +954,7 @@ if persistence_data_store_loaded~=true then
       end
     end
 
-    return math.ceil(price * ModSettingGet("persistence.research_wand_price_multiplier"));
+    return math.ceil(price * mod_setting.research_wand_price_multiplier);
   end
 
   function research_spell_entity_price(entity_id)
@@ -962,7 +962,7 @@ if persistence_data_store_loaded~=true then
     if action_id == nil then
       return nil
     end
-    return math.ceil(actions_by_id[action_id].price * ModSettingGet("persistence.research_spell_price_multiplier"))
+    return math.ceil(actions_by_id[action_id].price * mod_setting.research_spell_price_multiplier)
   end
 
   function data_store_everyframe()

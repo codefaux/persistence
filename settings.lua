@@ -23,6 +23,33 @@ mod_settings_version = 1; -- This is a magic global that can be used to migrate 
 mod_settings =
 {
   {
+    category_id = "encoded_settings",
+    -- ui_name = "",
+    -- ui_description = "",
+    settings = {
+      { hidden = true,  id = "loadout_1",   ui_name = "Wand loadout 1",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+      { hidden = true,  id = "loadout_2",   ui_name = "Wand loadout 2",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+      { hidden = true,  id = "loadout_3",   ui_name = "Wand loadout 3",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+      { hidden = true,  id = "loadout_4",   ui_name = "Wand loadout 4",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+      { hidden = true,  id = "loadout_5",   ui_name = "Wand loadout 5",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+      { hidden = true,  id = "loadout_6",   ui_name = "Wand loadout 6",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+      { hidden = true,  id = "loadout_7",   ui_name = "Wand loadout 7",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+      { hidden = true,  id = "loadout_8",   ui_name = "Wand loadout 8",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+      { hidden = true,  id = "loadout_9",   ui_name = "Wand loadout 9",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+      { hidden = true,  id = "loadout_10",   ui_name = "Wand loadout 10",   ui_description = "A saved wand loadout",    text_max_length = 512,    value_default = "",
+        allowed_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789, ",   scope = MOD_SETTING_SCOPE_RUNTIME,  },
+    },
+  },
+  {
     id = "restart_warning",
     ui_name = "-- NOTE: These settings will not apply until you start a New Game. --",
     not_setting = true,

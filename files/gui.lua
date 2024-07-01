@@ -13,6 +13,7 @@ if persistence_gui_loaded~=true then
   small_text_scale = 0.9;
   setting_buy_price_x = ModSettingGet("persistence.buy_wand_price_multiplier");
   spell_tooltip_id = "";
+  _right_panel_id = 0;
 
   window_open=false;
 
@@ -25,6 +26,7 @@ if persistence_gui_loaded~=true then
   dofile_once(mod_dir .. "files/gui/persistence.lua");
   dofile_once(mod_dir .. "files/gui/scan_nearby_entities.lua");
   dofile_once(mod_dir .. "files/gui/spell_list.lua");
+  dofile_once(mod_dir .. "files/gui/spell_loadout.lua");
   dofile_once(mod_dir .. "files/gui/spell_tooltip.lua");
   dofile_once(mod_dir .. "files/gui/teleport.lua");
   dofile_once(mod_dir .. "files/gui/wand_template.lua");
@@ -38,8 +40,10 @@ if persistence_gui_loaded~=true then
     close_purchase_spells();
     close_inventory_spells();
     close_modify_wand();
-    close_wand_template();
+    -- close_wand_template();
     close_scan_nearby_entities();
+    -- close_spell_loadouts();
+    right_panel_picker(0);
     --   close_persistence_menu();
     --   close_spell_tooltip();
   end

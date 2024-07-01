@@ -207,7 +207,25 @@ if gui_subfunc_loaded~=true then
         present_spell_tooltip();
       end
     end
+  end
 
+  function __render_spell_gridtile(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
+    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiImage(gui, _nid(), x_base, y_base, _data.type_sprite, 1, 1.2, 1.2, 0); -- background type slot
+
+    GuiZSetForNextWidget(gui, _layer(layer+1));
+    GuiImage(gui, _nid(), x_base+4, y_base+4, _data.sprite, 1, 1, 1, 0); -- Icon
+    if select(3, GuiGetPreviousWidgetInfo(gui)) then
+      spell_tooltip_id = _data.a_id or "";
+      present_spell_tooltip();
+    end
+
+    if _data.max_uses ~= nil then
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+      GuiColorNextWidgetEnum(gui, COLORS.Tip);
+      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiText(gui, x_base + 12, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+    end
   end
 
 

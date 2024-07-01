@@ -248,12 +248,12 @@ if persistence_helper_loaded~=true then
     return true;
   end
 
-  function get_purchase_spell_price(action_id)
+  function get_spell_purchase_price(action_id)
     return math.ceil(actions_by_id[action_id].price * ModSettingGet("persistence.buy_spell_price_multiplier"));
   end
 
   function purchase_spell(action_id)
-    local price = get_purchase_spell_price(action_id);
+    local price = get_spell_purchase_price(action_id);
     if get_player_money() < price then return false; end
 
     local x, y = EntityGetTransform(player_e_id);

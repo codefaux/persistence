@@ -102,7 +102,7 @@ if scan_nearby_entities_loaded~=true then
           if _nearby_wand_new_type>0 then
             GuiColorNextWidgetEnum(gui, _color);
             GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-            GuiText(gui, x_base + x_offset, y_base, string.format("(%i type only)", _nearby_wand_new_type), small_text_scale);
+            GuiText(gui, x_base + x_offset, y_base + 10, string.format("(%i type only)", _nearby_wand_new_type), small_text_scale);
           end
         end
 

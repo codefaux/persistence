@@ -60,7 +60,7 @@ if scan_nearby_entities_loaded~=true then
           local _wand_parent_e_id = EntityGetParent(_wand_e_id);
           local _parent_is_quick_inv = EntityGetName(_wand_parent_e_id)=="inventory_quick";
           if not _parent_is_quick_inv then
-            local _result = research_wand_is_new(_wand_parent_e_id);
+            local _result = research_wand_is_new(_wand_e_id);
             if _result.is_new then
               _nearby_wand_new_type = _nearby_wand_new_type + (_result.b_new_is_only_type and 1 or 0);
               _nearby_wand_new = true;

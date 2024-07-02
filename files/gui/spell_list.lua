@@ -206,9 +206,10 @@ if spell_list_loaded~=true then
         for _inv_spell_idx, _inv_spell_members in pairs(spell_list_table.slots_data) do
           if _inv_spell_idx~="_index" then
             local show_curr_spell = true;
-            if _search_for~= "" and string.find(string.lower(GameTextGetTranslatedOrNot(_inv_spell_members.name)), string.lower(_search_for), 1, true)==nil then
-              show_curr_spell = false;
-            end
+            -- if _search_for~="" and string.find(string.lower(GameTextGetTranslatedOrNot(_inv_spell_members.name)), string.lower(_search_for), 1, true)==nil then
+            --   show_curr_spell = false;
+            -- end
+            if _search_for~="" then show_curr_spell=check_search_for(_inv_spell_members, _search_for); end
             if _active_filter~=99 and _active_filter~=_inv_spell_members.type then
               show_curr_spell = false;
             end

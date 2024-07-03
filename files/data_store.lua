@@ -22,6 +22,32 @@ if persistence_data_store_loaded~=true then
   ---- PRIVATE FUNCTIONS
   ---- =================
 
+
+  local function _do_startup_paycheck_check()
+    if not GameHasFlagRun("persistence_startup_paid") then
+      GameAddFlagRun("persistence_startup_paid");
+      if mod_setting.start_with_money>0 then
+        local _withdraw = math.min(mod_setting.start_with_money, get_stash_money());
+        GamePrint(string.format("Persistence: Run start, $ %i from Stash", _withdraw));
+        transfer_money_stash_to_player(_withdraw);
+      end
+    end
+  end
+
+  local function _do_holy_mountain_paycheck_check()
+    if mod_setting.holy_mountain_money==0 then return; end
+
+    local _workshop_e_id = tonumber(GlobalsGetValue("workshop_e_id", "0"));
+    if not EntityHasTag(_workshop_e_id, "persistence_visited") then return; end
+    if EntityHasTag(_workshop_e_id, "persistence_paid") then return; end
+
+    local _withdraw = math.min(get_stash_money(), mod_setting.holy_mountain_money);
+    transfer_money_stash_to_player(_withdraw);
+    GamePrint(string.format("Persistence: Holy Mountain paycheck, $ %i from Stash", _withdraw));
+    EntityAddTag(_workshop_e_id, "persistence_paid");
+  end
+
+
   ---return wand bounds for profile
   ---@param profile_id integer
   ---@return wand_bounds_data
@@ -647,10 +673,10 @@ if persistence_data_store_loaded~=true then
 
       if _in_wand_data["spells"] ~= nil and #_in_wand_data["spells"] > 0 then
         for _, _spell_id in ipairs(_in_wand_data["spells"]) do
-          if actions_by_id[_spell_id] ~= nil and (_profile_known_spells == nil or _profile_known_spells[_spell_id] == nil) then
+          if actions_by_id[_spell_id] ~= nil and (_profile_known_spells == nil or _profile_known_spells[_spell_id] ~= true) then
             i_spells = i_spells + 1;
             b_spells = true;
-            is_new = true;
+            -- is_new = true;
           end
         end
       end
@@ -858,12 +884,6 @@ if persistence_data_store_loaded~=true then
     print("wand_types_known: " .. data_store[profile_id]["wand_types_known"]);
     loaded_profile_id = profile_id;
     GlobalsSetValue("persistence_profile", tostring(profile_id));
-
-    if mod_setting.start_with_money>0 and get_player_money()==0 then
-      local _withdraw = math.min(mod_setting.start_with_money, get_stash_money());
-      transfer_money_stash_to_player(_withdraw);
-      GamePrint(string.format("Persistence: Starting run with $ %i from Stash", _withdraw));
-    end
   end
 
   function can_create_wand(profile_id)
@@ -956,6 +976,18 @@ if persistence_data_store_loaded~=true then
 
   function data_store_everyframe()
     if selected_profile_id>0 and loaded_profile_id~=selected_profile_id then load_profile(selected_profile_id); end
+
+    if loaded_profile_id==0 then return; end
+
+    local _game_frame = GameGetFrameNum();
+
+    if _game_frame%120 then
+      _do_startup_paycheck_check();
+    end
+
+    if _game_frame%10==0 and _in_workshop then
+      _do_holy_mountain_paycheck_check();
+    end
   end
   ---end function declarations, run code here;
 

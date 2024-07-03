@@ -3,10 +3,11 @@ if scan_nearby_entities_loaded~=true then
 
   local function draw_scan_nearby_entities()
     local x_base = 320;
-    local x_offset = 45;
+    local x_offset = 50;
     local y_base = 300;
-    local _frame_skip=5;
-    local _frame_num=5;
+    local _frame_skip = 15; --- only actually *scan* entities every x frames
+    local _frame_overshoot = 5; --- show indicator for x frames longer than previous detection, in case an event doesn't fire for a frame or two
+    local _show_tip_frames = 0; --- counter indicating how long remains
     local _search_radius = 20;
     local _nearby_spell_old = false;
     local _nearby_spell_new = false;
@@ -23,8 +24,33 @@ if scan_nearby_entities_loaded~=true then
         _nearby_wand_new = false;
         _nearby_wand_spell_new = false;
         local _plr_x, _plr_y = EntityGetTransform(player_e_id);
-        local _nearby_cards = EntityGetInRadiusWithTag(_plr_x, _plr_y + 5, _search_radius, "card_action");
-        for _, _card_e_id in pairs(_nearby_cards) do
+        local _nearby_card_pool = EntityGetInRadiusWithTag(_plr_x, _plr_y + 5, _search_radius, "card_action");
+        local _nearby_wand_pool = EntityGetInRadiusWithTag(_plr_x, _plr_y, _search_radius, "wand");
+
+        _nearby_wand_new_type = 0;
+        for _, _wand_e_id in pairs(_nearby_wand_pool) do
+          local _wand_parent_e_id = EntityGetParent(_wand_e_id);
+          local _parent_is_quick_inv = EntityGetName(_wand_parent_e_id)=="inventory_quick";
+
+          if not _parent_is_quick_inv then
+            -- local _wand_card_pool = EntityGetAllChildren(_wand_e_id, "card_action");
+            -- for _, _wand_card_e_id in ipairs(_wand_card_pool) do
+            --   if _wand_card_e_id~=0 then table.insert(_nearby_card_pool, _wand_card_e_id); end
+            -- end
+            local _result = research_wand_is_new(_wand_e_id);
+
+            if _result.b_spells==true then _nearby_wand_spell_new=true; end
+            if _result.is_new then
+              _nearby_wand_new_type = _nearby_wand_new_type + (_result.b_new_is_only_type and 1 or 0);
+              _nearby_wand_new = true;
+            else
+              _nearby_wand_old = true;
+            end
+            _show_tip_frames = _frame_skip + _frame_overshoot;
+          end
+        end
+
+        for _, _card_e_id in pairs(_nearby_card_pool) do
           local _card_parent_e_id = EntityGetParent(_card_e_id);
           local _parent_is_full_inv = EntityGetName(_card_parent_e_id)=="inventory_full";
           local _parent_is_wand = EntityHasTag(_card_parent_e_id, "wand");
@@ -44,38 +70,21 @@ if scan_nearby_entities_loaded~=true then
                 if not _parent_is_quick_inv then
                   local _card_item_c_id = EntityGetFirstComponentIncludingDisabled(_card_e_id, "ItemComponent");
                   local _is_permanent = ComponentGetValueBool(_card_item_c_id or 0, "permanently_attached");
-                  _nearby_wand_spell_new = _is_permanent==false;
+                  if _is_permanent==true then _nearby_wand_spell_new=true; end
                 end
               else
                 _nearby_spell_new = true;
               end
             end
-            _frame_num = 10;
+            _show_tip_frames = _frame_skip + _frame_overshoot;
           end
         end
-
-        local _nearby_wands = EntityGetInRadiusWithTag(_plr_x, _plr_y, _search_radius, "wand");
-        _nearby_wand_new_type = 0;
-        for _, _wand_e_id in pairs(_nearby_wands) do
-          local _wand_parent_e_id = EntityGetParent(_wand_e_id);
-          local _parent_is_quick_inv = EntityGetName(_wand_parent_e_id)=="inventory_quick";
-          if not _parent_is_quick_inv then
-            local _result = research_wand_is_new(_wand_e_id);
-            if _result.is_new then
-              _nearby_wand_new_type = _nearby_wand_new_type + (_result.b_new_is_only_type and 1 or 0);
-              _nearby_wand_new = true;
-            else
-              _nearby_wand_old = true;
-            end
-            _frame_num = 10;
-          end
-        end
-      elseif _frame_num>0 then
-        _frame_num = _frame_num - 1;
+      elseif _show_tip_frames>0 then
+        _show_tip_frames = _show_tip_frames - 1;
       -- else
       end
 
-      if _frame_num>0 then
+      if _show_tip_frames>0 then
         if _nearby_spell_new or _nearby_spell_old then
           local _color = _nearby_spell_new and COLORS.Tip or COLORS.Yellow;
           GuiZSet(gui, _layer(1));
@@ -111,11 +120,11 @@ if scan_nearby_entities_loaded~=true then
           GuiZSet(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-          GuiText(gui, x_base, y_base - 10, "unresearched", 1);
+          GuiText(gui, x_base, y_base, "unresearched", 1);
           GuiZSet(gui, _layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-          GuiText(gui, x_base, y_base, "spell ON wand", 1);
+          GuiText(gui, x_base, y_base + 10, "spell ON wand", 1);
         end
       end
     end

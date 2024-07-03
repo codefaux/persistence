@@ -12,19 +12,21 @@ persistence_active=false;
 player_e_id=0;
 last_known_money=0;
 mod_setting = {
-  start_with_money = ModSettingGet("persistence.start_with_money");
+  start_with_money = ModSettingGet("persistence.start_with_money"); --- see profile load
+  holy_mountain_money = ModSettingGet("persistence.holy_mountain_money"); --- see entity_mgr
+  cap_money_saved_on_death = ModSettingGet("persistence.cap_money_saved_on_death") * 1000,
+  allow_stash = tonumber(ModSettingGet("persistence.allow_stash")), --- 1, allow   0, disable  -1, deposit only
   buy_wand_price_multiplier = ModSettingGet("persistence.buy_wand_price_multiplier"),
   research_wand_price_multiplier = ModSettingGet("persistence.research_wand_price_multiplier"),
   buy_spell_price_multiplier = ModSettingGet("persistence.buy_spell_price_multiplier"),
   research_spell_price_multiplier = ModSettingGet("persistence.research_spell_price_multiplier"),
-  cap_money_saved_on_death = ModSettingGet("persistence.cap_money_saved_on_death") * 1000,
   money_saved_on_death = ModSettingGet("persistence.money_saved_on_death"),
   always_choose_save_id = ModSettingGet("persistence.always_choose_save_id"),
   enable_edit_wands_in_lobby = ModSettingGet("persistence.enable_edit_wands_in_lobby"),
   reusable_holy_mountain = ModSettingGet("persistence.reusable_holy_mountain"),
 };
 
-function do_lobby_effect_entity()
+function create_lobby_effect_entity()
   local _e_id = EntityGetWithTag("player_unit")[1];
   if _e_id~=nil and _e_id~=0 then
     player_e_id = _e_id;
@@ -50,7 +52,7 @@ function OnModPreInit()
 end
 
 
-local _frame_skip = 5;
+local _frame_skip = 10;
 function OnWorldPostUpdate()
   if mod_disabled then return; end
 
@@ -78,10 +80,9 @@ function OnWorldPostUpdate()
     end
 
     dofile(mod_dir .. "files/gui.lua");
+    -- GamePrint( "Post-update hook " .. tostring(GameGetFrameNum()) );
+    OnModEndFrame();
   end
-
-  -- GamePrint( "Post-update hook " .. tostring(GameGetFrameNum()) );
-  OnModEndFrame();
 end
 
 

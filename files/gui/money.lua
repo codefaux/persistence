@@ -3,7 +3,9 @@ if money_loaded~=true then
   dofile("data/scripts/debug/keycodes.lua");
 
   local function draw_money()
-    active_windows["money"] = function (_nid)
+    if mod_setting.allow_stash==0 then money_open=true; return; end
+
+      active_windows["money"] = function (_nid)
       local stash_money = get_stash_money();
       local player_money = get_player_money();
       local money_amts = {1, 10, 100, 1000};
@@ -26,9 +28,10 @@ if money_loaded~=true then
 
       for _, _money_amt in ipairs(money_amts) do
         _new_money_amt = _money_amt * _multiplier;
-        if stash_money < _new_money_amt then
+
+        if stash_money < _new_money_amt or mod_setting.allow_stash~=1 then
           GuiZSetForNextWidget(gui, _layer(1));
-          GuiColorNextWidgetEnum(gui, COLORS.Dark)
+          GuiColorNextWidgetEnum(gui, COLORS.Dark);
           GuiText(gui, col_a, offset_y + (idx * 10), string.format("Take $ %1.0f", _new_money_amt));
         else
           GuiZSetForNextWidget(gui, _layer(1));
@@ -52,13 +55,19 @@ if money_loaded~=true then
         idx = idx + 1;
       end
 
-      GuiZSetForNextWidget(gui, _layer(1));
-      GuiColorNextWidgetEnum(gui, COLORS.Green);
-      if GuiButton(gui, _nid(), col_a, offset_y + (idx * 10), "Take ALL") then
-        transfer_money_stash_to_player(stash_money);
-      end
-      if select(2, GuiGetPreviousWidgetInfo(gui)) and _multiplier==50 then
-        set_player_money(get_stash_money() * _multiplier);
+      if mod_setting.allow_stash==1 then
+        GuiZSetForNextWidget(gui, _layer(1));
+        GuiColorNextWidgetEnum(gui, COLORS.Green);
+        if GuiButton(gui, _nid(), col_a, offset_y + (idx * 10), "Take ALL") then
+          transfer_money_stash_to_player(stash_money);
+        end
+        if select(2, GuiGetPreviousWidgetInfo(gui)) and _multiplier==50 then
+          set_player_money(get_stash_money() * _multiplier);
+        end
+      else
+        GuiZSetForNextWidget(gui, _layer(1));
+        GuiColorNextWidgetEnum(gui, COLORS.Dark);
+        GuiText(gui, col_a, offset_y + (idx * 10), "Take ALL");
       end
 
       GuiZSetForNextWidget(gui, _layer(1));
@@ -66,6 +75,7 @@ if money_loaded~=true then
       if GuiButton(gui, _nid(), col_b, offset_y + (idx * 10), "Stash ALL") then
         transfer_money_player_to_stash(player_money);
       end
+
       idx = idx + 1;
       GuiZSetForNextWidget(gui, _layer(1));
       GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Stashed: $ %1.0f", stash_money));

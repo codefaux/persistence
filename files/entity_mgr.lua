@@ -5,30 +5,36 @@ if entity_mgr_loaded==false then
   lobby_e_id = 0;
   local _lobby_entity_frame_skip=30;
 
+  local function _do_lobby_effect_check()
+    if mod_setting.enable_edit_wands_in_lobby==true then
+      local _lobby_effect_pool = EntityGetWithName("persistence_lobby_effect_entity");
+      if _lobby_effect_pool==nil or _lobby_effect_pool==0 then
+        if type(_lobby_effect_pool)=="table" then
+          for _, _e_id in ipairs(_lobby_effect_pool) do
+            EntityKill(_e_id);
+          end
+        end
+        create_lobby_effect_entity();
+      end
+    end
+  end
+
   ---close out frame by disabling triggers
   function OnModEndFrame()
-    local _lobby = tonumber(GlobalsGetValue("lobby_collider_triggered", "0"));
-    local _workshop = tonumber(GlobalsGetValue("workshop_collider_triggered", "0"));
+    local _lobby_frames = tonumber(GlobalsGetValue("lobby_collider_triggered", "0"));
+    local _workshop_frames = tonumber(GlobalsGetValue("workshop_collider_triggered", "0"));
+    local _game_frame = GameGetFrameNum();
 
-    if _lobby>0 then
-      GlobalsSetValue("lobby_collider_triggered", tostring(_lobby-1));
-    end  ---disable trigger every frame; re-enabled by collider entity
-    if _workshop>0 then
-      GlobalsSetValue("workshop_collider_triggered", tostring(_workshop-1));
-    end  ---disable trigger every frame; re-enabled by collider entity
+    if _lobby_frames>0 then
+      GlobalsSetValue("lobby_collider_triggered", tostring(_lobby_frames-1));
+    end  ---decrement trigger per frame, re-enabled by collider entity
 
-    if GameGetFrameNum()%_lobby_entity_frame_skip==0 then
-      if mod_setting.enable_edit_wands_in_lobby==true then
-        local _lobby_effect_pool = EntityGetWithName("persistence_lobby_effect_entity");
-        if _lobby_effect_pool==nil or _lobby_effect_pool==0 then
-          if type(_lobby_effect_pool)=="table" then
-            for _, _e_id in ipairs(_lobby_effect_pool) do
-              EntityKill(_e_id);
-            end
-          end
-          do_lobby_effect_entity();
-        end
-      end
+    if _workshop_frames>0 then
+      GlobalsSetValue("workshop_collider_triggered", tostring(_workshop_frames-1));
+    end  ---decrement trigger per frame, re-enabled by collider entity
+
+    if _game_frame%_lobby_entity_frame_skip==0 and _lobby_frames>1 then
+      _do_lobby_effect_check();
     end
   end
 
@@ -68,7 +74,8 @@ end
 
 
 -- every frame
-if GameGetFrameNum()%5==0 then -- every five frames, for performance
+local _frame_skip=10;
+if GameGetFrameNum()%_frame_skip==0 then -- every five frames, for performance
   if lobby_e_id==0 and player_e_id~=0 then
     lobby_e_id=EntityGetWithName("persistence_lobby");
     if lobby_e_id==0 then

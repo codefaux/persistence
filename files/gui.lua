@@ -54,9 +54,9 @@ if persistence_gui_loaded~=true then
 end
 
 -- every frame;
-local _lobby = GlobalsGetValue("lobby_collider_triggered", "0")~="0";
-local _workshop = GlobalsGetValue("workshop_collider_triggered", "0")~="0";
-local _persistence_area = _lobby==true or _workshop==true;
+_in_lobby = GlobalsGetValue("lobby_collider_triggered", "0")~="0";
+_in_workshop = GlobalsGetValue("workshop_collider_triggered", "0")~="0";
+_in_persistence_area = _in_lobby==true or _in_workshop==true;
 
 data_store_everyframe();
 if spell_tooltip_id=="" then close_spell_tooltip(); end
@@ -74,12 +74,12 @@ if loaded_profile_id>0 then
     close_open_windows();
   end
 
-  if _workshop then
+  if _in_workshop then
     present_teleport();
   else
     close_teleport();
   end
-  if _persistence_area then
+  if _in_persistence_area then
     present_persistence_menu();
   else
     close_persistence_menu();

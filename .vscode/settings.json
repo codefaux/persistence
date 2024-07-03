@@ -5,6 +5,8 @@
   "Lua.diagnostics.globals": [
     "mod_dir",
     "persistence_active",
-    "_nid"
+    "_nid",
+    "small_text_scale",
+    "gui"
   ]
 }

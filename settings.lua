@@ -228,6 +228,14 @@ mod_settings =
     ui_description = "Feature toggles",
     settings = {
       {
+        id = "show_guide_tips",
+        ui_name = "Show Guide Tooltips in Persistence menus",
+        ui_description = "Hotkeys, feature explanations, etc...",
+        value_default = true,
+        scope = MOD_SETTING_SCOPE_RUNTIME,
+      },
+      {
+        hidden = true, -- Unused, keep for future need?
         id = "move_lobby_to_spawn",
         ui_name = "Move Lobby to Spawn location",
         ui_description = "Lobby is normally Starting Cave. Move Lobby to Spawn instead. Meant for Random runs.",

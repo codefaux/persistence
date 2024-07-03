@@ -1,4 +1,6 @@
-
+-- ============
+--  BACKBURNER
+-- ============
 -- persistence tokens?
 -- Wand Icons don't line up consistently (best-effort, needs better fix)
 -- Mod order fixes?
@@ -9,14 +11,20 @@
 -- Mod setting for "allow research spells inside wands"?
 -- Translation table for translation mods, translation helper Mod Options setting for tooltips indicating strings and meanings
 
-
---- DONE? NEEDS VERIFY:
-
--- Proximity scan report new types
-
+-- ====================
+--  DONE? NEEDS VERIFY
+-- ====================
 
 
--- for archival
+-- ==============
+--  KNOWN ISSUES
+-- ==============
+-- Holy Mountain pays out twice when configured
+
+
+-- ==============
+--  for archival
+-- ==============
 -- function extract_action_stats(action)
 -- function draw_actions(_, _) end
 -- function add_projectile(x) proc_projectiles(x); end

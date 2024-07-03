@@ -9,7 +9,14 @@ if spell_list_loaded~=true then
     redtext = "Recycle at no cost, for no gain",
     slots_data = {},
     slots_func = get_spell_inv_research_table,
-    datum_sort_funcs = {
+    empty_message_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
+      local _empty_message = "No spells in inventory";
+      GuiZSetForNextWidget(gui, _layer(layer));
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+      GuiColorNextWidgetEnum(gui, COLORS.Yellow);
+      GuiText(gui, x_base + (panel_width/2), y_base - 5 + (panel_width/2), _empty_message);
+    end,
+  datum_sort_funcs = {
       _index = {[0]=4, [1]="sort_inv_name", [2]="sort_inv_cost_name", [3]="sort_inv_type_name", [4]="sort_inv_type_cost" },
       sort_inv_name        = { "Name",       function (a, b)
         if (a.researchable and not b.researchable) then return true; end
@@ -61,6 +68,7 @@ if spell_list_loaded~=true then
               -- table.remove(researchable_spell_entities, r_s_e_idx);
               return true;
             end
+            GuiGuideTip(gui, "Click to buy", "Spells might (safely) overlap in inventory");
           end -- Colorize Button
 
         elseif slot_data.recyclable~=nil and slot_data.recyclable==true then
@@ -73,14 +81,14 @@ if spell_list_loaded~=true then
               -- table.remove(recyclable_spell_entities, d_s_e_idx);
               return true;
             end
-            GuiTooltip(gui, "RECYCLE SPELL", "NO COST. NO GAIN.")
+            GuiGuideTip(gui, "Recycle spell", "NO COST. NO GAIN.")
           else
             GuiColorNextWidgetEnum(gui, COLORS.Dim);
             GuiZSetForNextWidget(gui, _layer(layer));
             if GuiButton(gui, _nid(), x_base, 0 + y_base, slot_data.known and "-known-" or "-ineligible-") then
               spell_list_confirmation = slot_data.e_id;
             end
-            GuiTooltip(gui, "Recycle Spell", "No cost. No gain.")
+            GuiGuideTip(gui, "Recycle Spell. No cost. No gain. ", "Partially used spells cannot be researched.")
           end -- Colorize Button
         end
       end
@@ -94,7 +102,14 @@ if spell_list_loaded~=true then
     redtext = "No refunds",
     slots_data = {},
     slots_func = get_spell_purchase_table,
-    datum_sort_funcs = {
+    empty_message_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
+      local _empty_message = "No spells have been researched";
+      GuiZSetForNextWidget(gui, _layer(layer));
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+      GuiColorNextWidgetEnum(gui, COLORS.Yellow);
+      GuiText(gui, x_base + (panel_width/2), y_base - 5 + (panel_width/2), _empty_message);
+    end,
+  datum_sort_funcs = {
       _index = {[0]=4, [1]="sort_name", [2]="sort_cost_name", [3]="sort_type_name", [4]="sort_type_cost" },
       sort_name        = { "Name",       function (a, b)
         return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name)));
@@ -164,6 +179,7 @@ if spell_list_loaded~=true then
         _active_sort_name = spell_list_table.datum_sort_funcs._index[_active_sort_idx];
         _sorted = false;
       end
+      GuiGuideTip(gui, "Click to change sort order", "");
 
       if _sorted~=true then table.sort(spell_list_table.slots_data, spell_list_table.datum_sort_funcs[_active_sort_name][2]); _sorted=true;  end
 
@@ -171,11 +187,13 @@ if spell_list_loaded~=true then
       GuiText(gui, 240, 6, "Search:", 1);
       GuiZSetForNextWidget(gui, _layer(2));
       _search_for = GuiTextInput(gui, _nid(), 270, 5, _search_for, 100, 20);
+      GuiGuideTip(gui, "Search by name or #description, right-click to clear", "Multiple search (AND) by space or comma");
       if select(2, GuiGetPreviousWidgetInfo(gui))  then _search_for = ""; end
 
       local _f_idx = 1;
       GuiZSetForNextWidget(gui, _layer(2));
       GuiText(gui, 26, 6, "Filter:");
+      GuiGuideTip(gui, "Show only spells which match selected type", "")
       for _type_nr, _type_bool in pairs(spell_list_table.slots_data._index.type_hash) do
         if _type_bool then
           if _type_nr~=99 then
@@ -206,9 +224,6 @@ if spell_list_loaded~=true then
         for _inv_spell_idx, _inv_spell_members in pairs(spell_list_table.slots_data) do
           if _inv_spell_idx~="_index" then
             local show_curr_spell = true;
-            -- if _search_for~="" and string.find(string.lower(GameTextGetTranslatedOrNot(_inv_spell_members.name)), string.lower(_search_for), 1, true)==nil then
-            --   show_curr_spell = false;
-            -- end
             if _search_for~="" then show_curr_spell=check_search_for(_inv_spell_members, _search_for); end
             if _active_filter~=99 and _active_filter~=_inv_spell_members.type then
               show_curr_spell = false;
@@ -225,7 +240,7 @@ if spell_list_loaded~=true then
           end
         end
       else
-        GuiText(gui, 40, 40, "No spells in inventory");
+        (spell_list_table.empty_message_func or _gui_nop)(x_offset, y_offset, margin, panel_width, panel_height, 2, nil, _nid);
       end
       GuiEndScrollContainer(gui);
       __render_tricolor_footer(x_base, y_base, width, height, spell_list_table);

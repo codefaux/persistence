@@ -70,7 +70,7 @@ if loaded_profile_id>0 then
 
   present_scan_nearby_entities();
 
-  if InputIsKeyJustDown(Key_TAB) then
+  if InputIsKeyJustDown(Key_TAB) or InputIsKeyJustDown(Key_ESCAPE) then
     close_open_windows();
   end
 

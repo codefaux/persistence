@@ -40,6 +40,7 @@ if money_loaded~=true then
             transfer_money_stash_to_player(_new_money_amt);
           end
         end
+        GuiGuideTip(gui, "Hold Shift for 5x", "Hold Ctrl for 10x");
 
         if player_money < _new_money_amt then
           GuiZSetForNextWidget(gui, _layer(1));
@@ -52,6 +53,7 @@ if money_loaded~=true then
             transfer_money_player_to_stash(_new_money_amt);
           end
         end
+        GuiGuideTip(gui, "Hold Shift for 5x", "Hold Ctrl for 10x");
         idx = idx + 1;
       end
 
@@ -79,6 +81,7 @@ if money_loaded~=true then
       idx = idx + 1;
       GuiZSetForNextWidget(gui, _layer(1));
       GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Stashed: $ %1.0f", stash_money));
+      GuiGuideTip(gui, "Stashed money from previous runs", "See Mod Options for auomatic withdrawals");
     end
     money_open = true;
   end

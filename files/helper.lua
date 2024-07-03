@@ -498,14 +498,16 @@ if persistence_helper_loaded~=true then
     return _prev_e_id;
   end
 
-  function check_search_for(members, search_string)
+  function check_search_for(spell_object, search_string)
+    if spell_object==nil or spell_object.description==nil or spell_object.name==nil then return false; end
+
     local _show_item = true;
       for _search_word in string.gmatch(search_string,'([^, ]+)') do
       if string.sub(_search_word, 1, 1)=="#" then
         local _search_sub = string.sub(_search_word, 2, -1);
-        if string.find(string.lower(GameTextGetTranslatedOrNot(members.description)), string.lower(_search_sub), 1, true)==nil then _show_item = false; end
+        if string.find(string.lower(GameTextGetTranslatedOrNot(spell_object.description)), string.lower(_search_sub), 1, true)==nil then _show_item = false; end
       else
-        if string.find(string.lower(GameTextGetTranslatedOrNot(members.name)),        string.lower(_search_word), 1, true)==nil then _show_item = false; end
+        if string.find(string.lower(GameTextGetTranslatedOrNot(spell_object.name)),        string.lower(_search_word), 1, true)==nil then _show_item = false; end
       end
     end
     return _show_item;

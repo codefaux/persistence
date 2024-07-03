@@ -151,6 +151,8 @@ if modify_wand_loaded~=true then
         modify_wand_table.slot_data.label = (modify_wand_table.datum_translation[_member][1]~=nil and modify_wand_table.datum_translation[_member][1]~="") and GameTextGetTranslatedOrNot(modify_wand_table.datum_translation[_member][1]) or "";
         modify_wand_table.slot_data.cost[_member] = modify_wand_table.datum_translation[_member][6]~=nil and math.ceil(modify_wand_table.datum_translation[_member][6](_value)) or 0;
         modify_wand_table.slot_data.render_slots_override = get_always_cast_count();
+        modify_wand_table.slot_data.research=nil;
+        modify_wand_table.slot_data.color_val=nil;
         local _renderfunc = modify_wand_table.datum_translation[_member][4] or _gui_nop;
         _renderfunc(datum_x_pos, datum_y_pos, margin, panel_width - margin, panel_height, 3, modify_wand_table.slot_data, _nid);
         datum_y_pos = datum_y_pos + _height;
@@ -213,6 +215,7 @@ if modify_wand_loaded~=true then
           _active_sort_name = datum_sort_funcs._index[_active_sort_idx];
           _sorted = false;
         end
+        GuiGuideTip(gui, "Click to change sort order", "");
 
         if _sorted~=true then table.sort(modify_wand_table.slot_data.ac_spells, datum_sort_funcs[_active_sort_name][2]); _sorted=true;  end
 
@@ -220,11 +223,13 @@ if modify_wand_loaded~=true then
         GuiText(gui, 240, 6, "Search:", 1);
         GuiZSetForNextWidget(gui, _layer(2));
         _search_for = GuiTextInput(gui, _nid(), 270, 5, _search_for, 100, 20);
+        GuiGuideTip(gui, "Search by name or #description, right-click to clear", "Multiple search (AND) by space or comma");
         if select(2, GuiGetPreviousWidgetInfo(gui))  then _search_for = ""; end
 
         local _f_idx = 1;
         GuiZSetForNextWidget(gui, _layer(2));
         GuiText(gui, 26, 6, "Filter:");
+        GuiGuideTip(gui, "Show only spells which match selected type", "")
         for _type_nr, _type_bool in pairs(modify_wand_table.slot_data.ac_spells._index.type_hash) do
           if _type_bool then
             if _type_nr~=99 then
@@ -239,6 +244,7 @@ if modify_wand_loaded~=true then
                 _active_filter = 99;
               end
             end
+
             GuiZSetForNextWidget(gui, _layer(2));
             GuiTooltip(gui, _type_nr==99 and "ALL" or action_type_to_string(_type_nr), "");
             if _type_nr==_active_filter then
@@ -270,6 +276,7 @@ if modify_wand_loaded~=true then
           if GuiButton(gui, _nid(), margin, spell_y_offset, __yesno(true)) then
               table.remove(modify_wand_table.slot_data.wand.always_cast_spells, _sel_ac_idx);
           end
+          GuiGuideTip(gui, "Remove Always Casts spell", "");
           _ac_id_hash[_sel_ac_name]=true;
           _ac_sel_count = _ac_sel_count + 1;
           spell_y_offset = spell_y_offset + 26;
@@ -278,9 +285,7 @@ if modify_wand_loaded~=true then
         for _ac_idx = 1, modify_wand_table.slot_data.ac_spells._index.count do
           local _ac_name = modify_wand_table.slot_data.ac_spells[_ac_idx].a_id;
           local show_curr_spell = true;
-          if _search_for~= "" and string.find(string.lower(GameTextGetTranslatedOrNot(actions_by_id[_ac_name].name)), string.lower(_search_for), 1, true)==nil then
-            show_curr_spell = false;
-          end
+          if _search_for~="" then show_curr_spell=check_search_for(modify_wand_table.slot_data.ac_spells, _search_for); end
           if _active_filter~=99 and _active_filter~=actions_by_id[_ac_name].type then
             show_curr_spell = false;
           end
@@ -297,6 +302,7 @@ if modify_wand_loaded~=true then
               if GuiButton(gui, _nid(), margin, spell_y_offset, __yesno(false)) and (_fit_more) then
                 table.insert(modify_wand_table.slot_data.wand.always_cast_spells, _ac_name);
               end
+              GuiGuideTip(gui, _fit_more and "Add Always Casts spell" or "Can't fit more", "Quantity limited by researched wands");
               spell_y_offset = spell_y_offset + 26;
             end
           end
@@ -320,7 +326,8 @@ if modify_wand_loaded~=true then
       if GuiButton(gui, _nid(), icon_x_base, icon_y_base, "[WAND TYPE]", small_text_scale) then
         _window_display = _window_display~=1 and 1 or 0;
         -- GamePrint("Pick wand type");
-      end 
+      end
+      GuiGuideTip(gui, "Adjust Wand Type aka Icon", "Cosmetic only, for visual identification. Click to toggle window");
       local sel_ac_x_base = x_base + 54;
       local sel_ac_y_base = slot_y_pos + panel_sub_height - 10;
       GuiZSetForNextWidget(gui, _layer(3));
@@ -336,6 +343,7 @@ if modify_wand_loaded~=true then
         _window_display = _window_display~=2 and 2 or 0;
         -- GamePrint("Pick always casts");
       end
+      GuiGuideTip(gui, "Adjust Always Casts spells", "Click to toggle window");
 
       if (modify_wand_table.render_header_func or _gui_nop)(header_x_pos, header_y_pos, margin, panel_sub_width, panel_sub_height, 2, modify_wand_table.slot_data, _nid) then
         _reload_data = true;

@@ -5,10 +5,6 @@ if spell_loadouts_loaded~=true then
   local _saved_spell_loadouts;
   reload_ui_data = true;
 
-  -- ModSettingSetNextValue("persistence.loadout_1", "Kaboom,SUMMON_HOLLOW_EGG,BOMB,PROPANE_TANK,BOMB,BOMB,BOMB,BOMB,BOMB,BOMB,BOMB,EXPANDING_ORB,BOMB,BOMB,BOMB,BOMB,BOMB,BOMB,BOMB,SUMMON_ROCK", false);
-  -- ModSettingSetNextValue("persistence.loadout_3", "Kaboom 2,SUMMON_HOLLOW_EGG,PROPANE_TANK,BOMB,EXPANDING_ORB,BOMB,SUMMON_ROCK", false);
-  -- ModSettingSetNextValue("persistence.loadout_4", "Simple,BURST_2,LIGHT_BULLET,CHAINSAW", false);
-
   local function draw_spell_loadouts(in_x_loc, in_y_loc)
 
     local function _get_stored_loadouts()
@@ -96,6 +92,7 @@ if spell_loadouts_loaded~=true then
             if GuiButton(gui, _nid(), 15, _y_offset, "Clear", 1) then
               _list_confirm=-_loadout_idx;
             end
+            GuiGuideTip(gui, "Erase Loadout", "(Requires confirmation)");
           end
           GuiZSetForNextWidget(gui, _layer(3));
           GuiColorNextWidgetBool(gui, _loadout_data.price<=last_known_money);
@@ -107,6 +104,7 @@ if spell_loadouts_loaded~=true then
               end
             end
           end
+          GuiGuideTip(gui, "Spells fill inventory", "(may overlap other spells for now)");
           _y_offset = _y_offset + 9;
           local _y_loc = 0;
           for _loadout_spell_idx, _loadout_spell_a_id in pairs(_loadout_data.spells) do
@@ -136,23 +134,29 @@ if spell_loadouts_loaded~=true then
                   _new_loadout_spells = _wands[_slot_idx].wand.spells;
                 end
               end
+              GuiGuideTip(gui, "Copy spells from wand " .. _slot_idx, "(max length may prevent saving with 20+ spells)");
             end
           else
             _y_offset = _y_offset + 2;
             GuiZSetForNextWidget(gui, _layer(3));
             _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 32, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 -/+");
+            GuiGuideTip(gui, "Name your loadout", "Must be 1 ~ 32 chars");
             GuiZSetForNextWidget(gui, _layer(4));
             if GuiButton(gui, _nid(), 86, _y_offset, "Save", 1) or InputIsKeyJustDown(Key_RETURN) then
-              save_spell_loadout(_loadout_idx, {name = _name_temp, spells = _new_loadout_spells});
-              _list_confirm = 0;
-              _reload_data = true;
+              if #_name_temp>0 then
+                save_spell_loadout(_loadout_idx, {name = _name_temp, spells = _new_loadout_spells});
+                _list_confirm = 0;
+                _reload_data = true;
+              end
             end
+            GuiGuideTip(gui, "Save loadout", "HOTKEY: Return");
             GuiZSetForNextWidget(gui, _layer(4));
             GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
             if GuiButton(gui, _nid(), _panel_width - _unit_margin, _y_offset, "Cancel", 1) then
               _list_confirm = 0;
               _reload_data = true;
             end
+            GuiGuideTip(gui, "Abort save", "");
             _y_offset = _y_offset - 2;
           end
           _y_offset = _y_offset + 9 + (_unit_margin * 3);

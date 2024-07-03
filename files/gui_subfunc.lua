@@ -31,6 +31,12 @@ if gui_subfunc_loaded~=true then
     end
   end
 
+  function GuiGuideTip(gui, text, subtext)
+    if mod_setting.show_guide_tips==true then
+      GuiTooltip(gui, text, subtext);
+    end
+  end
+
   function __render_tricolor_footer(x_base, y_base, width, height, textdata)
     GuiColorNextWidgetEnum(gui, COLORS.Green); ---green text
     GuiZSetForNextWidget(gui, _layer(2));
@@ -84,7 +90,7 @@ if gui_subfunc_loaded~=true then
       local new_offset_y = 0;
       GuiZSetForNextWidget(gui, _layer(layer+2));
       GuiImage(gui, _nid(), x_base + new_offset_x, y_base + new_offset_y, new_icon, 1, 2, 2, math.rad(30)); -- radians are annoying
-      GuiTooltip(gui, "This wand provides a new design.", "");
+      GuiGuideTip(gui, "This wand provides a new design", "");
     end
   end
 
@@ -100,7 +106,7 @@ if gui_subfunc_loaded~=true then
       local new_offset_y = 0;
       GuiZSetForNextWidget(gui, _layer(layer+2));
       GuiImage(gui, _nid(), x_base + new_offset_x, y_base + new_offset_y, new_icon, 1, 2, 2, math.rad(30)); -- radians are annoying
-      GuiTooltip(gui, "This wand provides a new design.", "");
+      GuiGuideTip(gui, "This wand provides a new design", "");
     end
   end
 
@@ -123,6 +129,7 @@ if gui_subfunc_loaded~=true then
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
       GuiZSetForNextWidget(gui, _layer(layer));
       GuiText(gui, x_base + panel_width - margin, y_base, tostring(_capacity), small_text_scale);
+      if _data.research~=nil then GuiGuideTip(gui, (_data.research~=nil and type(_data.color_val)=="boolean" and _data.color_val==true) and "Contributes to research" or "Does not contribute to research", ""); end
       grid_y_offset = 10;
       grid_x_offset = 6;
       grid_columns = 8;
@@ -159,6 +166,7 @@ if gui_subfunc_loaded~=true then
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
     GuiZSetForNextWidget(gui, _layer(layer));
     GuiText(gui, x_base + panel_width - margin, y_base, _data.value, small_text_scale);
+    if _data.research~=nil then GuiGuideTip(gui, (_data.research~=nil and type(_data.color_val)=="boolean" and _data.color_val==true) and "Contributes to research" or "Does not contribute to research", ""); end
   end
 
   function __render_spell_listentry(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
@@ -272,11 +280,13 @@ if gui_subfunc_loaded~=true then
     else
       _ret = slot_data.wand[slot_data.member];
     end
+    GuiGuideTip(gui, "Click to toggle", "");
 
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
     GuiZSetForNextWidget(gui, _layer(layer));
     GuiColorNextWidgetEnum(gui, COLORS.Tip);
     GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", math.ceil(slot_data.cost[slot_data.member] * mod_setting.buy_wand_price_multiplier) ), small_text_scale);
+    GuiGuideTip(gui, "Cost contribution from this stat", "");
     return _ret;
   end
 
@@ -297,6 +307,7 @@ if gui_subfunc_loaded~=true then
     GuiColorNextWidgetEnum(gui, COLORS.Tip);
     GuiZSetForNextWidget(gui, _layer(layer));
     GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", math.ceil(slot_data.cost[slot_data.member] * mod_setting.buy_wand_price_multiplier)), small_text_scale); ---- COST
+    GuiGuideTip(gui, "Cost contribution from this stat", "");
     local _x_offset, _, _width = select(8, GuiGetPreviousWidgetInfo(gui));
 
     if _x_mouse/2>_x_min and _x_mouse/2<_x_offset+_width+15 then
@@ -307,12 +318,13 @@ if gui_subfunc_loaded~=true then
 
     GuiZSetForNextWidget(gui, _layer(layer));  ---- SLIDER
     local _ret = math.floor(GuiSlider(gui, _nid(), x_base + margin, y_base + 10, "", slot_data.wand[slot_data.member], _bounds_min, _bounds_max, 0, 1, " ", panel_width ) + 0.5);
+    GuiGuideTip(gui, "Scroll Mouse Wheel to quickly adjust", "Hold Shift for 5x\nHold Ctrl for 10x");
 
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
     GuiZSetForNextWidget(gui, _layer(layer));
     GuiColorNextWidgetEnum(gui,  _mouse_hover and COLORS.Green or COLORS.Yellow);
     GuiText(gui, x_base + (panel_width / 2), y_base, slot_data.value, small_text_scale); ---- VALUE
-    -- _ret = tonumber(GuiTextInput(gui, _nid(), x_base + (panel_width / 2), y_base, slot_data.value, 20, 4, "1234567890." )) or _ret;
+    GuiGuideTip(gui, "Scroll Mouse Wheel to quickly adjust", "Hold Shift for 5x\nHold Ctrl for 10x");
 
     if _mouse_hover and _mouse_scroll~=0 then
       local _factor = 1;

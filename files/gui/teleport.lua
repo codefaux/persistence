@@ -17,6 +17,7 @@ if teleport_loaded~=true then
         if GuiButton(gui, _nid(), x_loc, y_loc, "Teleport to Lobby") then
           teleport_confirmation = true;
         end
+        GuiGuideTip(gui, "In Persistence Workshop areas, you can teleport to this run's spawn point.", "(Requires confirmation)");
       end
     end;
   end

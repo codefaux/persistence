@@ -37,6 +37,7 @@ if wand_template_loaded~=true then
               set_template(i, modify_wand_table.slot_data.wand);
               _reload_data = true;
             end
+            GuiGuideTip(gui, "Save active wand as template", "");
           else
             if template_confirmation~=i then
               GuiZSetForNextWidget(gui, _layer(1));
@@ -44,6 +45,7 @@ if wand_template_loaded~=true then
               if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 2), "Update") then
                 template_confirmation = i;
               end
+              GuiGuideTip(gui, "Update template with active wand", "(Requires confirmation)");
             else
               GuiZSetForNextWidget(gui, _layer(1));
               GuiColorNextWidgetEnum(gui, COLORS.Green);
@@ -59,7 +61,7 @@ if wand_template_loaded~=true then
               -- GamePrint("Load Template");
               modify_wand_table.slot_data.wand = get_template(i);
             end
-
+            GuiGuideTip(gui, "Load template to active wand", "");
           end
         end
 
@@ -75,6 +77,7 @@ if wand_template_loaded~=true then
             -- GamePrint("Buy Template");
             purchase_wand(get_template(i));
           end
+          GuiGuideTip(gui, "Click to buy", "Wands drop at your feet");
 
           GuiZSetForNextWidget(gui, _layer(1));
           GuiColorNextWidgetBool(gui, _affordable);
@@ -82,8 +85,16 @@ if wand_template_loaded~=true then
             -- GamePrint("Buy Template");
             purchase_wand(get_template(i));
           end
+          GuiGuideTip(gui, "Click to buy", "Wands drop at your feet");
 
-          if template_confirmation == -i then
+          if template_confirmation ~= -i then
+            GuiZSetForNextWidget(gui, _layer(1));
+            GuiColorNextWidgetEnum(gui, COLORS.Yellow);
+            if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 2), "Delete") then
+              template_confirmation = -i;
+            end
+            GuiGuideTip(gui, "Delete template", "(Requires confirmation)");
+          else
             GuiZSetForNextWidget(gui, _layer(1));
             GuiColorNextWidgetEnum(gui, COLORS.Yellow);
             if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 2), "CONFIRM") then
@@ -91,12 +102,6 @@ if wand_template_loaded~=true then
               delete_template(i);
               _reload_data = true;
               -- GamePrint("Delete Template");
-            end
-          else
-            GuiZSetForNextWidget(gui, _layer(1));
-            GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-            if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 2), "Delete") then
-              template_confirmation = -i;
             end
           end
 

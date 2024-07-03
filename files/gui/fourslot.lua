@@ -57,7 +57,7 @@ if fourslot_loaded~=true then
     id = "wand_select",
     centertext = "WANDS ARE DESTROYED WHEN RESEARCHED",
     greentext = "Green stats improve your research",
-    redtext = "Red stats do not",
+    redtext = "Red stats don't improve research",
     slot_title = "Wand slot %i:",
     render_slot_func = __render_wand_slot,
     render_header_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
@@ -84,6 +84,7 @@ if fourslot_loaded~=true then
                 GamePrint("Modify Wand");
                 present_modify_wand(slot_data.e_id or 0, slot_data.id);
               end
+              GuiGuideTip(gui, "Click to modify Persistence-created Wand", "Right-click to Recycle (Requires confirmation)");
               if select(2, GuiGetPreviousWidgetInfo(gui))==true then
                 fourslot_confirmation = slot_data.id;
               end
@@ -104,6 +105,7 @@ if fourslot_loaded~=true then
                 if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "No improved stats") then
                   fourslot_confirmation = slot_data.id;
                 end
+                GuiGuideTip(gui, "Click to recycle wand. No cost. No gain.", "(Requires confirmation)");
               end
             end
           end
@@ -115,6 +117,7 @@ if fourslot_loaded~=true then
               GuiColorNextWidgetEnum(gui, COLORS.Red);
               GuiZSetForNextWidget(gui, _layer(layer));
               GuiText(gui, x_base + 2 + x_offset, y_base + row3_y_offset, "UNRESEARCHED SPELLS", small_text_scale);
+              GuiGuideTip(gui, "Spells on wands are destroyed", "At least one spell is unresearched");
             else
               GuiColorNextWidgetEnum(gui, COLORS.Yellow);
               GuiZSetForNextWidget(gui, _layer(layer));
@@ -122,6 +125,7 @@ if fourslot_loaded~=true then
               GuiColorNextWidgetEnum(gui, COLORS.Yellow);
               GuiZSetForNextWidget(gui, _layer(layer));
               GuiText(gui, x_base + 2 + x_offset, y_base + row3_y_offset, "will be lost on research", small_text_scale);
+              GuiGuideTip(gui, "Spells on wands are destroyed", "These spells are all researched");
             end
           end
         else
@@ -132,22 +136,23 @@ if fourslot_loaded~=true then
             present_modify_wand(slot_data.e_id or 0, slot_data.id);
             ---TODO: CREATE WAND
           end
+          GuiGuideTip(gui, "Create a new wand from researched stats", "Wand Templates can be saved and loaded")
         end
       end,
     datum_submember = "wand",
     datum_translation = {
         _index = {[0] = 11, [1] = "sprite", [2] = "spells", [3] = "shuffle", [4] = "spells_per_cast", [5] = "cast_delay", [6] = "recharge_time", [7] = "mana_max", [8] = "mana_charge_speed", [9] = "capacity", [10] = "spread", [11] = "always_cast_spells"},
-        sprite              = {"",                            __val,      0,      __render_wand_sprite,    "b_wand_types"  },
-        spells              =  {"",                            __val,      34,      __render_wand_spells,    "b_capacity"  },
-        shuffle              = {"$inventory_shuffle",          __yesno,    9,      __render_gen_stat,      "b_shuffle"  },
-        spells_per_cast      = {"$inventory_actionspercast",    __val,      9,      __render_gen_stat,      "b_spells_per_cast"  },
-        cast_delay          = {"$inventory_castdelay",        __ctime,    9,      __render_gen_stat,      "b_cast_delay"  },
-        recharge_time        = {"$inventory_rechargetime",      __ctime,    9,      __render_gen_stat,      "b_recharge_time"  },
-        mana_max            = {"$inventory_manamax",          __round,    9,      __render_gen_stat,      "b_mana_max"  },
-        mana_charge_speed    = {"$inventory_manachargespeed",  __round,    9,      __render_gen_stat,      "b_mana_charge_speed"  },
-        capacity            =  {"$inventory_capacity",          __val,      9,      __render_gen_stat,      "b_capacity"  },
-        spread              = {"$inventory_spread",            __deg,      9,      __render_gen_stat,      "b_spread"  },
-        always_cast_spells  = {"$inventory_alwayscasts",      __val,      9,      __render_wand_spells,    "b_always_cast_spells"  },
+        sprite              = {"",                                __val,       0,    __render_wand_sprite,           "b_wand_types"  },
+        spells              = {"",                                __val,      34,    __render_wand_spells,             "b_capacity"  },
+        shuffle             = {"$inventory_shuffle",            __yesno,       9,       __render_gen_stat,              "b_shuffle"  },
+        spells_per_cast     = {"$inventory_actionspercast",       __val,       9,       __render_gen_stat,      "b_spells_per_cast"  },
+        cast_delay          = {"$inventory_castdelay",          __ctime,       9,       __render_gen_stat,           "b_cast_delay"  },
+        recharge_time       = {"$inventory_rechargetime",       __ctime,       9,       __render_gen_stat,        "b_recharge_time"  },
+        mana_max            = {"$inventory_manamax",            __round,       9,       __render_gen_stat,             "b_mana_max"  },
+        mana_charge_speed   = {"$inventory_manachargespeed",    __round,       9,       __render_gen_stat,    "b_mana_charge_speed"  },
+        capacity            = {"$inventory_capacity",             __val,       9,       __render_gen_stat,             "b_capacity"  },
+        spread              = {"$inventory_spread",               __deg,       9,       __render_gen_stat,               "b_spread"  },
+        always_cast_spells  = {"$inventory_alwayscasts",          __val,       9,    __render_wand_spells,   "b_always_cast_spells"  },
       },
     datum_exists_member = "wand",
     slots_func = get_player_wands,

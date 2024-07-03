@@ -275,6 +275,8 @@ if persistence_helper_loaded~=true then
       local _inv_full_e_id = EntityGetWithName("inventory_full");
       EntitySetComponentsWithTagEnabled(_spell_e_id, "enabled_in_world", false);
       EntityAddChild(_inv_full_e_id, _spell_e_id);
+      local _spell_item_c_id = EntityGetFirstComponentIncludingDisabled(_spell_e_id, "ItemComponent");
+      ComponentSetValue2(_spell_item_c_id, "inventory_slot", 0, 1);
       set_player_money(get_player_money() - price);
     end
     return true;

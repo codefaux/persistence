@@ -49,7 +49,7 @@ if persistence_data_store_loaded~=true then
 
     local _workshops_here = EntityGetInRadiusWithTag(_ent_x, _ent_y, 500, "persistence_workshop");
     for _, _test_e_id in ipairs(_workshops_here) do
-      GamePrint("Persistence: Marking workshop as paid");
+      -- GamePrint("Persistence: Marking workshop as paid");
       EntityRemoveTag(_test_e_id, "persistence_unpaid");
       EntityAddTag(_test_e_id, "persistence_paid");
       EntityAddTag(_test_e_id, "persistence_visited");

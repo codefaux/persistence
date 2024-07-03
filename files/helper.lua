@@ -253,10 +253,6 @@ if persistence_helper_loaded~=true then
     end
     SetWandSprite(_new_wand_e_id, ability_comp, wand.file, wand.grip_x, wand.grip_y, (wand.tip_x - wand.grip_x), (wand.tip_y - wand.grip_y));
 
-    -- UnlockPlayer();
-    -- GamePickUpInventoryItem(player_e_id, _new_wand_e_id, true);
-    -- LockPlayer();
-
     set_player_money(get_player_money() - _price);
     return true;
   end

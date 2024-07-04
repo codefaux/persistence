@@ -11,6 +11,47 @@
 -- Mod setting for "allow research spells inside wands"?
 -- Translation table for translation mods, translation helper Mod Options setting for tooltips indicating strings and meanings
 
+
+
+
+-- =====================
+--  BUGS / TOP PRIORITY
+-- =====================
+-- stash overflows; split into two variables, store w/ data_store into big_money, bigger_money?
+
+-- ====================
+--  REQUESTS / IDEAS
+-- ====================
+-- Character stat buffs
+-- PlayerEntity;
+--  CharacterDataComponent
+--    fly_time_max=3 -- adjusts as expected
+--    flying_in_air_wait_frames==24
+--  CharacterPlatformingComponent
+--    velocity_min x, y=-57, -200
+--    velocity_max x, y=57, 350
+--    fly_velocity_x = ?
+--    fly_speed_max_up = ?
+--    swim_drag = 0.95
+--    swim_extra_horizontal_drag = 0.9
+--    pixel_gravity = 
+--  DamageModelComponent
+--    damage_multipliers
+--    air_in_lungs_max
+--  IngestionComponent
+--    ingestion_capacity
+--    ingestion_reduce_every_n_frame
+--  KickComponent
+--    kick_radius
+--    player_kickforce
+--    kick_damage
+--    kick_knockback
+--  LightComponent
+--    radius
+--  MaterialSuckerComponent
+--    barrel_size
+--    num_cells_sucked_per_frame
+
 -- ====================
 --  DONE? NEEDS VERIFY
 -- ====================

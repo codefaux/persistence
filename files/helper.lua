@@ -500,19 +500,13 @@ if persistence_helper_loaded~=true then
     ["!="] = function (x, y) return x~=y; end
   }
 
-  local _spell_object_long_to_member = {};
-  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_actiontype_drawmany"))] = "draw_actions";
-  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_usesremaining"))] = "max_uses";
-  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_manadrain"))] = "mana";
-  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_castdelay"))] = "fire_rate_wait";
-  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_rechargetime"))] = "reload_time";
 
   local _spell_object_members = {
-    "draw_actions",    string.lower(GameTextGetTranslatedOrNot("$inventory_actiontype_drawmany")),
-    "max_uses",        string.lower(GameTextGetTranslatedOrNot("$inventory_usesremaining")),
-    "mana",            string.lower(GameTextGetTranslatedOrNot("$inventory_manadrain")),
-    "fire_rate_wait",  string.lower(GameTextGetTranslatedOrNot("$inventory_castdelay")),
-    "reload_time",     string.lower(GameTextGetTranslatedOrNot("$inventory_rechargetime")),
+    "draw_actions",
+    "max_uses",
+    "mana",
+    "fire_rate_wait",
+    "reload_time",
   }
 
 
@@ -533,13 +527,10 @@ if persistence_helper_loaded~=true then
               local _target_member = closest_match(_cmd, _spell_object_members);
               if _target_member~=nil then
                 local _spell = actions_by_id[spell_object.a_id];
-                if _spell[_target_member]~=nil and execute[_op](_spell[_target_member], tonumber(_val))==false then
+                if _spell[_target_member]~=nil then
+                  if execute[_op](_spell[_target_member], tonumber(_val))==false then   _show_item = false;   end
+                else
                   _show_item = false;
-                elseif _spell_object_long_to_member[_target_member]~=nil then
-                  local _short_member = _spell_object_long_to_member[_target_member];
-                  if _spell[_short_member]~=nil and execute[_op](_spell[_short_member], tonumber(_val))==false then
-                    _show_item = false;
-                  end
                 end
               end
             end

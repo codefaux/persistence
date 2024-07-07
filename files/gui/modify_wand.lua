@@ -65,22 +65,60 @@ if modify_wand_loaded~=true then
     mod_wand_s_id = slot_id or 0;
     local _reload_data = true;
     local datum_sort_funcs = {
-      _index = {[0]=4, [1]="sort_name", [2]="sort_cost_name", [3]="sort_type_name", [4]="sort_type_cost" },
-      sort_name        = { "Name",       function (a, b)
+      _index = {[0]=10, [1]="sort_name", [2]="sort_cost_name", [3]="sort_type_name", [4]="sort_type_cost", [5]="sort_draw", [6]="sort_uses", [7]="sort_mana", [8]="sort_delay", [9]="sort_recharge", [10]="sort_crit" },
+      sort_name = { "Name", function (a, b)
         return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name)));
         end },
-      sort_cost_name  = {"Cost,Name",        function (a, b)
+      sort_cost_name = {"Cost", function (a, b)
         if (a.price==b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
         return a.price<b.price;
         end },
-      sort_type_name  = {"Type,Name",    function (a, b)
+      sort_type_name = {"Type,Name", function (a, b)
         if (a.type==b.type) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
         return a.type<b.type;
         end },
-      sort_type_cost  = {"Type,Cost,Name",    function (a, b)
+      sort_type_cost = {"Type,Cost", function (a, b)
         if (a.type==b.type) and (a.price)==(b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
         if (a.type==b.type) then return (a.price<b.price); end
         return a.type<b.type;
+        end },
+      sort_draw = {GameTextGetTranslatedOrNot("$inventory_actiontype_drawmany"), function (a, b)
+        if (actions_by_id[a.a_id].c.draw_actions==actions_by_id[b.a_id].c.draw_actions) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].c.draw_actions~=nil and actions_by_id[b.a_id].c.draw_actions==nil then return true; end
+        if actions_by_id[a.a_id].c.draw_actions==nil and actions_by_id[b.a_id].c.draw_actions~=nil then return false; end
+        if actions_by_id[a.a_id].c.draw_actions>1 and actions_by_id[b.a_id].c.draw_actions<2 then return true; end
+        if actions_by_id[a.a_id].c.draw_actions<2 and actions_by_id[b.a_id].c.draw_actions>1 then return false; end
+        return actions_by_id[a.a_id].c.draw_actions<actions_by_id[b.a_id].c.draw_actions;
+        end },
+      sort_uses = {GameTextGetTranslatedOrNot("$inventory_usesremaining"), function (a, b)
+        if (actions_by_id[a.a_id].max_uses==actions_by_id[b.a_id].max_uses) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].max_uses~=nil and actions_by_id[b.a_id].max_uses==nil then return true; end
+        if actions_by_id[a.a_id].max_uses==nil and actions_by_id[b.a_id].max_uses~=nil then return false; end
+        return actions_by_id[a.a_id].max_uses<actions_by_id[b.a_id].max_uses;
+        end },
+      sort_mana = {GameTextGetTranslatedOrNot("$inventory_manadrain"), function (a, b)
+        if (actions_by_id[a.a_id].mana==actions_by_id[b.a_id].mana) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].mana~=nil and actions_by_id[b.a_id].mana==nil then return true; end
+        if actions_by_id[a.a_id].mana==nil and actions_by_id[b.a_id].mana~=nil then return false; end
+        return actions_by_id[a.a_id].mana<actions_by_id[b.a_id].mana;
+        end },
+      sort_delay = {GameTextGetTranslatedOrNot("$inventory_castdelay"), function (a, b)
+        if (actions_by_id[a.a_id].c.fire_rate_wait==actions_by_id[b.a_id].c.fire_rate_wait) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].c.fire_rate_wait~=nil and actions_by_id[b.a_id].c.fire_rate_wait==nil then return true; end
+        if actions_by_id[a.a_id].c.fire_rate_wait==nil and actions_by_id[b.a_id].c.fire_rate_wait~=nil then return false; end
+        return actions_by_id[a.a_id].c.fire_rate_wait<actions_by_id[b.a_id].c.fire_rate_wait;
+        end },
+      sort_recharge = {GameTextGetTranslatedOrNot("$inventory_mod_rechargetime"), function (a, b)
+        if (actions_by_id[a.a_id].c.reload_time==actions_by_id[b.a_id].c.reload_time) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].c.reload_time~=nil and actions_by_id[b.a_id].c.reload_time==nil then return true; end
+        if actions_by_id[a.a_id].c.reload_time==nil and actions_by_id[b.a_id].c.reload_time~=nil then return false; end
+        return actions_by_id[a.a_id].c.reload_time<actions_by_id[b.a_id].c.reload_time;
+        end },
+      sort_crit = {GameTextGetTranslatedOrNot("$inventory_mod_critchance"), function (a, b)
+        if (actions_by_id[a.a_id].c.damage_critical_chance==actions_by_id[b.a_id].c.damage_critical_chance) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].c.damage_critical_chance~=nil and actions_by_id[b.a_id].c.damage_critical_chance==nil then return false; end
+        if actions_by_id[a.a_id].c.damage_critical_chance==nil and actions_by_id[b.a_id].c.damage_critical_chance~=nil then return true; end
+        return actions_by_id[a.a_id].c.damage_critical_chance>actions_by_id[b.a_id].c.damage_critical_chance;
         end },
     };
 
@@ -214,7 +252,12 @@ if modify_wand_loaded~=true then
           _active_sort_name = datum_sort_funcs._index[_active_sort_idx];
           _sorted = false;
         end
-        GuiGuideTip(gui, "Click to change sort order", "");
+        if select(2, GuiGetPreviousWidgetInfo(gui)) then
+          _active_sort_idx = (_active_sort_idx>1) and (_active_sort_idx - 1) or datum_sort_funcs._index[0];
+          _active_sort_name = datum_sort_funcs._index[_active_sort_idx];
+          _sorted = false;
+        end
+        GuiGuideTip(gui, "Click to change sort order", "Right-click to move backward");
 
         if _sorted~=true then table.sort(modify_wand_table.slot_data.ac_spells, datum_sort_funcs[_active_sort_name][2]); _sorted=true;  end
 
@@ -222,7 +265,7 @@ if modify_wand_loaded~=true then
         GuiText(gui, 240, 6, "Search:", 1);
         GuiZSetForNextWidget(gui, __layer(2));
         _search_for = GuiTextInput(gui, _nid(), 270, 5, _search_for, 100, 20);
-        GuiGuideTip(gui, "Search by name, #description, .variable[=,<,>]value\nRight-click to clear", "Multiple search (AND) by space or comma");
+        GuiGuideTip(gui, "Search by name, #description. Right-click to clear", "Multiple search (AND) by space or comma");
         if select(2, GuiGetPreviousWidgetInfo(gui))  then _search_for = ""; end
 
         local _f_idx = 1;

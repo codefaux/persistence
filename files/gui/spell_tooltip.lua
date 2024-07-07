@@ -3,7 +3,7 @@ if spell_tooltip_loaded~=true then
   local curr_spell = {};
 
   local function draw_spell_tooltip(in_x_loc, in_y_loc)
-      local x_loc = in_x_loc or 120;
+      local x_loc = in_x_loc or 80;
       local y_loc = in_y_loc or 245;
 
       curr_spell = actions_by_id[spell_tooltip_id];
@@ -22,33 +22,33 @@ if spell_tooltip_loaded~=true then
         local line_cnt = 1;
 
         -- GuiLayoutBeginLayer(gui);
-        GuiZSetForNextWidget(gui, __layer(2));
+        GuiZSetForNextWidget(gui, __layer(4));
         GuiBeginAutoBox(gui);
 
         local action_struct_pool = get_action_struct(curr_spell);
         for _, action_struct in ipairs(action_struct_pool) do
           if action_struct.name=="name" then
-            GuiZSetForNextWidget(gui, __layer(3));
+            GuiZSetForNextWidget(gui, __layer(5));
             GuiText(gui, col_a, y_loc, action_struct.value);      -- NAME
           elseif action_struct.name=="description" then
-            GuiZSetForNextWidget(gui, __layer(3));
+            GuiZSetForNextWidget(gui, __layer(5));
             GuiText(gui, col_a, y_loc + 3 + line_h, action_struct.value);      -- Description
           elseif action_struct.name=="sprite" then
-            GuiZSetForNextWidget(gui, __layer(3));
+            GuiZSetForNextWidget(gui, __layer(5));
             GuiImage(gui, _nid(), col_d, y_loc + 28, action_struct.icon, 1, 1.5, 1.5, 0);    -- ICON
           else
             line_cnt = line_cnt + 1;
             line_y = base_y + (line_h * line_cnt);
-            GuiZSetForNextWidget(gui, __layer(3));
+            GuiZSetForNextWidget(gui, __layer(5));
             GuiImage(gui, _nid(), col_a, line_y + 2, action_struct.icon, 1, 1, 1, 0);
-            GuiZSetForNextWidget(gui, __layer(3));
+            GuiZSetForNextWidget(gui, __layer(5));
             GuiText(gui, col_b, line_y, action_struct.label);
-            GuiZSetForNextWidget(gui, __layer(3));
+            GuiZSetForNextWidget(gui, __layer(5));
             GuiText(gui, col_c, line_y, action_struct.value);
           end
         end
 
-        GuiZSetForNextWidget(gui, __layer(2));
+        GuiZSetForNextWidget(gui, __layer(4));
         GuiEndAutoBoxNinePiece(gui, 4, 100, 25);
         -- GuiLayoutEndLayer(gui);
       end;

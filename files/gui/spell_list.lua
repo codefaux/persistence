@@ -15,17 +15,17 @@ if spell_list_loaded~=true then
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
       GuiColorNextWidgetEnum(gui, COLORS.Yellow);
       GuiText(gui, x_base + (panel_width/2), y_base - 5 + (panel_width/2), _empty_message);
-    end,
-  datum_sort_funcs = {
-      _index = {[0]=4, [1]="sort_inv_name", [2]="sort_inv_cost_name", [3]="sort_inv_type_name", [4]="sort_inv_type_cost" },
-      sort_inv_name        = { "Name",       function (a, b)
+      end,
+    datum_sort_funcs = {
+      _index = {[0]=10, [1]="sort_inv_name", [2]="sort_inv_cost_name", [3]="sort_inv_type_name", [4]="sort_inv_type_cost", [5]="sort_inv_draw", [6]="sort_inv_uses", [7]="sort_inv_mana", [8]="sort_inv_delay", [9]="sort_inv_recharge", [10]="sort_inv_crit" },
+      sort_inv_name = { "Name", function (a, b)
         if (a.researchable and not b.researchable) then return true; end
         if (b.researchable and not a.researchable) then return false; end
         if (b.recyclable and not a.recyclable) then return true; end
         if (a.recyclable and not b.recyclable) then return false; end
         return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name)));
         end },
-      sort_inv_cost_name  = {"Cost,Name",        function (a, b)
+      sort_inv_cost_name = {"Cost", function (a, b)
         if (a.researchable and not b.researchable) then return true; end
         if (b.researchable and not a.researchable) then return false; end
         if (b.recyclable and not a.recyclable) then return true; end
@@ -33,7 +33,7 @@ if spell_list_loaded~=true then
         if (a.price==b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
         return a.price<b.price;
         end },
-      sort_inv_type_name  = {"Type,Name",    function (a, b)
+      sort_inv_type_name = {"Type,Name", function (a, b)
         if (a.researchable and not b.researchable) then return true; end
         if (b.researchable and not a.researchable) then return false; end
         if (b.recyclable and not a.recyclable) then return true; end
@@ -41,7 +41,7 @@ if spell_list_loaded~=true then
         if (a.type==b.type) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
         return a.type<b.type;
         end },
-      sort_inv_type_cost  = {"Type,Cost,Name",    function (a, b)
+      sort_inv_type_cost = {"Type,Cost", function (a, b)
         if (a.researchable and not b.researchable) then return true; end
         if (b.researchable and not a.researchable) then return false; end
         if (b.recyclable and not a.recyclable) then return true; end
@@ -50,7 +50,69 @@ if spell_list_loaded~=true then
         if (a.type==b.type) then return (a.price<b.price); end
         return a.type<b.type;
         end },
-    },
+        sort_draw = {GameTextGetTranslatedOrNot("$inventory_actiontype_drawmany"), function (a, b)
+          if (a.researchable and not b.researchable) then return true; end
+          if (b.researchable and not a.researchable) then return false; end
+          if (b.recyclable and not a.recyclable) then return true; end
+          if (a.recyclable and not b.recyclable) then return false; end
+          if (actions_by_id[a.a_id].c.draw_actions==actions_by_id[b.a_id].c.draw_actions) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+          if actions_by_id[a.a_id].c.draw_actions~=nil and actions_by_id[b.a_id].c.draw_actions==nil then return true; end
+          if actions_by_id[a.a_id].c.draw_actions==nil and actions_by_id[b.a_id].c.draw_actions~=nil then return false; end
+          if actions_by_id[a.a_id].c.draw_actions>1 and actions_by_id[b.a_id].c.draw_actions<2 then return true; end
+          if actions_by_id[a.a_id].c.draw_actions<2 and actions_by_id[b.a_id].c.draw_actions>1 then return false; end
+          return actions_by_id[a.a_id].c.draw_actions<actions_by_id[b.a_id].c.draw_actions;
+          end },
+        sort_uses = {GameTextGetTranslatedOrNot("$inventory_usesremaining"), function (a, b)
+          if (a.researchable and not b.researchable) then return true; end
+          if (b.researchable and not a.researchable) then return false; end
+          if (b.recyclable and not a.recyclable) then return true; end
+          if (a.recyclable and not b.recyclable) then return false; end
+          if (actions_by_id[a.a_id].max_uses==actions_by_id[b.a_id].max_uses) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+          if actions_by_id[a.a_id].max_uses~=nil and actions_by_id[b.a_id].max_uses==nil then return true; end
+          if actions_by_id[a.a_id].max_uses==nil and actions_by_id[b.a_id].max_uses~=nil then return false; end
+          return actions_by_id[a.a_id].max_uses<actions_by_id[b.a_id].max_uses;
+          end },
+        sort_mana = {GameTextGetTranslatedOrNot("$inventory_manadrain"), function (a, b)
+          if (a.researchable and not b.researchable) then return true; end
+          if (b.researchable and not a.researchable) then return false; end
+          if (b.recyclable and not a.recyclable) then return true; end
+          if (a.recyclable and not b.recyclable) then return false; end
+          if (actions_by_id[a.a_id].mana==actions_by_id[b.a_id].mana) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+          if actions_by_id[a.a_id].mana~=nil and actions_by_id[b.a_id].mana==nil then return true; end
+          if actions_by_id[a.a_id].mana==nil and actions_by_id[b.a_id].mana~=nil then return false; end
+          return actions_by_id[a.a_id].mana<actions_by_id[b.a_id].mana;
+          end },
+        sort_delay = {GameTextGetTranslatedOrNot("$inventory_castdelay"), function (a, b)
+          if (a.researchable and not b.researchable) then return true; end
+          if (b.researchable and not a.researchable) then return false; end
+          if (b.recyclable and not a.recyclable) then return true; end
+          if (a.recyclable and not b.recyclable) then return false; end
+          if (actions_by_id[a.a_id].c.fire_rate_wait==actions_by_id[b.a_id].c.fire_rate_wait) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+          if actions_by_id[a.a_id].c.fire_rate_wait~=nil and actions_by_id[b.a_id].c.fire_rate_wait==nil then return true; end
+          if actions_by_id[a.a_id].c.fire_rate_wait==nil and actions_by_id[b.a_id].c.fire_rate_wait~=nil then return false; end
+          return actions_by_id[a.a_id].c.fire_rate_wait<actions_by_id[b.a_id].c.fire_rate_wait;
+          end },
+        sort_recharge = {GameTextGetTranslatedOrNot("$inventory_mod_rechargetime"), function (a, b)
+          if (a.researchable and not b.researchable) then return true; end
+          if (b.researchable and not a.researchable) then return false; end
+          if (b.recyclable and not a.recyclable) then return true; end
+          if (a.recyclable and not b.recyclable) then return false; end
+          if (actions_by_id[a.a_id].c.reload_time==actions_by_id[b.a_id].c.reload_time) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+          if actions_by_id[a.a_id].c.reload_time~=nil and actions_by_id[b.a_id].c.reload_time==nil then return true; end
+          if actions_by_id[a.a_id].c.reload_time==nil and actions_by_id[b.a_id].c.reload_time~=nil then return false; end
+          return actions_by_id[a.a_id].c.reload_time<actions_by_id[b.a_id].c.reload_time;
+          end },
+        sort_crit = {GameTextGetTranslatedOrNot("$inventory_mod_critchance"), function (a, b)
+          if (a.researchable and not b.researchable) then return true; end
+          if (b.researchable and not a.researchable) then return false; end
+          if (b.recyclable and not a.recyclable) then return true; end
+          if (a.recyclable and not b.recyclable) then return false; end
+          if (actions_by_id[a.a_id].c.damage_critical_chance==actions_by_id[b.a_id].c.damage_critical_chance) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+          if actions_by_id[a.a_id].c.damage_critical_chance~=nil and actions_by_id[b.a_id].c.damage_critical_chance==nil then return false; end
+          if actions_by_id[a.a_id].c.damage_critical_chance==nil and actions_by_id[b.a_id].c.damage_critical_chance~=nil then return true; end
+          return actions_by_id[a.a_id].c.damage_critical_chance>actions_by_id[b.a_id].c.damage_critical_chance;
+          end },
+      },
     datum_render_func = __render_spell_listentry,
     action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
         if slot_data.researchable~=nil and slot_data.researchable==true then
@@ -110,24 +172,62 @@ if spell_list_loaded~=true then
       GuiText(gui, x_base + (panel_width/2), y_base - 5 + (panel_width/2), _empty_message);
     end,
   datum_sort_funcs = {
-      _index = {[0]=4, [1]="sort_name", [2]="sort_cost_name", [3]="sort_type_name", [4]="sort_type_cost" },
-      sort_name        = { "Name",       function (a, b)
+      _index = {[0]=10, [1]="sort_name", [2]="sort_cost_name", [3]="sort_type_name", [4]="sort_type_cost", [5]="sort_draw", [6]="sort_uses", [7]="sort_mana", [8]="sort_delay", [9]="sort_recharge", [10]="sort_crit" },
+      sort_name = { "Name", function (a, b)
         return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name)));
         end },
-      sort_cost_name  = {"Cost,Name",        function (a, b)
+      sort_cost_name = {"Cost", function (a, b)
         if (a.price==b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
         return a.price<b.price;
         end },
-      sort_type_name  = {"Type,Name",    function (a, b)
+      sort_type_name = {"Type,Name", function (a, b)
         if (a.type==b.type) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
         return a.type<b.type;
         end },
-      sort_type_cost  = {"Type,Cost,Name",    function (a, b)
+      sort_type_cost = {"Type,Cost", function (a, b)
         if (a.type==b.type) and (a.price)==(b.price) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
         if (a.type==b.type) then return (a.price<b.price); end
         return a.type<b.type;
         end },
-    },
+      sort_draw = {GameTextGetTranslatedOrNot("$inventory_actiontype_drawmany"), function (a, b)
+        if (actions_by_id[a.a_id].c.draw_actions==actions_by_id[b.a_id].c.draw_actions) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].c.draw_actions~=nil and actions_by_id[b.a_id].c.draw_actions==nil then return true; end
+        if actions_by_id[a.a_id].c.draw_actions==nil and actions_by_id[b.a_id].c.draw_actions~=nil then return false; end
+        if actions_by_id[a.a_id].c.draw_actions>1 and actions_by_id[b.a_id].c.draw_actions<2 then return true; end
+        if actions_by_id[a.a_id].c.draw_actions<2 and actions_by_id[b.a_id].c.draw_actions>1 then return false; end
+        return actions_by_id[a.a_id].c.draw_actions<actions_by_id[b.a_id].c.draw_actions;
+        end },
+      sort_uses = {GameTextGetTranslatedOrNot("$inventory_usesremaining"), function (a, b)
+        if (actions_by_id[a.a_id].max_uses==actions_by_id[b.a_id].max_uses) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].max_uses~=nil and actions_by_id[b.a_id].max_uses==nil then return true; end
+        if actions_by_id[a.a_id].max_uses==nil and actions_by_id[b.a_id].max_uses~=nil then return false; end
+        return actions_by_id[a.a_id].max_uses<actions_by_id[b.a_id].max_uses;
+        end },
+      sort_mana = {GameTextGetTranslatedOrNot("$inventory_manadrain"), function (a, b)
+        if (actions_by_id[a.a_id].mana==actions_by_id[b.a_id].mana) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].mana~=nil and actions_by_id[b.a_id].mana==nil then return true; end
+        if actions_by_id[a.a_id].mana==nil and actions_by_id[b.a_id].mana~=nil then return false; end
+        return actions_by_id[a.a_id].mana<actions_by_id[b.a_id].mana;
+        end },
+      sort_delay = {GameTextGetTranslatedOrNot("$inventory_castdelay"), function (a, b)
+        if (actions_by_id[a.a_id].c.fire_rate_wait==actions_by_id[b.a_id].c.fire_rate_wait) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].c.fire_rate_wait~=nil and actions_by_id[b.a_id].c.fire_rate_wait==nil then return true; end
+        if actions_by_id[a.a_id].c.fire_rate_wait==nil and actions_by_id[b.a_id].c.fire_rate_wait~=nil then return false; end
+        return actions_by_id[a.a_id].c.fire_rate_wait<actions_by_id[b.a_id].c.fire_rate_wait;
+        end },
+      sort_recharge = {GameTextGetTranslatedOrNot("$inventory_mod_rechargetime"), function (a, b)
+        if (actions_by_id[a.a_id].c.reload_time==actions_by_id[b.a_id].c.reload_time) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].c.reload_time~=nil and actions_by_id[b.a_id].c.reload_time==nil then return true; end
+        if actions_by_id[a.a_id].c.reload_time==nil and actions_by_id[b.a_id].c.reload_time~=nil then return false; end
+        return actions_by_id[a.a_id].c.reload_time<actions_by_id[b.a_id].c.reload_time;
+        end },
+      sort_crit = {GameTextGetTranslatedOrNot("$inventory_mod_critchance"), function (a, b)
+        if (actions_by_id[a.a_id].c.damage_critical_chance==actions_by_id[b.a_id].c.damage_critical_chance) then return (string.lower(GameTextGetTranslatedOrNot(a.name))<string.lower(GameTextGetTranslatedOrNot(b.name))); end
+        if actions_by_id[a.a_id].c.damage_critical_chance~=nil and actions_by_id[b.a_id].c.damage_critical_chance==nil then return false; end
+        if actions_by_id[a.a_id].c.damage_critical_chance==nil and actions_by_id[b.a_id].c.damage_critical_chance~=nil then return true; end
+        return actions_by_id[a.a_id].c.damage_critical_chance>actions_by_id[b.a_id].c.damage_critical_chance;
+        end },
+      },
     datum_render_func = __render_spell_listentry,
     action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
         local _price = math.ceil(slot_data.price * mod_setting.buy_spell_price_multiplier);
@@ -141,7 +241,6 @@ if spell_list_loaded~=true then
           if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
             purchase_spell(slot_data.a_id);
             GamePrintImportant("Spell Purchased", slot_data.name);
-            -- table.remove(researchable_spell_entities, r_s_e_idx);
             return true;
           end
         end -- Colorize Button
@@ -179,7 +278,12 @@ if spell_list_loaded~=true then
         _active_sort_name = spell_list_table.datum_sort_funcs._index[_active_sort_idx];
         _sorted = false;
       end
-      GuiGuideTip(gui, "Click to change sort order", "");
+      if select(2, GuiGetPreviousWidgetInfo(gui)) then
+        _active_sort_idx = (_active_sort_idx>1) and (_active_sort_idx - 1) or spell_list_table.datum_sort_funcs._index[0];
+        _active_sort_name = spell_list_table.datum_sort_funcs._index[_active_sort_idx];
+        _sorted = false;
+      end
+      GuiGuideTip(gui, "Click to change sort order", "Right-click to move backward");
 
       if _sorted~=true then table.sort(spell_list_table.slots_data, spell_list_table.datum_sort_funcs[_active_sort_name][2]); _sorted=true;  end
 
@@ -187,7 +291,7 @@ if spell_list_loaded~=true then
       GuiText(gui, 240, 6, "Search:", 1);
       GuiZSetForNextWidget(gui, __layer(2));
       _search_for = GuiTextInput(gui, _nid(), 270, 5, _search_for, 100, 20);
-      GuiGuideTip(gui, "Search by name, #description, .variable[=,<,>]value\nRight-click to clear", "Multiple search (AND) by space or comma");
+      GuiGuideTip(gui, "Search by name, #description. Right-click to clear", "Multiple search (AND) by space or comma");
       if select(2, GuiGetPreviousWidgetInfo(gui))  then _search_for = ""; end
 
       local _f_idx = 1;

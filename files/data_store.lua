@@ -305,13 +305,20 @@ if persistence_data_store_loaded~=true then
   end
 
   local function _transfer_money_stash_to_player(profile_id, amount)
-    if _get_stash_money(profile_id) < amount then
+    local _money = get_player_money();
+    if _money >= (2^29) then return false; end
+    if _money + amount > (2^29) then return false; end
+    if _get_stash_money(profile_id) < amount then return false; end
+
+    local _newtarget = math.min(_money + amount, (2^29));
+    local _difference = _newtarget - _money;
+
+    if set_player_money( _newtarget )==true then
+      _decrement_stash_money(profile_id, _difference);
+      return true;
+    else
       return false;
     end
-
-    increment_player_money(amount);
-    _decrement_stash_money(profile_id, amount);
-    return true;
   end
 
   ---Load a profile quick-view, return values and populate datastore

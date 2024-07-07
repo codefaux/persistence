@@ -431,7 +431,9 @@ if persistence_helper_loaded~=true then
   end
 
   function set_player_money(value)
+    if value>(2^29) then return false; end
     ComponentSetValue2(EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0, "money", value);
+    return true;
   end
 
   function decrement_player_money(amount)

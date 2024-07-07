@@ -11,7 +11,7 @@ if spell_list_loaded~=true then
     slots_func = get_spell_inv_research_table,
     empty_message_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
       local _empty_message = "No spells in inventory";
-      GuiZSetForNextWidget(gui, _layer(layer));
+      GuiZSetForNextWidget(gui, __layer(layer));
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
       GuiColorNextWidgetEnum(gui, COLORS.Yellow);
       GuiText(gui, x_base + (panel_width/2), y_base - 5 + (panel_width/2), _empty_message);
@@ -57,11 +57,11 @@ if spell_list_loaded~=true then
           local _price = math.ceil(slot_data.price * mod_setting.research_spell_price_multiplier);
           if last_known_money < _price then
             GuiColorNextWidgetEnum(gui, COLORS.Red);
-            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiZSetForNextWidget(gui, __layer(layer));
             GuiText(gui, x_base, 3 + y_base, string.format(" $ %1.0f", _price))
           else
             GuiColorNextWidgetEnum(gui, COLORS.Green);
-            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiZSetForNextWidget(gui, __layer(layer));
             if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
               research_spell_entity(slot_data.e_id);
               GamePrintImportant("Spell Researched", slot_data.name);
@@ -74,7 +74,7 @@ if spell_list_loaded~=true then
         elseif slot_data.recyclable~=nil and slot_data.recyclable==true then
           if spell_list_confirmation==slot_data.e_id then
             GuiColorNextWidgetEnum(gui, COLORS.Red);
-            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiZSetForNextWidget(gui, __layer(layer));
             if GuiButton(gui, _nid(), x_base, 10 + y_base, "CONFIRM") then
               GamePrintImportant("Spell Recycled", slot_data.name);
               delete_spell_entity(slot_data.e_id);
@@ -84,7 +84,7 @@ if spell_list_loaded~=true then
             GuiGuideTip(gui, "Recycle spell", "NO COST. NO GAIN.")
           else
             GuiColorNextWidgetEnum(gui, COLORS.Dim);
-            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiZSetForNextWidget(gui, __layer(layer));
             if GuiButton(gui, _nid(), x_base, 0 + y_base, slot_data.known and "-known-" or "-ineligible-") then
               spell_list_confirmation = slot_data.e_id;
             end
@@ -104,7 +104,7 @@ if spell_list_loaded~=true then
     slots_func = get_spell_purchase_table,
     empty_message_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
       local _empty_message = "No spells have been researched";
-      GuiZSetForNextWidget(gui, _layer(layer));
+      GuiZSetForNextWidget(gui, __layer(layer));
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
       GuiColorNextWidgetEnum(gui, COLORS.Yellow);
       GuiText(gui, x_base + (panel_width/2), y_base - 5 + (panel_width/2), _empty_message);
@@ -133,11 +133,11 @@ if spell_list_loaded~=true then
         local _price = math.ceil(slot_data.price * mod_setting.buy_spell_price_multiplier);
         if last_known_money < _price then
           GuiColorNextWidgetEnum(gui, COLORS.Red);
-          GuiZSetForNextWidget(gui, _layer(layer));
+          GuiZSetForNextWidget(gui, __layer(layer));
           GuiText(gui, x_base, 3 + y_base, string.format(" $ %1.0f", _price));
         else
           GuiColorNextWidgetEnum(gui, COLORS.Green);
-          GuiZSetForNextWidget(gui, _layer(layer));
+          GuiZSetForNextWidget(gui, __layer(layer));
           if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
             purchase_spell(slot_data.a_id);
             GamePrintImportant("Spell Purchased", slot_data.name);
@@ -173,7 +173,7 @@ if spell_list_loaded~=true then
       local panel_height = height - (margin * 2);
       local entry_height = 20;
 
-      GuiZSetForNextWidget(gui, _layer(2));
+      GuiZSetForNextWidget(gui, __layer(2));
       if GuiButton(gui, _nid(), 400, 6, "Sort: " .. spell_list_table.datum_sort_funcs[_active_sort_name][1] ) then
         _active_sort_idx = (_active_sort_idx<spell_list_table.datum_sort_funcs._index[0]) and (_active_sort_idx + 1) or 1;
         _active_sort_name = spell_list_table.datum_sort_funcs._index[_active_sort_idx];
@@ -183,15 +183,15 @@ if spell_list_loaded~=true then
 
       if _sorted~=true then table.sort(spell_list_table.slots_data, spell_list_table.datum_sort_funcs[_active_sort_name][2]); _sorted=true;  end
 
-      GuiZSetForNextWidget(gui, _layer(2));
+      GuiZSetForNextWidget(gui, __layer(2));
       GuiText(gui, 240, 6, "Search:", 1);
-      GuiZSetForNextWidget(gui, _layer(2));
+      GuiZSetForNextWidget(gui, __layer(2));
       _search_for = GuiTextInput(gui, _nid(), 270, 5, _search_for, 100, 20);
       GuiGuideTip(gui, "Search by name or #description, right-click to clear", "Multiple search (AND) by space or comma");
       if select(2, GuiGetPreviousWidgetInfo(gui))  then _search_for = ""; end
 
       local _f_idx = 1;
-      GuiZSetForNextWidget(gui, _layer(2));
+      GuiZSetForNextWidget(gui, __layer(2));
       GuiText(gui, 26, 6, "Filter:");
       GuiGuideTip(gui, "Show only spells which match selected type", "")
       for _type_nr, _type_bool in pairs(spell_list_table.slots_data._index.type_hash) do
@@ -200,7 +200,7 @@ if spell_list_loaded~=true then
             _f_idx = _f_idx + 1;
           end
           local _filter_x_offset = 40 + ( (_type_nr==99 and 1 or _f_idx) * 20);
-          GuiZSetForNextWidget(gui, _layer(2));
+          GuiZSetForNextWidget(gui, __layer(2));
           if GuiImageButton(gui, _nid(), _filter_x_offset, 1, "", action_type_to_slot_sprite(_type_nr)) then
             if _active_filter~=_type_nr then
               _active_filter = _type_nr;
@@ -212,13 +212,13 @@ if spell_list_loaded~=true then
           if _type_nr==_active_filter then
             local _mark_offset_x = 10;
             local _mark_offset_y = 8;
-            GuiZSetForNextWidget(gui, _layer(2));
+            GuiZSetForNextWidget(gui, __layer(2));
             GuiImage(gui, _nid(), _filter_x_offset + _mark_offset_x, _mark_offset_y, "data/ui_gfx/damage_indicators/explosion.png", 0.5, 1, 1, math.rad(45)); -- radians are annoying
           end
         end
       end
 
-      GuiZSet(gui, _layer(0)); ---gui frame
+      GuiZSet(gui, __layer(0)); ---gui frame
       GuiBeginScrollContainer(gui, _nid(), x_base, y_base, width, height);
       if spell_list_table.slots_data._index.count > 0 then  ---Main iteration loop for spell list UI
         for _inv_spell_idx, _inv_spell_members in pairs(spell_list_table.slots_data) do

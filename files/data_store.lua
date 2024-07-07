@@ -27,6 +27,7 @@ if persistence_data_store_loaded~=true then
     if not GameHasFlagRun("persistence_startup_paid") then
       GameAddFlagRun("persistence_startup_paid");
       if mod_setting.start_with_money>0 then
+        ---@diagnostic disable-next-line: param-type-mismatch
         local _withdraw = math.min(mod_setting.start_with_money, get_stash_money());
         GamePrint(string.format("Persistence: Run start, $ %i from Stash", _withdraw));
         transfer_money_stash_to_player(_withdraw);
@@ -37,12 +38,13 @@ if persistence_data_store_loaded~=true then
   local function _do_holy_mountain_paycheck_check()
     if mod_setting.holy_mountain_money==0 then return; end
 
-    local _workshop_e_id = tonumber(GlobalsGetValue("workshop_e_id", "0"));
+    local _workshop_e_id = tonumber(GlobalsGetValue("workshop_e_id", "0")) or 0;
     if not EntityHasTag(_workshop_e_id, "persistence_visited") then return; end
     if not EntityHasTag(_workshop_e_id, "persistence_unpaid") then return; end
     if     EntityHasTag(_workshop_e_id, "persistence_paid") then return; end
 
-    local _withdraw = math.min(get_stash_money(), mod_setting.holy_mountain_money);
+        ---@diagnostic disable-next-line: param-type-mismatch
+        local _withdraw = math.min(get_stash_money(), mod_setting.holy_mountain_money);
     transfer_money_stash_to_player(_withdraw);
     GamePrint(string.format("Persistence: Holy Mountain paycheck, $ %i from Stash", _withdraw));
     local _ent_x, _ent_y = EntityGetTransform(_workshop_e_id);
@@ -64,6 +66,7 @@ if persistence_data_store_loaded~=true then
     return {
       wand_types = data_store[profile_id]["wand_types"],
       always_casts = data_store[profile_id]["always_cast_spells"],
+      always_cast_count = data_store[profile_id]["always_cast_count"],
       spells_per_cast = {1, data_store[profile_id]["spells_per_cast"] == nil and 1 or data_store[profile_id]["spells_per_cast"]},
       mana_max = {2, data_store[profile_id]["mana_max"] or 2},
       mana_charge_speed = {2, data_store[profile_id]["mana_charge_speed"] or 2},
@@ -326,12 +329,26 @@ if persistence_data_store_loaded~=true then
     write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
   end
 
+  local function _increment_stash_money(profile_id, amount)
+    local _stash = data_store[profile_id]["money"] == nil and 0 or data_store[profile_id]["money"];
+    local _amount = _stash + amount;
+    data_store[profile_id]["money"] = math.max(_stash, _amount);
+    write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
+  end
+
+  local function _decrement_stash_money(profile_id, amount)
+    local _stash = data_store[profile_id]["money"] == nil and 0 or data_store[profile_id]["money"];
+    _stash = math.max(_stash - amount, 0);
+    data_store[profile_id]["money"] = _stash;
+    write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
+  end
+
   -- always_cast_count
-  function _get_always_cast_count(profile_id)
+  local function _get_always_cast_count(profile_id)
     return data_store[profile_id]["always_cast_count"] == nil and 0 or data_store[profile_id]["always_cast_count"];
   end
 
-  function _set_always_cast_count(profile_id, value)
+  local function _set_always_cast_count(profile_id, value)
     data_store[profile_id]["always_cast_count"] = value;
     write_encode_integer(tostring(profile_id) .. "_always_cast_count", data_store[profile_id]["always_cast_count"]);
   end
@@ -342,8 +359,8 @@ if persistence_data_store_loaded~=true then
       return false;
     end
 
-    _set_stash_money(profile_id, _get_stash_money(profile_id) + amount);
-    set_player_money(get_player_money() - amount);
+    _increment_stash_money(profile_id, amount);
+    decrement_player_money(amount);
     return true;
   end
 
@@ -352,8 +369,8 @@ if persistence_data_store_loaded~=true then
       return false;
     end
 
-    set_player_money(get_player_money() + amount);
-    _set_stash_money(profile_id, _get_stash_money(profile_id) - amount);
+    increment_player_money(amount);
+    _decrement_stash_money(profile_id, amount);
     return true;
   end
 
@@ -363,7 +380,7 @@ if persistence_data_store_loaded~=true then
   ---@return integer|nil always_cast quantity known always cast spells
   ---@return integer|nil spells quantity known spells
   ---@return integer|nil wand_types quantity known wand types
-  function _load_profile_quick(profile_id)
+  local function _load_profile_quick(profile_id)
     local money = load_decode_integer(profile_id .. "_money") or 0;
     local always_cast = load_decode_integer(profile_id .. "_always_cast_spells_known") or 0;
     local spells = load_decode_integer(profile_id .. "_spells_known") or 0;
@@ -385,9 +402,9 @@ if persistence_data_store_loaded~=true then
   end
 
   -- templates
-  function _load_template(profile_id, template_id)
+  local function _get_template(profile_id, template_id)
     local template_id_string = template_id;
-    
+
     local _template = {};
     if HasFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_template_" .. template_id_string) then
       if HasFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_template_" .. template_id_string .. "_shuffle") then
@@ -409,6 +426,7 @@ if persistence_data_store_loaded~=true then
           table.insert(_template["always_cast_spells"], key);
         end
       end
+      _template["always_cast_count"] = #_template["always_cast_spells"];
 
       for key, _ in pairs(data_store[profile_id]["wand_types"]) do
         if HasFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_template_" .. template_id_string .. "_wand_type_" .. string.lower(key)) then
@@ -416,24 +434,46 @@ if persistence_data_store_loaded~=true then
           break;
         end
       end
-      _template.price = get_wand_price(_template);
+      _template.price = get_wand_buy_price(_template);
     end
     return _template;
   end
 
-  function _get_template(profile_id, template_id)
-    return _load_template(profile_id, template_id);
-  end
-
-  function _get_templates(profile_id)
+  local function _get_templates(profile_id)
     local _templates = {};
     for _idx = 1, get_template_count() do
-      table.insert(_templates, _load_template(profile_id, _idx));
+      table.insert(_templates, _get_template(profile_id, _idx));
     end
     return _templates;
   end
 
-  function _set_template(profile_id, template_id, wand_data)
+  local function _delete_template(profile_id, template_id)
+    local template_prefix = profile_id .. "_template_" .. template_id;
+    local template_flag_prefix = mod_flag_name .. "_" .. template_prefix;
+    RemoveFlagPersistent(template_flag_prefix .. "_shuffle");
+    clear_encode_integer(template_prefix .. "_spells_per_cast");
+    clear_encode_integer(template_prefix .. "_cast_delay");
+    clear_encode_integer(template_prefix .. "_recharge_time");
+    clear_encode_integer(template_prefix .. "_mana_max");
+    clear_encode_integer(template_prefix .. "_mana_charge_speed");
+    clear_encode_integer(template_prefix .. "_capacity");
+    clear_encode_integer(template_prefix .. "_spread");
+
+    for scan_action_id, _ in pairs(actions_by_id) do
+      RemoveFlagPersistent(template_flag_prefix .. "_always_cast_spell_" .. string.lower(scan_action_id));
+    end
+
+    for def_idx, _ in ipairs(default_wands) do
+      RemoveFlagPersistent(template_flag_prefix .. "_wand_type_default_" .. def_idx);
+    end
+    for _, scan_wand in ipairs(wands) do
+      RemoveFlagPersistent(template_flag_prefix .. "_wand_type_" .. string.lower(sprite_file_to_wand_type(scan_wand.file)));
+    end
+
+    RemoveFlagPersistent(template_flag_prefix);
+  end
+
+  local function _set_template(profile_id, template_id, wand_data)
     _delete_template(profile_id, template_id);
     if wand_data == nil then
       return;
@@ -460,98 +500,254 @@ if persistence_data_store_loaded~=true then
     AddFlagPersistent(template_flag_prefix);
   end
 
-  function _delete_template(profile_id, template_id)
-    local template_prefix = profile_id .. "_template_" .. template_id;
-    local template_flag_prefix = mod_flag_name .. "_" .. template_prefix;
-    RemoveFlagPersistent(template_flag_prefix .. "_shuffle");
-    clear_encode_integer(template_prefix .. "_spells_per_cast");
-    clear_encode_integer(template_prefix .. "_cast_delay");
-    clear_encode_integer(template_prefix .. "_recharge_time");
-    clear_encode_integer(template_prefix .. "_mana_max");
-    clear_encode_integer(template_prefix .. "_mana_charge_speed");
-    clear_encode_integer(template_prefix .. "_capacity");
-    clear_encode_integer(template_prefix .. "_spread");
+  --- Check if and how a wand entity is new research for profile
+  ---@param profile_id integer
+  ---@param entity_id integer
+  ---@return table research_flags {is_new, improves_spells_per_cast, improves_cast_delay_min, improves_cast_delay_max, improves_recharge_time_min, improves_recharge_time_max, improves_mana_max, improves_mana_charge_speed, improves_capacity, improves_spread_min, improves_spread_max, improves_always_cast_spells, improves_wand_types, count_new_always_cast_spells}
+  ---@return table cost_data {_sum, wand_type, always_casts, always_cast_count, shuffle, spells_per_cast, cast_delay, recharge_time, mana_max, mana_charge_speed, capacity, spread }
+  ---@return table wand_data wand data
+  local function _get_wand_entity_research(profile_id, entity_id)
+    local _research = { is_new = false,
+                        b_new_is_only_type = false,
+                        b_spells_per_cast = false,
+                        b_cast_delay = false,
+                        b_cast_delay_min = false,
+                        b_cast_delay_max = false,
+                        b_recharge_time = false,
+                        b_recharge_time_min = false,
+                        b_recharge_time_max = false,
+                        b_mana_max = false,
+                        b_mana_charge_speed = false,
+                        b_capacity = false,
+                        b_spread = false,
+                        b_spread_min = false,
+                        b_spread_max = false,
+                        b_always_cast_spells = false,
+                        i_always_cast_spells = 0,
+                        b_spells = false,
+                        i_spells = 0,
+                        b_always_cast_count = false,
+                        b_wand_types = false };
+    local _cost = { wand_type           = 0,
+                    always_cast_spells  = 0,
+                    always_cast_count   = 0,
+                    shuffle             = 0,
+                    spells_per_cast     = 0,
+                    cast_delay          = 0,
+                    recharge_time       = 0,
+                    mana_max            = 0,
+                    mana_charge_speed   = 0,
+                    capacity            = 0,
+                    spread              = 0 };
+    local _profile_known_spells = _get_profile_spells(profile_id);
+    local _in_wand_data = {};
 
-    for scan_action_id, _ in pairs(actions_by_id) do
-      RemoveFlagPersistent(template_flag_prefix .. "_always_cast_spell_" .. string.lower(scan_action_id));
-    end
+    if entity_id~=nil and entity_id~=0 then
+      local _wand_bounds = _get_wand_bounds(profile_id);
+      _in_wand_data = read_wand_entity(entity_id);
 
-    for def_idx, _ in ipairs(default_wands) do
-      RemoveFlagPersistent(template_flag_prefix .. "_wand_type_default_" .. def_idx);
-    end
-    for _, scan_wand in ipairs(wands) do
-      RemoveFlagPersistent(template_flag_prefix .. "_wand_type_" .. string.lower(sprite_file_to_wand_type(scan_wand.file)));
-    end
+      if _in_wand_data["spells_per_cast"] > _wand_bounds.spells_per_cast[2] then
+        _research.b_spells_per_cast = true;
+        _research.is_new = true;
+        _cost.spells_per_cast = math.ceil(__cost_func_spells_per_cast(_in_wand_data["spells_per_cast"]));
+      end
+      if _wand_bounds.cast_delay[1] == nil or _wand_bounds.cast_delay[2] == nil then
+        b_cast_delay_min = _wand_bounds.cast_delay[1] == nil;
+        b_cast_delay_max = _wand_bounds.cast_delay[2] == nil;
+        _research.b_cast_delay = true;
+        _research.b_cast_delay_min = true;
+        _research.b_cast_delay_max = true;
+        _research.is_new = true;
+        _cost.cast_delay = math.ceil(__cost_func_cast_delay(_in_wand_data["cast_delay"]));
+      else
+        if _in_wand_data["cast_delay"] < _wand_bounds.cast_delay[1] then
+          _research.b_cast_delay = true;
+          _research.b_cast_delay_min = true;
+          _research.is_new = true;
+          _cost.cast_delay = math.ceil(__cost_func_cast_delay(_in_wand_data["cast_delay"]));
+        elseif _in_wand_data["cast_delay"] > _wand_bounds.cast_delay[2] then
+          _research.b_cast_delay = true;
+          _research.b_cast_delay_max = true;
+          _research.is_new = true;
+          _cost.cast_delay = math.ceil(__cost_func_cast_delay(_in_wand_data["cast_delay"]));
+        end
+      end
+      if _wand_bounds.recharge_time[1] == nil or _wand_bounds.recharge_time[2] == nil then
+        b_recharge_time_min = _wand_bounds.recharge_time[1] == nil;
+        b_recharge_time_max = _wand_bounds.recharge_time[2] == nil;
+        _research.b_recharge_time = true;
+        _research.b_recharge_time_min = true;
+        _research.b_recharge_time_max = true;
+        _research.is_new = true;
+        _cost.recharge_time = math.ceil(__cost_func_recharge_time(_in_wand_data["recharge_time"]));
+      else
+        if _in_wand_data["recharge_time"] < _wand_bounds.recharge_time[1] then
+          _research.b_recharge_time = true;
+          _research.b_recharge_time_min = true;
+          _research.is_new = true;
+          _cost.recharge_time = math.ceil(__cost_func_recharge_time(_in_wand_data["recharge_time"]));
+        end
+        if _in_wand_data["recharge_time"] > _wand_bounds.recharge_time[2] then
+          _research.b_recharge_time = true;
+          _research.b_recharge_time_max = true;
+          _research.is_new = true;
+          _cost.recharge_time = math.ceil(__cost_func_recharge_time(_in_wand_data["recharge_time"]));
+        end
+      end
+      if _in_wand_data["mana_max"] > _wand_bounds.mana_max[2] then
+        _research.b_mana_max = true;
+        _research.is_new = true;
+        _cost.mana_max = math.ceil(__cost_func_mana_max(_in_wand_data["mana_max"]));
+      end
+      if _in_wand_data["mana_charge_speed"] > _wand_bounds.mana_charge_speed[2] then
+        _research.b_mana_charge_speed = true;
+        _research.is_new = true;
+        _cost.mana_charge_speed = math.ceil(__cost_func_mana_charge_speed(_in_wand_data["mana_charge_speed"]));
+      end
+      if _in_wand_data["capacity"] > _wand_bounds.capacity[2] then
+        _cost.capacity = math.ceil(__cost_func_capacity(_in_wand_data["capacity"]));
+        _research.b_capacity = true;
+        _research.is_new = true;
+      end
+      if _wand_bounds.spread[1] == nil or _wand_bounds.spread[2] == nil then
+        b_spread_min = _wand_bounds.spread[1] == nil;
+        b_spread_max = _wand_bounds.spread[2] == nil;
+        _research.b_spread = true;
+        _research.b_spread_min = true;
+        _research.b_spread_max = true;
+        _research.is_new = true;
+        _cost.spread = math.ceil(__cost_func_spread(_in_wand_data["spread"]));
+      else
+        if _in_wand_data["spread"] < _wand_bounds.spread[1] then
+          _research.b_spread = true;
+          _research.b_spread_min = true;
+          _research.is_new = true;
+          _cost.spread = math.ceil(__cost_func_spread(_in_wand_data["spread"]));
+        end
+        if _in_wand_data["spread"] > _wand_bounds.spread[2] then
+          _research.b_spread = true;
+          _research.b_spread_max = true;
+          _research.is_new = true;
+          _cost.spread = math.ceil(__cost_func_spread(_in_wand_data["spread"]));
+        end
+      end
 
-    RemoveFlagPersistent(template_flag_prefix);
+      if _in_wand_data["always_cast_spells"] ~= nil and #_in_wand_data["always_cast_spells"] > 0 then
+        for _, _always_cast_id in pairs(_in_wand_data["always_cast_spells"]) do
+          if actions_by_id[_always_cast_id] ~= nil and (_wand_bounds.always_casts == nil or _wand_bounds.always_casts[_always_cast_id] == nil) then
+            i_always_cast_spells = i_always_cast_spells + 1;
+            _research.b_always_cast_spells = true;
+            _research.is_new = true;
+            _cost.always_cast_spells = _cost.always_cast_spells + math.ceil(__cost_func_always_cast_spell(_always_cast_id));
+          end
+        end
+        if #_in_wand_data["always_cast_spells"] > _wand_bounds.always_cast_count then
+          _research.b_always_cast_count = true;
+          _research.is_new = true;
+          _cost.always_cast_count = math.ceil(__cost_func_always_cast_count(#_in_wand_data["always_cast_spells"]));
+        end
+      end
+
+      if _in_wand_data["spells"] ~= nil and #_in_wand_data["spells"] > 0 then
+        for _, _spell_id in pairs(_in_wand_data["spells"]) do
+          if actions_by_id[_spell_id] ~= nil and (_profile_known_spells == nil or _profile_known_spells[_spell_id] ~= true) then
+            _research.i_spells = _research.i_spells + 1;
+            _research.b_spells = true;
+          end
+        end
+      end
+
+      if _wand_bounds.wand_types == nil or _wand_bounds.wand_types[_in_wand_data["wand_type"]] == nil then
+        if wand_type_to_base_wand(_in_wand_data["wand_type"]) ~= nil then
+          b_new_is_only_type = not _research.is_new;
+          _research.b_wand_types = true;
+          _research.is_new = true;
+          _cost.wand_type = math.ceil(__cost_func_wand_type(_in_wand_data["wand_type"]));
+        end
+      end
+    end -- if entity_id~=nil|0
+
+    local _sum = 0;
+    for _member_name, _member_cost in pairs(_cost) do
+      if _member_name=="always_cast_spells" then
+        _sum = _sum + math.ceil(_member_cost * mod_setting.research_spell_price_multiplier);
+      else
+        _sum = _sum + math.ceil(_member_cost * mod_setting.research_wand_price_multiplier);
+      end
+    end
+    _cost._sum = _sum;
+
+    return _research, _cost, _in_wand_data;
   end
 
   local function _research_wand(profile_id, entity_id)
-    local wand_data = read_wand_entity(entity_id);
-    local spells_per_cast = _get_spells_per_cast(profile_id);
-    local cast_delay_min = _get_cast_delay_min(profile_id);
-    local cast_delay_max = _get_cast_delay_max(profile_id);
-    local recharge_time_min = _get_recharge_time_min(profile_id);
-    local recharge_time_max = _get_recharge_time_max(profile_id);
-    local mana_max = _get_mana_max(profile_id);
-    local mana_charge_speed = _get_mana_charge_speed(profile_id);
-    local capacity = _get_capacity(profile_id);
-    local spread_min = _get_spread_min(profile_id);
-    local spread_max = _get_spread_max(profile_id);
-    local always_cast_count = _get_always_cast_count(profile_id);
+    local _research, _cost, _wand_data = _get_wand_entity_research(profile_id, entity_id);
+    -- local _bounds = _get_wand_bounds(profile_id);
 
-    local price = research_wand_price(profile_id, entity_id);
-    if get_player_money() < price then
+    if get_player_money() < _cost._sum then
       return false;
     end
 
-    if wand_data["spells_per_cast"] > spells_per_cast then
-      _set_spells_per_cast(profile_id, wand_data["spells_per_cast"]);
+    if _research.b_spells_per_cast then
+      _set_spells_per_cast(profile_id, _wand_data["spells_per_cast"]);
+      -- decrement_player_money(_cost.spells_per_cast);
     end
-    if cast_delay_min == nil or wand_data["cast_delay"] < cast_delay_min then
-      _set_cast_delay_min(profile_id, wand_data["cast_delay"]);
+    if _research.b_cast_delay_min then
+    _set_cast_delay_min(profile_id, _wand_data["cast_delay"]);
+      -- decrement_player_money(_cost.cast_delay);
     end
-    if cast_delay_max == nil or wand_data["cast_delay"] > cast_delay_max then
-      _set_cast_delay_max(profile_id, wand_data["cast_delay"]);
+    if _research.b_cast_delay_max then
+      _set_cast_delay_max(profile_id, _wand_data["cast_delay"]);
+      -- decrement_player_money(_cost.cast_delay);
     end
-    if recharge_time_min == nil or wand_data["recharge_time"] < recharge_time_min then
-      _set_recharge_time_min(profile_id, wand_data["recharge_time"]);
+    if _research.b_recharge_time_min then
+      _set_recharge_time_min(profile_id, _wand_data["recharge_time"]);
+      -- decrement_player_money(_cost.recharge_time);
     end
-    if recharge_time_max == nil or wand_data["recharge_time"] > recharge_time_max then
-      _set_recharge_time_max(profile_id, wand_data["recharge_time"]);
+    if _research.b_recharge_time_max then
+      _set_recharge_time_max(profile_id, _wand_data["recharge_time"]);
+      -- decrement_player_money(_cost.recharge_time);
     end
-    if wand_data["mana_max"] > mana_max then
-      _set_mana_max(profile_id, wand_data["mana_max"]);
+    if _research.b_mana_max then
+      _set_mana_max(profile_id, _wand_data["mana_max"]);
+      -- decrement_player_money(_cost.mana_max);
     end
-    if wand_data["mana_charge_speed"] > mana_charge_speed then
-      _set_mana_charge_speed(profile_id, wand_data["mana_charge_speed"]);
+    if _research.b_mana_charge_speed_max then
+      _set_mana_charge_speed(profile_id, _wand_data["mana_charge_speed"]);
+      -- decrement_player_money(_cost.mana_charge_speed);
     end
-    if wand_data["capacity"] > capacity then
-      _set_capacity(profile_id, wand_data["capacity"]);
+    if _research.b_capacity then
+      _set_capacity(profile_id, _wand_data["capacity"]);
+      -- decrement_player_money(_cost.capacity);
     end
-    if spread_min == nil or wand_data["spread"] < spread_min then
-      _set_spread_min(profile_id, wand_data["spread"]);
+    if _research.b_spread_min then
+      _set_spread_min(profile_id, _wand_data["spread"]);
+      -- decrement_player_money(_cost.spread);
     end
-    if spread_max == nil or wand_data["spread"] > spread_max then
-      _set_spread_max(profile_id, wand_data["spread"]);
+    if _research.b_spread_max then
+      _set_spread_max(profile_id, _wand_data["spread"]);
+      -- decrement_player_money(_cost.spread);
     end
-    if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 then
-      _add_always_cast_spells(profile_id, wand_data["always_cast_spells"]);
+    if _research.b_always_cast_spells then
+      _add_always_cast_spells(profile_id, _wand_data["always_cast_spells"]);
+      -- decrement_player_money(_cost.always_cast_spells);
     end
-    if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > always_cast_count then
-      _set_always_cast_count(profile_id, #wand_data["always_cast_spells"]);
+    if _research.b_always_cast_count then
+      _set_always_cast_count(profile_id, #_wand_data["always_cast_spells"]);
+      -- decrement_player_money(_cost.always_cast_count);
     end
-      if wand_type_to_base_wand(wand_data["wand_type"]) ~= nil then
-      _add_wand_types(profile_id, { wand_data["wand_type"] });
+    if _research.b_wand_types then
+      _add_wand_types(profile_id, { _wand_data["wand_type"] });
+      -- decrement_player_money(_cost.wand_type);
     end
 
     delete_wand_entity(entity_id);
-    set_player_money(get_player_money() - price);
+    decrement_player_money(_cost._sum);
     return true;
   end
 
   local function _research_spell_entity(profile_id, entity_id)
-    local price = research_spell_entity_price(entity_id);
+    local price = get_spell_entity_research_price(entity_id);
     if price == nil then
       return false;
     end
@@ -562,166 +758,8 @@ if persistence_data_store_loaded~=true then
     _add_spells(profile_id, { get_spell_entity_action_id(entity_id) });
 
     delete_spell_entity(entity_id);
-    set_player_money(get_player_money() - price);
+    decrement_player_money(price);
     return true;
-  end
-
-  --- Check if and how a wand entity is new research for profile
-  ---@param profile_id integer
-  ---@param entity_id integer
-  ---@return table _ {is_new, improves_spells_per_cast, improves_cast_delay_min, improves_cast_delay_max, improves_recharge_time_min, improves_recharge_time_max, improves_mana_max, improves_mana_charge_speed, improves_capacity, improves_spread_min, improves_spread_max, improves_always_cast_spells, improves_wand_types, count_new_always_cast_spells}
-  local function _research_wand_is_new(profile_id, entity_id)
-    local is_new = false;
-    local b_new_is_only_type = false;
-    local b_spells_per_cast = false;
-    local b_cast_delay_min = false;
-    local b_cast_delay_max = false;
-    local b_recharge_time_min = false;
-    local b_recharge_time_max = false;
-    local b_mana_max = false;
-    local b_mana_charge_speed = false;
-    local b_capacity = false;
-    local b_spread_min = false;
-    local b_spread_max = false;
-    local b_always_cast_spells = false;
-    local i_always_cast_spells = 0;
-    local b_spells = false;
-    local i_spells = 0;
-    local b_always_cast_count = false;
-    local b_wand_types = false;
-
-    if entity_id~=nil and entity_id~=0 then
-      local _in_wand_data = read_wand_entity(entity_id);
-      local _profile_spells_per_cast = _get_spells_per_cast(profile_id);
-      local _profile_cast_delay_min = _get_cast_delay_min(profile_id);
-      local _profile_cast_delay_max = _get_cast_delay_max(profile_id);
-      local _profile_recharge_time_min = _get_recharge_time_min(profile_id);
-      local _profile_recharge_time_max = _get_recharge_time_max(profile_id);
-      local _profile_mana_max = _get_mana_max(profile_id);
-      local _profile_mana_charge_speed = _get_mana_charge_speed(profile_id);
-      local _profile_capacity = _get_capacity(profile_id);
-      local _profile_spread_min = _get_spread_min(profile_id);
-      local _profile_spread_max = _get_spread_max(profile_id);
-      local _profile_known_spells = _get_profile_spells(profile_id);
-      local _profile_known_always_cast_spells = _get_always_cast_spells(profile_id);
-      local _profile_always_cast_count = _get_always_cast_count(profile_id);
-      local _profile_wand_types = _get_wand_types(profile_id);
-
-      if _in_wand_data["spells_per_cast"] > _profile_spells_per_cast then
-        b_spells_per_cast = true;
-        is_new = true;
-      end
-      if _profile_cast_delay_min == nil or _profile_cast_delay_max == nil then
-        b_cast_delay_min = _profile_cast_delay_min == nil;
-        b_cast_delay_max = _profile_cast_delay_max == nil;
-        is_new = true;
-      else
-        if _in_wand_data["cast_delay"] < _profile_cast_delay_min then
-          b_cast_delay_min = true;
-          is_new = true;
-        end
-        if _in_wand_data["cast_delay"] > _profile_cast_delay_max then
-          b_cast_delay_max = true;
-          is_new = true;
-        end
-      end
-      if _profile_recharge_time_min == nil or _profile_recharge_time_max == nil then
-        b_recharge_time_min = _profile_recharge_time_min == nil;
-        b_recharge_time_max = _profile_recharge_time_max == nil;
-        is_new = true;
-      else
-        if _in_wand_data["recharge_time"] < _profile_recharge_time_min then
-          b_recharge_time_min = true;
-          is_new = true;
-        end
-        if _in_wand_data["recharge_time"] > _profile_recharge_time_max then
-          b_recharge_time_max = true;
-          is_new = true;
-        end
-      end
-      if _in_wand_data["mana_max"] > _profile_mana_max then
-        b_mana_max = true;
-        is_new = true;
-      end
-      if _in_wand_data["mana_charge_speed"] > _profile_mana_charge_speed then
-        b_mana_charge_speed = true;
-        is_new = true;
-      end
-      if _in_wand_data["capacity"] > _profile_capacity then
-        b_capacity = true;
-        is_new = true;
-      end
-      if _profile_spread_min == nil or _profile_spread_max == nil then
-        b_spread_min = _profile_spread_min == nil;
-        b_spread_max = _profile_spread_max == nil;
-        is_new = true;
-      else
-        if _in_wand_data["spread"] < _profile_spread_min then
-          b_spread_min = true;
-          is_new = true;
-        end
-        if _in_wand_data["spread"] > _profile_spread_max then
-          b_spread_max = true;
-          is_new = true;
-        end
-      end
-
-      if _in_wand_data["always_cast_spells"] ~= nil and #_in_wand_data["always_cast_spells"] > 0 then
-        for _, always_cast_id in ipairs(_in_wand_data["always_cast_spells"]) do
-          if actions_by_id[always_cast_id] ~= nil and (_profile_known_always_cast_spells == nil or _profile_known_always_cast_spells[always_cast_id] == nil) then
-            i_always_cast_spells = i_always_cast_spells + 1;
-            b_always_cast_spells = true;
-            is_new = true;
-          end
-        end
-        if #_in_wand_data["always_cast_spells"] > _profile_always_cast_count then
-          b_always_cast_count = true;
-          is_new = true;
-        end
-      end
-
-      if _in_wand_data["spells"] ~= nil and #_in_wand_data["spells"] > 0 then
-        for _, _spell_id in ipairs(_in_wand_data["spells"]) do
-          if actions_by_id[_spell_id] ~= nil and (_profile_known_spells == nil or _profile_known_spells[_spell_id] ~= true) then
-            i_spells = i_spells + 1;
-            b_spells = true;
-            -- is_new = true;
-          end
-        end
-      end
-
-      if _profile_wand_types == nil or _profile_wand_types[_in_wand_data["wand_type"]] == nil then
-        if wand_type_to_base_wand(_in_wand_data["wand_type"]) ~= nil then
-          b_new_is_only_type = not is_new;
-          b_wand_types = true;
-          is_new = true;
-        end
-      end
-    end -- if entity_id~=nil|0
-
-    return {
-      is_new = is_new,
-      b_spells_per_cast = b_spells_per_cast,
-      b_cast_delay = b_cast_delay_min or b_cast_delay_max;
-      b_cast_delay_min = b_cast_delay_min,
-      b_cast_delay_max = b_cast_delay_max,
-      b_recharge_time = b_recharge_time_min or b_recharge_time_max,
-      b_recharge_time_min = b_recharge_time_min,
-      b_recharge_time_max = b_recharge_time_max,
-      b_mana_max = b_mana_max,
-      b_mana_charge_speed = b_mana_charge_speed,
-      b_capacity = b_capacity,
-      b_spread = b_spread_min or b_spread_max;
-      b_spread_min = b_spread_min,
-      b_spread_max = b_spread_max,
-      b_spells = b_spells,
-      i_spells = i_spells,
-      b_always_cast_spells = b_always_cast_spells or b_always_cast_count,
-      i_always_cast_spells = i_always_cast_spells,
-      b_always_cast_count = b_always_cast_count,
-      b_wand_types = b_wand_types,
-      b_new_is_only_type = b_new_is_only_type
-    };
   end
 
   ---- ===========================
@@ -729,7 +767,9 @@ if persistence_data_store_loaded~=true then
   ---- ===========================
 
   function get_stash_money() return _get_stash_money(loaded_profile_id); end
-  function set_stash_money(value) _set_stash_money(loaded_profile_id, value); end
+  function set_stash_money(value) return _set_stash_money(loaded_profile_id, value); end
+  function increment_stash_money(amount) return _increment_stash_money(loaded_profile_id, amount); end
+  function decrement_stash_money(amount) return _decrement_stash_money(loaded_profile_id, amount); end
   function transfer_money_player_to_stash(value) return _transfer_money_player_to_stash(loaded_profile_id, value); end
   function transfer_money_stash_to_player(value) return _transfer_money_stash_to_player(loaded_profile_id, value); end
   function get_profile_spells() return _get_profile_spells(loaded_profile_id); end
@@ -738,13 +778,14 @@ if persistence_data_store_loaded~=true then
   function research_wand(entity_id) return _research_wand(loaded_profile_id, entity_id); end
   function get_templates() return _get_templates(loaded_profile_id); end
   function get_template(template_id) return _get_template(loaded_profile_id, template_id); end
-  function load_template(template_id) return _load_template(loaded_profile_id, template_id); end
+  function load_template(template_id) return _get_template(loaded_profile_id, template_id); end
   function set_template(template_id, wand_data) _set_template(loaded_profile_id, template_id, wand_data); end
   function delete_template(template_id) _delete_template(loaded_profile_id, template_id); end
   function get_always_cast_spells() return _get_always_cast_spells(loaded_profile_id); end
   function get_always_cast_count() return _get_always_cast_count(loaded_profile_id); end
   function get_wand_bounds() return _get_wand_bounds(loaded_profile_id); end
-  function research_wand_is_new(entity_id) return _research_wand_is_new(loaded_profile_id, entity_id); end
+  function get_wand_entity_research(entity_id) return _get_wand_entity_research(loaded_profile_id, entity_id); end
+
   ---- ================
   ---- PUBLIC FUNCTIONS
   ---- ================
@@ -763,6 +804,7 @@ if persistence_data_store_loaded~=true then
       end
     else
       _table.wand = read_wand_entity(entity_id);
+      _table.price = get_wand_buy_price(_table.wand);
       _table.origin_e_id = entity_id;
     end
     if _table.wand.wand_type==-1 then
@@ -776,12 +818,6 @@ if persistence_data_store_loaded~=true then
     _table.ac_limit = get_always_cast_count();
     _table.ac_spells = get_always_cast_spell_purchase_table();
     return _table;
-  end
-
-
-  function get_ac_cost(_a_c_id)
-    if _a_c_id==nil then return 0; end
-    return math.ceil(actions_by_id[_a_c_id].price * 5 * mod_setting.buy_spell_price_multiplier);
   end
 
   -- PROFILES
@@ -896,91 +932,12 @@ if persistence_data_store_loaded~=true then
   end
 
   function can_create_wand(profile_id)
-    return _get_cast_delay_min(profile_id) ~= nil and _get_cast_delay_max(profile_id) ~= nil and _get_recharge_time_min(profile_id) ~= nil and _get_recharge_time_max(profile_id) ~= nil and _get_spread_min(profile_id) ~= nil and _get_spread_max(profile_id) ~= nil;
-  end
-
-  function research_wand_price(profile_id, entity_id)
-    local wand_data = read_wand_entity(entity_id);
-    local spells_per_cast = _get_spells_per_cast(profile_id);
-    local cast_delay_min = _get_cast_delay_min(profile_id);
-    local cast_delay_max = _get_cast_delay_max(profile_id);
-    local recharge_time_min = _get_recharge_time_min(profile_id);
-    local recharge_time_max = _get_recharge_time_max(profile_id);
-    local mana_max = _get_mana_max(profile_id);
-    local mana_charge_speed = _get_mana_charge_speed(profile_id);
-    local capacity = _get_capacity(profile_id);
-    local spread_min = _get_spread_min(profile_id);
-    local spread_max = _get_spread_max(profile_id);
-    local always_cast_spells = _get_always_cast_spells(profile_id);
-    local wand_types = _get_wand_types(profile_id);
-    local price = 0;
-
-    if wand_data["spells_per_cast"] > spells_per_cast then
-      price = price + (wand_data["spells_per_cast"] - spells_per_cast) * 1000;
-    end
-    if cast_delay_min == nil or cast_delay_max == nil then
-      price = price + 0.01 ^ (wand_data["cast_delay"] / 60 - 1.8) + 200;
-    else
-      if wand_data["cast_delay"] < cast_delay_min then
-        price = price + (0.01 ^ (wand_data["cast_delay"] / 60 - 1.8) + 200) - (0.01 ^ (cast_delay_min / 60 - 1.8) + 200);
-      end
-      if wand_data["cast_delay"] > cast_delay_max then
-        price = price + (wand_data["cast_delay"] / 60 - cast_delay_max / 60) * 100;
-      end
-    end
-    if recharge_time_min == nil or recharge_time_max == nil then
-      price = price + 0.01 ^ (wand_data["recharge_time"] / 60 - 1.8) + 200;
-    else
-      if wand_data["recharge_time"] < recharge_time_min then
-        price = price + (0.01 ^ (wand_data["recharge_time"] / 60 - 1.8) + 200) - (0.01 ^ (recharge_time_min / 60 - 1.8) + 200);
-      end
-      if wand_data["recharge_time"] > recharge_time_max then
-        price = price + (wand_data["recharge_time"] / 60 - recharge_time_max / 60) * 100;
-      end
-    end
-    if wand_data["mana_max"] > mana_max then
-      price = price + (wand_data["mana_max"] - mana_max) * 10;
-    end
-    if wand_data["mana_charge_speed"] > mana_charge_speed then
-      price = price + (wand_data["mana_charge_speed"] - mana_charge_speed) * 20;
-    end
-    if wand_data["capacity"] > capacity then
-      price = price + (wand_data["capacity"] - capacity) * 1000;
-    end
-    if spread_min == nil or spread_max == nil then
-      price = price + math.abs(5 - wand_data["spread"]) * 10;
-    else
-      if wand_data["spread"] < spread_min then
-        price = price + (spread_min - wand_data["spread"]) * 10;
-      end
-      if wand_data["spread"] > spread_max then
-        price = price + (wand_data["spread"] - spread_max) * 10;
-      end
-    end
-
-    if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 and always_cast_spells ~= nil then
-      for _, always_cast_id in ipairs(wand_data["always_cast_spells"]) do
-        if always_cast_spells[always_cast_id] == nil then
-          price = price + actions_by_id[always_cast_id].price * 20;
-        end
-      end
-    end
-
-    if wand_types == nil or wand_types[wand_data["wand_type"]] == nil then
-      if wand_type_to_base_wand(wand_data["wand_type"]) ~= nil then
-        price = math.max(100, price);
-      end
-    end
-
-    return math.ceil(price * mod_setting.research_wand_price_multiplier);
-  end
-
-  function research_spell_entity_price(entity_id)
-    local action_id = get_spell_entity_action_id(entity_id);
-    if action_id == nil then
-      return nil
-    end
-    return math.ceil(actions_by_id[action_id].price * mod_setting.research_spell_price_multiplier)
+    return _get_cast_delay_min(profile_id) ~= nil and 
+           _get_cast_delay_max(profile_id) ~= nil and 
+           _get_recharge_time_min(profile_id) ~= nil and 
+           _get_recharge_time_max(profile_id) ~= nil and 
+           _get_spread_min(profile_id) ~= nil and 
+           _get_spread_max(profile_id) ~= nil;
   end
 
   function data_store_everyframe()

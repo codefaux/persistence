@@ -6,7 +6,7 @@ if teleport_loaded~=true then
     local x_loc = 275;
     local y_loc = 345;
     active_windows["teleport"] = function(_nid)
-      GuiZSetForNextWidget(gui, _layer(1))
+      GuiZSetForNextWidget(gui, __layer(1))
       if teleport_confirmation then
         GuiColorNextWidgetEnum(gui, COLORS.Yellow);
         if GuiButton(gui, _nid(), x_loc, y_loc, "Press again to teleport to Lobby") then

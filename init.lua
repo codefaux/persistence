@@ -3,6 +3,7 @@ dofile_once("data/scripts/lib/mod_settings.lua");
 mod_dir = "mods/persistence_staging/";
 
 dofile_once(mod_dir .. "files/meta.lua");
+dofile_once(mod_dir .. "files/cost.lua");
 
 mod_flag_name = "persistence";
 
@@ -18,8 +19,8 @@ mod_setting = {
   cap_money_saved_on_death =          ModSettingGet("persistence.cap_money_saved_on_death") * 1000,
   allow_stash =              tonumber(ModSettingGet("persistence.allow_stash")), --- 1, allow   0, disable  -1, deposit only
   buy_wand_price_multiplier =         ModSettingGet("persistence.buy_wand_price_multiplier"),
-  research_wand_price_multiplier =    ModSettingGet("persistence.research_wand_price_multiplier"),
   buy_spell_price_multiplier =        ModSettingGet("persistence.buy_spell_price_multiplier"),
+  research_wand_price_multiplier =    ModSettingGet("persistence.research_wand_price_multiplier"),
   research_spell_price_multiplier =   ModSettingGet("persistence.research_spell_price_multiplier"),
   money_saved_on_death =              ModSettingGet("persistence.money_saved_on_death"),
   always_choose_save_id =             ModSettingGet("persistence.always_choose_save_id"),
@@ -38,8 +39,8 @@ function OnPausedChanged(is_paused, _)
     cap_money_saved_on_death =          ModSettingGet("persistence.cap_money_saved_on_death") * 1000,
     allow_stash =              tonumber(ModSettingGet("persistence.allow_stash")), --- 1, allow   0, disable  -1, deposit only
     buy_wand_price_multiplier =         ModSettingGet("persistence.buy_wand_price_multiplier"),
-    research_wand_price_multiplier =    ModSettingGet("persistence.research_wand_price_multiplier"),
     buy_spell_price_multiplier =        ModSettingGet("persistence.buy_spell_price_multiplier"),
+    research_wand_price_multiplier =    ModSettingGet("persistence.research_wand_price_multiplier"),
     research_spell_price_multiplier =   ModSettingGet("persistence.research_spell_price_multiplier"),
     money_saved_on_death =              ModSettingGet("persistence.money_saved_on_death"),
     always_choose_save_id =             ModSettingGet("persistence.always_choose_save_id"),
@@ -148,5 +149,5 @@ function OnPlayerDied(entity_id)
     print("recovery cap: " .. _mod_cap);
     print(string.format(" $ %i evaporated, and you asked for it.", _pain));
   end
-  set_stash_money(math.abs(get_stash_money() + _money_to_save));
+  increment_stash_money(_money_to_save);
 end

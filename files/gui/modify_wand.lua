@@ -13,19 +13,19 @@ if modify_wand_loaded~=true then
         local row2_y_offset = 11;
         local row3_y_offset = 18;
         local x_offset = 6;
-        slot_data.price = get_wand_price(slot_data.wand);
+        slot_data.price = get_wand_buy_price(slot_data.wand);
 
         local _tmp_price = slot_data.price;
         if slot_data.origin_e_id~=nil and slot_data.origin_e_id~=0 then
           local _var_comp = EntityGetFirstComponentIncludingDisabled(slot_data.origin_e_id, "VariableStorageComponent", "persistence_wand_price") or 0;
           local _origin_price = ComponentGetValue(_var_comp, "value_int");
           _tmp_price = _tmp_price - _origin_price;
-          GuiZSetForNextWidget(gui, _layer(layer));
+          GuiZSetForNextWidget(gui, __layer(layer));
           GuiColorNextWidgetEnum(gui, COLORS.Dim);
           GuiText(gui, x_base + x_offset, y_base + row2_y_offset, string.format("Paid: $ %i", _origin_price, small_text_scale));
         end
 
-        GuiZSetForNextWidget(gui, _layer(layer));
+        GuiZSetForNextWidget(gui, __layer(layer));
         GuiColorNextWidgetBool(gui, last_known_money >= _tmp_price);
         if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, string.format("Purchase: $ %1.0f", _tmp_price)) and _tmp_price <= get_player_money() then
           if slot_data.origin_e_id~=nil and slot_data.origin_e_id~=0 then
@@ -43,16 +43,16 @@ if modify_wand_loaded~=true then
     datum_translation = {
       -- <name>              = {<label>,                        <val_func>,  <height>,  <render_func>,            <widget_func>              cost_formula_func },
       _index = {[0] = 10, [1] = "wand_type", [2] = "shuffle", [3] = "spells_per_cast", [4] = "cast_delay", [5] = "recharge_time", [6] = "mana_max", [7] = "mana_charge_speed", [8] = "capacity", [9] = "spread", [10] = "always_cast_spells"},
-      wand_type           = {"",                               __val,      34,       __render_wand_type,     nil,                       cost_func_wand_type  },
-      shuffle             = {"$inventory_shuffle",             __yesno,    9,        __render_gen_stat,      __widget_toggle,           cost_func_shuffle  },
-      spells_per_cast     = {"$inventory_actionspercast",      __val,      9,        __render_gen_stat,      __widget_slider,           cost_func_spells_per_cast  },
-      cast_delay          = {"$inventory_castdelay",           __ctime,    9,        __render_gen_stat,      __widget_slider,           cost_func_cast_delay  },
-      recharge_time       = {"$inventory_rechargetime",        __ctime,    9,        __render_gen_stat,      __widget_slider,           cost_func_recharge_time  },
-      mana_max            = {"$inventory_manamax",             __round,    9,        __render_gen_stat,      __widget_slider,           cost_func_mana_max  },
-      mana_charge_speed   = {"$inventory_manachargespeed",     __val,      9,        __render_gen_stat,      __widget_slider,           cost_func_mana_charge_speed  },
-      capacity            = {"$inventory_capacity",            __val,      9,        __render_gen_stat,      __widget_slider,           cost_func_capacity  },
-      spread              = {"$inventory_spread",              __deg,      9,        __render_gen_stat,      __widget_slider,           cost_func_spread  },
-      always_cast_spells  = {"$inventory_alwayscasts",         __val,      9,        __render_wand_spells,    nil,                      cost_func_always_cast_spells  },
+      wand_type           = {"",                               __val,      34,       __render_wand_type,     nil,                       __cost_func_wand_type  },
+      shuffle             = {"$inventory_shuffle",             __yesno,    9,        __render_gen_stat,      __widget_toggle,           __cost_func_shuffle  },
+      spells_per_cast     = {"$inventory_actionspercast",      __val,      9,        __render_gen_stat,      __widget_slider,           __cost_func_spells_per_cast  },
+      cast_delay          = {"$inventory_castdelay",           __ctime,    9,        __render_gen_stat,      __widget_slider,           __cost_func_cast_delay  },
+      recharge_time       = {"$inventory_rechargetime",        __ctime,    9,        __render_gen_stat,      __widget_slider,           __cost_func_recharge_time  },
+      mana_max            = {"$inventory_manamax",             __round,    9,        __render_gen_stat,      __widget_slider,           __cost_func_mana_max  },
+      mana_charge_speed   = {"$inventory_manachargespeed",     __val,      9,        __render_gen_stat,      __widget_slider,           __cost_func_mana_charge_speed  },
+      capacity            = {"$inventory_capacity",            __val,      9,        __render_gen_stat,      __widget_slider,           __cost_func_capacity  },
+      spread              = {"$inventory_spread",              __deg,      9,        __render_gen_stat,      __widget_slider,           __cost_func_spread  },
+      always_cast_spells  = {"$inventory_alwayscasts",         __val,      9,        __render_wand_spells,    nil,                      __cost_func_always_cast_spells  },
     },
     slot_func = get_modify_wand_table,
     slot_data = {};
@@ -107,11 +107,11 @@ if modify_wand_loaded~=true then
       local y_offset = y_base + margin;
       local panel_width = 104;
       local panel_height = height - (margin * 2);
-      GuiZSet(gui, _layer(0)); ---gui frame
+      GuiZSet(gui, __layer(0)); ---gui frame
       GuiImageNinePiece(gui, _nid(), x_base, y_base, width, height);
 
       local panel_x_offset = x_offset;
-      GuiZSet(gui, _layer(1)); ---panel border
+      GuiZSet(gui, __layer(1)); ---panel border
       GuiImageNinePiece(gui, _nid(), panel_x_offset, y_offset, panel_width, panel_height);
 
       local panel_sub_width = panel_width - (margin*2);
@@ -124,7 +124,7 @@ if modify_wand_loaded~=true then
 
       local label_x_pos = panel_x_offset + 23;
       local label_y_pos = header_y_pos + 27;
-      GuiZSetForNextWidget(gui, _layer(2)); ---slot label
+      GuiZSetForNextWidget(gui, __layer(2)); ---slot label
       GuiText(gui, label_x_pos, label_y_pos, string.format(modify_wand_table.slot_title, mod_wand_s_id), 1);
 
       local slot_x_pos = panel_x_offset + margin;
@@ -149,10 +149,10 @@ if modify_wand_loaded~=true then
         modify_wand_table.slot_data.value = _valfunc(_value);
         modify_wand_table.slot_data.member = _member;
         modify_wand_table.slot_data.label = (modify_wand_table.datum_translation[_member][1]~=nil and modify_wand_table.datum_translation[_member][1]~="") and GameTextGetTranslatedOrNot(modify_wand_table.datum_translation[_member][1]) or "";
-        modify_wand_table.slot_data.cost[_member] = modify_wand_table.datum_translation[_member][6]~=nil and math.ceil(modify_wand_table.datum_translation[_member][6](_value)) or 0;
         modify_wand_table.slot_data.render_slots_override = get_always_cast_count();
         modify_wand_table.slot_data.research=nil;
         modify_wand_table.slot_data.color_val=nil;
+        modify_wand_table.slot_data.cost_func=modify_wand_table.datum_translation[_member][6];
         local _renderfunc = modify_wand_table.datum_translation[_member][4] or _gui_nop;
         _renderfunc(datum_x_pos, datum_y_pos, margin, panel_width - margin, panel_height, 3, modify_wand_table.slot_data, _nid);
         datum_y_pos = datum_y_pos + _height;
@@ -160,12 +160,11 @@ if modify_wand_loaded~=true then
 
         if _window_display==0 then ---- Render setting sliders
           if _widgetfunc~=_gui_nop then
-            GuiZSet(gui, _layer(2));
+            GuiZSet(gui, __layer(2));
             GuiBeginAutoBox(gui);
             local _newvalue = _widgetfunc(widget_x_pos, widget_y_pos, margin, widget_width - (margin * 2), panel_height, 3, modify_wand_table.slot_data, _nid);
             modify_wand_table.slot_data.wand[_member] = _newvalue;
-            modify_wand_table.slot_data.cost[_member] = modify_wand_table.datum_translation[_member][6] and modify_wand_table.datum_translation[_member][6](_value) or 0;
-            GuiZSet(gui, _layer(2));
+            GuiZSet(gui, __layer(2));
             GuiEndAutoBoxNinePiece(gui, margin-2, widget_width, 10);
             local _height = select(7, GuiGetPreviousWidgetInfo(gui));
             widget_y_pos = widget_y_pos + _height + (margin - 1);
@@ -175,7 +174,7 @@ if modify_wand_loaded~=true then
 
       if _window_display==1 then ---- Render icon picker
         ---right panel border
-        GuiZSet(gui, _layer(2));
+        GuiZSet(gui, __layer(2));
         GuiBeginScrollContainer(gui, _nid(), widget_x_pos, y_offset, width - panel_width - (margin * 6), panel_height - margin);
         local line_gap = 60;
         local icon_gap_x = 48;
@@ -191,7 +190,7 @@ if modify_wand_loaded~=true then
             local wand_offset_x, wand_offset_y = get_wand_rotated_offset(_type_data.grip_x, _type_data.grip_y, -45);
 
             GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter)
-            GuiZSetForNextWidget(gui, _layer(3))
+            GuiZSetForNextWidget(gui, __layer(3))
             if GuiButton(gui, _nid(), _type_x_offset + 16, widget_y_pos + _type_y_offset - 4, "Select") then
               modify_wand_table.slot_data.wand["wand_type"] = _type_name;
               _window_display=-1;
@@ -202,14 +201,14 @@ if modify_wand_loaded~=true then
             local frame_offset_x = 7;
             local frame_offset_y = -11;
 
-            GuiZSetForNextWidget(gui, _layer(3))
+            GuiZSetForNextWidget(gui, __layer(3))
             GuiImage(gui, _nid(), _type_x_offset, y_offset + _type_y_offset, gui_icon, 1, 1.5, 1.5, math.rad(-90)); -- radians are annoying
-            GuiZSetForNextWidget(gui, _layer(4))
+            GuiZSetForNextWidget(gui, __layer(4))
             GuiImage(gui, _nid(), _type_x_offset + frame_offset_x + wand_offset_x, widget_y_pos + _type_y_offset + frame_offset_y - wand_offset_y, _type_data.file, 1, 1, 1, math.rad(-45)); -- radians are annoying
           end
         end
       elseif _window_display==2 then --- Render Always Cast Spell picker
-        GuiZSetForNextWidget(gui, _layer(2));
+        GuiZSetForNextWidget(gui, __layer(2));
         if GuiButton(gui, _nid(), 400, 6, "Sort: " .. datum_sort_funcs[_active_sort_name][1] ) then
           _active_sort_idx = (_active_sort_idx<datum_sort_funcs._index[0]) and (_active_sort_idx + 1) or 1;
           _active_sort_name = datum_sort_funcs._index[_active_sort_idx];
@@ -219,15 +218,15 @@ if modify_wand_loaded~=true then
 
         if _sorted~=true then table.sort(modify_wand_table.slot_data.ac_spells, datum_sort_funcs[_active_sort_name][2]); _sorted=true;  end
 
-        GuiZSetForNextWidget(gui, _layer(2));
+        GuiZSetForNextWidget(gui, __layer(2));
         GuiText(gui, 240, 6, "Search:", 1);
-        GuiZSetForNextWidget(gui, _layer(2));
+        GuiZSetForNextWidget(gui, __layer(2));
         _search_for = GuiTextInput(gui, _nid(), 270, 5, _search_for, 100, 20);
         GuiGuideTip(gui, "Search by name or #description, right-click to clear", "Multiple search (AND) by space or comma");
         if select(2, GuiGetPreviousWidgetInfo(gui))  then _search_for = ""; end
 
         local _f_idx = 1;
-        GuiZSetForNextWidget(gui, _layer(2));
+        GuiZSetForNextWidget(gui, __layer(2));
         GuiText(gui, 26, 6, "Filter:");
         GuiGuideTip(gui, "Show only spells which match selected type", "")
         for _type_nr, _type_bool in pairs(modify_wand_table.slot_data.ac_spells._index.type_hash) do
@@ -236,7 +235,7 @@ if modify_wand_loaded~=true then
               _f_idx = _f_idx + 1;
             end
             local _filter_x_offset = 40 + ( (_type_nr==99 and 1 or _f_idx) * 20);
-            GuiZSetForNextWidget(gui, _layer(2));
+            GuiZSetForNextWidget(gui, __layer(2));
             if GuiImageButton(gui, _nid(), _filter_x_offset, 1, "", action_type_to_slot_sprite(_type_nr)) then
               if _active_filter~=_type_nr then
                 _active_filter = _type_nr;
@@ -245,12 +244,12 @@ if modify_wand_loaded~=true then
               end
             end
 
-            GuiZSetForNextWidget(gui, _layer(2));
+            GuiZSetForNextWidget(gui, __layer(2));
             GuiTooltip(gui, _type_nr==99 and "ALL" or action_type_to_string(_type_nr), "");
             if _type_nr==_active_filter then
               local _mark_offset_x = 10;
               local _mark_offset_y = 8;
-              GuiZSetForNextWidget(gui, _layer(3));
+              GuiZSetForNextWidget(gui, __layer(3));
               GuiImage(gui, _nid(), _filter_x_offset + _mark_offset_x, _mark_offset_y, "data/ui_gfx/damage_indicators/explosion.png", 0.5, 1, 1, math.rad(45)); -- radians are annoying
             end
           end
@@ -258,7 +257,7 @@ if modify_wand_loaded~=true then
 
 
         ---right panel border
-        GuiZSet(gui, _layer(2));
+        GuiZSet(gui, __layer(2));
         GuiBeginScrollContainer(gui, _nid(), widget_x_pos, y_offset, width - panel_width - (margin * 6), panel_height - margin);
         local spell_y_offset = margin;
         local spell_y_height = 26;
@@ -268,10 +267,10 @@ if modify_wand_loaded~=true then
         for _sel_ac_idx, _sel_ac_name in pairs(modify_wand_table.slot_data.wand.always_cast_spells) do
           ---- Render currently selected AC spells -- do not touch
           __render_spell_listentry(margin, spell_y_offset, margin, panel_width, panel_height, 3, get_spell_purchase_single(_sel_ac_name), _nid);
-          GuiZSetForNextWidget(gui, _layer(3));
+          GuiZSetForNextWidget(gui, __layer(3));
           GuiColorNextWidgetEnum(gui, COLORS.Dim);
-          GuiText(gui, margin, spell_y_offset + 10, string.format(" $ %1.0f", get_ac_cost(_sel_ac_name)) );
-          GuiZSetForNextWidget(gui, _layer(3));
+          GuiText(gui, margin, spell_y_offset + 10, string.format(" $ %1.0f", math.ceil(__get_ac_raw_cost(_ac_name) * mod_setting.buy_spell_price_multiplier)) );
+          GuiZSetForNextWidget(gui, __layer(3));
           GuiColorNextWidgetEnum(gui, COLORS.Yellow);
           if GuiButton(gui, _nid(), margin, spell_y_offset, __yesno(true)) then
               table.remove(modify_wand_table.slot_data.wand.always_cast_spells, _sel_ac_idx);
@@ -293,10 +292,10 @@ if modify_wand_loaded~=true then
           if show_curr_spell==true then
             if _ac_id_hash[_ac_name]~=true then
               __render_spell_listentry(margin, spell_y_offset, margin, panel_width, panel_height, 3, modify_wand_table.slot_data.ac_spells[_ac_idx], _nid);
-              GuiZSetForNextWidget(gui, _layer(3));
+              GuiZSetForNextWidget(gui, __layer(3));
               GuiColorNextWidgetEnum(gui, COLORS.Tip);
-              GuiText(gui, margin, spell_y_offset + 10, string.format(" $ %0.0f", get_ac_cost(_ac_name)));
-              GuiZSetForNextWidget(gui, _layer(3));
+              GuiText(gui, margin, spell_y_offset + 10, string.format(" $ %0.0f", math.ceil(__get_ac_raw_cost(_ac_name) * mod_setting.buy_spell_price_multiplier)));
+              GuiZSetForNextWidget(gui, __layer(3));
               local _fit_more = _ac_sel_count < get_always_cast_count();
               GuiColorNextWidgetBool(gui, _fit_more);
               if GuiButton(gui, _nid(), margin, spell_y_offset, __yesno(false)) and (_fit_more) then
@@ -315,7 +314,7 @@ if modify_wand_loaded~=true then
       local icon_x_base = x_base + 46;
       local icon_y_base = slot_y_pos + margin + 8;
       ---gui button for icon pick, always cast pick
-      GuiZSetForNextWidget(gui, _layer(3));
+      GuiZSetForNextWidget(gui, __layer(3));
       if _window_display==1 then 
         GuiColorNextWidgetEnum(gui, COLORS.Green);
       elseif _window_display==2 then 
@@ -330,7 +329,7 @@ if modify_wand_loaded~=true then
       GuiGuideTip(gui, "Adjust Wand Type aka Icon", "Cosmetic only, for visual identification. Click to toggle window");
       local sel_ac_x_base = x_base + 54;
       local sel_ac_y_base = slot_y_pos + panel_sub_height - 10;
-      GuiZSetForNextWidget(gui, _layer(3));
+      GuiZSetForNextWidget(gui, __layer(3));
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
       if _window_display==1 then 
         GuiColorNextWidgetEnum(gui, COLORS.Dim);

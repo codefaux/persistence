@@ -1,27 +1,27 @@
 if persistence_menu_loaded~=true then
   dofile_once("data/scripts/debug/keycodes.lua");
   persistence_open=false;
+  local _right_panel_id = 0;
+
+  function right_panel_picker(panel_id)
+    _right_panel_id = panel_id or 0;
+    if _right_panel_id==0 then
+      close_spell_loadouts();
+      close_wand_template();
+    elseif _right_panel_id==1 then
+      present_wand_template();
+      close_spell_loadouts();
+    elseif _right_panel_id==2 then
+      close_wand_template();
+      present_spell_loadouts();
+    end
+  end
 
   local function draw_persistence_menu()
     persistence_expanded = false;
-    local _right_panel_id = 0;
 
     active_windows["persistence"] = function (_nid)
       local _hotkey = 0;
-
-      function right_panel_picker(panel_id)
-        _right_panel_id = panel_id or 0;
-        if _right_panel_id==0 then
-          close_spell_loadouts();
-          close_wand_template();
-        elseif _right_panel_id==1 then
-          present_wand_template();
-          close_spell_loadouts();
-        elseif _right_panel_id==2 then
-          close_wand_template();
-          present_spell_loadouts();
-        end
-      end
 
       local function _toggle_state()
         if persistence_expanded then
@@ -60,26 +60,26 @@ if persistence_menu_loaded~=true then
 
       if _right_panel_id~=0 then
         GuiBeginAutoBox(gui);
-        GuiZSetForNextWidget(gui, _layer(4));
+        GuiZSetForNextWidget(gui, __layer(4));
         GuiColorNextWidgetEnum(gui, _right_panel_id==1 and COLORS.Green or COLORS.Dim);
         if GuiButton(gui, _nid(), _picker_x_base, _picker_y_base, "Templates", 1) then
           right_panel_picker(1);
         end
         GuiGuideTip(gui, "Stored Wand Templates menu", "Create and buy wand templates");
 
-        GuiZSetForNextWidget(gui, _layer(3));
+        GuiZSetForNextWidget(gui, __layer(3));
         GuiEndAutoBoxNinePiece(gui, 2);
 
-        GuiZSetForNextWidget(gui, _layer(3));
+        GuiZSetForNextWidget(gui, __layer(3));
         GuiBeginAutoBox(gui);
-        GuiZSetForNextWidget(gui, _layer(4));
+        GuiZSetForNextWidget(gui, __layer(4));
         GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
         GuiColorNextWidgetEnum(gui, _right_panel_id==2 and COLORS.Green or COLORS.Dim);
         if GuiButton(gui, _nid(), _picker_x_base + _picker_width, _picker_y_base, "Loadouts", 1) then
           right_panel_picker(2);
         end
         GuiGuideTip(gui, "Spell Loadouts menu", "Create and Buy spell loadouts");
-        GuiZSetForNextWidget(gui, _layer(3));
+        GuiZSetForNextWidget(gui, __layer(3));
         GuiEndAutoBoxNinePiece(gui, 2);
       end
 
@@ -88,7 +88,7 @@ if persistence_menu_loaded~=true then
       local y_base = 348;
       local y_expand = 40;
 
-      GuiZSetForNextWidget(gui, _layer(1));
+      GuiZSetForNextWidget(gui, __layer(1));
       GuiColorNextWidgetEnum(gui, COLORS.Tip);
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
 
@@ -98,12 +98,12 @@ if persistence_menu_loaded~=true then
       if persistence_expanded==false then GuiGuideTip(gui, "HOTKEY: ` (aka Tilde / Grave)", ""); end
 
       if persistence_expanded==false then
-        GuiZSet(gui, _layer(0)); ---gui frame
+        GuiZSet(gui, __layer(0)); ---gui frame
         GuiImageNinePiece(gui, _nid(), x_base, y_base, 50, 10);
       else
-        GuiZSet(gui, _layer(0)); ---gui frame
+        GuiZSet(gui, __layer(0)); ---gui frame
         GuiImageNinePiece(gui, _nid(), x_base, y_base - y_expand, 48, 10 + y_expand);
-        GuiZSetForNextWidget(gui, _layer(1));
+        GuiZSetForNextWidget(gui, __layer(1));
         GuiColorNextWidgetEnum(gui, (wands_open and COLORS.Green or COLORS.Bright));
         GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
         if GuiButton(gui, _nid(), x_base + x_offset, y_base - 40, "wands", 1) or _hotkey==1 then
@@ -120,12 +120,12 @@ if persistence_menu_loaded~=true then
         end
         GuiGuideTip(gui, "Wands Menu    HOTKEY: ` (aka Tilde/Grave)", "Research, Recycle, Create, and Modify wands");
 
-        GuiZSetForNextWidget(gui, _layer(1));
+        GuiZSetForNextWidget(gui, __layer(1));
         GuiColorNextWidgetEnum(gui, ((purchase_spells_open or inventory_spells_open) and COLORS.Green or COLORS.Dark));
         GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
         local _btn1 = GuiButton(gui, _nid(), x_base + x_offset, y_base - 28, "spells:", 1) or _hotkey==2
 
-        GuiZSetForNextWidget(gui, _layer(1));
+        GuiZSetForNextWidget(gui, __layer(1));
         GuiColorNextWidgetEnum(gui, (purchase_spells_open and COLORS.Green or COLORS.Bright));
         GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
         local _btn2 = GuiButton(gui, _nid(), x_base + x_offset, y_base - 19, "purchase", 1) or _hotkey==2
@@ -143,7 +143,7 @@ if persistence_menu_loaded~=true then
         end
         GuiGuideTip(gui, "Purchase Spells menu    HOTKEY: Shift+` (aka Tilde / Grave)", "Purchase spells you've researched");
 
-        GuiZSetForNextWidget(gui, _layer(1));
+        GuiZSetForNextWidget(gui, __layer(1));
         GuiColorNextWidgetEnum(gui, (inventory_spells_open and COLORS.Green or COLORS.Bright));
         GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
         if GuiButton(gui, _nid(), x_base + x_offset, y_base - 11, "research", 1) or _hotkey==3 then

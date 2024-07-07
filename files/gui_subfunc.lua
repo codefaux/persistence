@@ -39,16 +39,16 @@ if gui_subfunc_loaded~=true then
 
   function __render_tricolor_footer(x_base, y_base, width, height, textdata)
     GuiColorNextWidgetEnum(gui, COLORS.Green); ---green text
-    GuiZSetForNextWidget(gui, _layer(2));
+    GuiZSetForNextWidget(gui, __layer(2));
     GuiText(gui, x_base, height + 25, textdata.greentext, small_text_scale);
 
     GuiColorNextWidgetEnum(gui, COLORS.Red); ---red text
-    GuiZSetForNextWidget(gui, _layer(2));
+    GuiZSetForNextWidget(gui, __layer(2));
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
     GuiText(gui, x_base + width, height + 25, textdata.redtext, small_text_scale);
 
     GuiColorNextWidgetEnum(gui, COLORS.Tip); ---middle text
-    GuiZSetForNextWidget(gui, _layer(2));
+    GuiZSetForNextWidget(gui, __layer(2));
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
     GuiText(gui, x_base + (width / 2), height + 25, textdata.centertext, 1);
   end
@@ -70,25 +70,25 @@ if gui_subfunc_loaded~=true then
   __cntarr = function(value) if type(value)=="table" then return #value; end return -1; end
 
   function __render_wand_slot(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
-    GuiZSet(gui, _layer(layer)); ---gui frame
+    GuiZSet(gui, __layer(layer)); ---gui frame
     GuiImageNinePiece(gui, _nid(), x_base, y_base, panel_width, panel_height);
 
     local gui_icon = (slot_data.research~=nil and slot_data.research.is_new) and "data/ui_gfx/inventory/full_inventory_box_highlight.png" or "data/ui_gfx/inventory/full_inventory_box.png";
-    GuiZSetForNextWidget(gui, _layer(layer+1));
+    GuiZSetForNextWidget(gui, __layer(layer+1));
     GuiImage(gui, _nid(), x_base, y_base, gui_icon, 1, 1.75, 1.75, 0);
   end
 
 
   function __render_wand_sprite(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
     local wand_offset_x, wand_offset_y = get_wand_rotated_offset(0, 0, -45);
-    GuiZSetForNextWidget(gui, _layer(layer+1));
+    GuiZSetForNextWidget(gui, __layer(layer+1));
     GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 6, y_base + (-wand_offset_y * 1.333) + 18, slot_data.value, 1, 1.333, 1.333, math.rad(-45));
 
     if slot_data.research~=nil and slot_data.research.b_wand_types then
       local new_icon = "data/ui_gfx/damage_indicators/explosion.png";
       local new_offset_x = 6;
       local new_offset_y = 0;
-      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiZSetForNextWidget(gui, __layer(layer+2));
       GuiImage(gui, _nid(), x_base + new_offset_x, y_base + new_offset_y, new_icon, 1, 2, 2, math.rad(30)); -- radians are annoying
       GuiGuideTip(gui, "This wand provides a new design", "");
     end
@@ -97,14 +97,14 @@ if gui_subfunc_loaded~=true then
 
   function __render_wand_type(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
     local wand_offset_x, wand_offset_y = get_wand_rotated_offset(0, 0, -45);
-    GuiZSetForNextWidget(gui, _layer(layer+1));
+    GuiZSetForNextWidget(gui, __layer(layer+1));
     GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 6, y_base + (-wand_offset_y * 1.333) + 18, wand_type_to_sprite_file(slot_data.value), 1, 1.333, 1.333, math.rad(-45));
 
     if slot_data.research~=nil and slot_data.research.b_wand_types then
       local new_icon = "data/ui_gfx/damage_indicators/explosion.png";
       local new_offset_x = 6;
       local new_offset_y = 0;
-      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiZSetForNextWidget(gui, __layer(layer+2));
       GuiImage(gui, _nid(), x_base + new_offset_x, y_base + new_offset_y, new_icon, 1, 2, 2, math.rad(30)); -- radians are annoying
       GuiGuideTip(gui, "This wand provides a new design", "");
     end
@@ -116,7 +116,7 @@ if gui_subfunc_loaded~=true then
     local grid_x_offset = 34;
     local grid_columns = 5;
     if _data.label~=nil and _data.label~="" then
-      GuiZSetForNextWidget(gui, _layer(layer));
+      GuiZSetForNextWidget(gui, __layer(layer));
       GuiText(gui, x_base + margin, y_base, _data.label, small_text_scale);
       if _data.color_val~=nil then
         if type(_data.color_val)=="boolean" then
@@ -127,7 +127,7 @@ if gui_subfunc_loaded~=true then
       end
       _capacity=#_data.value;
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
-      GuiZSetForNextWidget(gui, _layer(layer));
+      GuiZSetForNextWidget(gui, __layer(layer));
       GuiText(gui, x_base + panel_width - margin, y_base, tostring(_capacity), small_text_scale);
       if _data.research~=nil then GuiGuideTip(gui, (_data.research~=nil and type(_data.color_val)=="boolean" and _data.color_val==true) and "Contributes to research" or "Does not contribute to research", ""); end
       grid_y_offset = 10;
@@ -138,7 +138,7 @@ if gui_subfunc_loaded~=true then
       local grid_h = 12;
       local grid_x = (((cap_idx-1)%grid_columns) * grid_h);
       local grid_y = (math.floor((cap_idx-1)/grid_columns) * grid_h);
-      GuiZSetForNextWidget(gui, _layer(layer));
+      GuiZSetForNextWidget(gui, __layer(layer));
       GuiImage(gui, _nid(), x_base + grid_x_offset + grid_x, y_base + grid_y_offset + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
       if _data.value[cap_idx] ~= nil then
         local curr_spell_id = _data.value[cap_idx];
@@ -147,14 +147,14 @@ if gui_subfunc_loaded~=true then
           spell_tooltip_id = curr_spell_id;
           present_spell_tooltip();
         end
-        GuiZSetForNextWidget(gui, _layer(layer + 1));
+        GuiZSetForNextWidget(gui, __layer(layer + 1));
         GuiImage(gui, _nid(), x_base + grid_x_offset + grid_x, y_base + grid_y_offset + grid_y, actions_by_id[curr_spell_id].sprite, 1, 0.8, 0.8, 0);
       end
     end
   end
 
   function __render_gen_stat(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     GuiText(gui, x_base + margin, y_base, _data.label, small_text_scale);
     if _data.color_val~=nil then
       if type(_data.color_val)=="boolean" then
@@ -164,7 +164,7 @@ if gui_subfunc_loaded~=true then
       end
     end
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     GuiText(gui, x_base + panel_width - margin, y_base, _data.value, small_text_scale);
     if _data.research~=nil then GuiGuideTip(gui, (_data.research~=nil and type(_data.color_val)=="boolean" and _data.color_val==true) and "Contributes to research" or "Does not contribute to research", ""); end
   end
@@ -173,22 +173,17 @@ if gui_subfunc_loaded~=true then
     local _offset_x = x_base + 45;
     local _after_icon_x = _offset_x + 20;
 
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     GuiImage(gui, _nid(), _offset_x-4, y_base -3, _data.type_sprite, 1, 1.2, 1.2); -- background type slot
 
-    GuiZSetForNextWidget(gui, _layer(layer+1));
+    GuiZSetForNextWidget(gui, __layer(layer+1));
     GuiImage(gui, _nid(), _offset_x, y_base + 1, _data.sprite, (_data.recyclable~=nil and _data.recyclable==true) and 0.5 or 1, 1, 1, 0); -- Icon
-    -- local s_hover, x_loc, y_loc = select(3, GuiGetPreviousWidgetInfo(gui));
-    -- if s_hover then
-    --   spell_tooltip_id = _data.a_id;
-    --   show_spell_tooltip_gui();
-    -- end
     if _data.recyclable~=nil and _data.recyclable==true then
       GuiColorNextWidgetEnum(gui, COLORS.Dim);
     elseif _data.name_color~=nil then
       GuiColorNextWidgetEnum(gui, _data.name_color);
     end
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     GuiText(gui, _after_icon_x, y_base - 1, GameTextGetTranslatedOrNot(_data.name)); -- Name
     local _edge_x, _edge_y1 = select(8, GuiGetPreviousWidgetInfo(gui));
     if _data.max_uses ~= nil then
@@ -201,7 +196,7 @@ if gui_subfunc_loaded~=true then
         _uses_string = _data.max_uses;
         GuiColorNextWidgetEnum(gui, COLORS.Tip);
       end
-      GuiZSetForNextWidget(gui, _layer(layer));
+      GuiZSetForNextWidget(gui, __layer(layer));
       GuiText(gui, _after_icon_x + _x_text_width + 3, y_base - 1, "(" .. _uses_string .. ")"); -- uses
     end
 
@@ -212,7 +207,7 @@ if gui_subfunc_loaded~=true then
     else
       GuiColorNextWidgetEnum(gui, COLORS.Dim);
     end
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     GuiText(gui, _after_icon_x, y_base + 8, GameTextGetTranslatedOrNot(_data.description), small_text_scale); -- Description
     local _edge_y2, _, _line_height = select(9, GuiGetPreviousWidgetInfo(gui));
 
@@ -226,10 +221,10 @@ if gui_subfunc_loaded~=true then
   end
 
   function __render_spell_gridtile(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     GuiImage(gui, _nid(), x_base, y_base, _data.type_sprite, 1, 1.2, 1.2, 0); -- background type slot
 
-    GuiZSetForNextWidget(gui, _layer(layer+1));
+    GuiZSetForNextWidget(gui, __layer(layer+1));
     GuiImage(gui, _nid(), x_base+4, y_base+4, _data.sprite, 1, 1, 1, 0); -- Icon
     if select(3, GuiGetPreviousWidgetInfo(gui)) then
       spell_tooltip_id = _data.a_id or "";
@@ -239,27 +234,27 @@ if gui_subfunc_loaded~=true then
     if _data.max_uses ~= nil then
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
       GuiColorNextWidgetEnum(gui, COLORS.Black);
-      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiZSetForNextWidget(gui, __layer(layer+2));
       GuiText(gui, x_base + 12, y_base + 12, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
 
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
       GuiColorNextWidgetEnum(gui, COLORS.Black);
-      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiZSetForNextWidget(gui, __layer(layer+2));
       GuiText(gui, x_base + 11, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
 
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
       GuiColorNextWidgetEnum(gui, COLORS.Black);
-      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiZSetForNextWidget(gui, __layer(layer+2));
       GuiText(gui, x_base + 12, y_base + 14, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
 
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
       GuiColorNextWidgetEnum(gui, COLORS.Black);
-      GuiZSetForNextWidget(gui, _layer(layer+2));
+      GuiZSetForNextWidget(gui, __layer(layer+2));
       GuiText(gui, x_base + 13, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
 
       GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
       GuiColorNextWidgetEnum(gui, COLORS.White);
-      GuiZSetForNextWidget(gui, _layer(layer+3));
+      GuiZSetForNextWidget(gui, __layer(layer+3));
       GuiText(gui, x_base + 12, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
     end
   end
@@ -267,12 +262,12 @@ if gui_subfunc_loaded~=true then
 
 
   function __widget_toggle(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     GuiColorNextWidgetEnum(gui, COLORS.White);
     GuiText(gui, x_base + margin, y_base, slot_data.label, small_text_scale);
 
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     local _ret = nil;
     GuiColorNextWidgetEnum(gui, COLORS.Yellow);
     if GuiButton(gui, _nid(), x_base + (panel_width / 2), y_base, " [ " .. GameTextGetTranslatedOrNot(slot_data.value) .. " ] ", small_text_scale) then
@@ -282,10 +277,11 @@ if gui_subfunc_loaded~=true then
     end
     GuiGuideTip(gui, "Click to toggle", "");
 
+    local _cost = math.ceil((slot_data.cost_func(slot_data.wand[slot_data.member]) or 0) * mod_setting.buy_wand_price_multiplier);
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     GuiColorNextWidgetEnum(gui, COLORS.Tip);
-    GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", math.ceil(slot_data.cost[slot_data.member] * mod_setting.buy_wand_price_multiplier) ), small_text_scale);
+    GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", _cost), small_text_scale);
     GuiGuideTip(gui, "Cost contribution from this stat", "");
     return _ret;
   end
@@ -298,15 +294,27 @@ if gui_subfunc_loaded~=true then
     local _bounds_min = slot_data.bounds[slot_data.member][1];
     local _bounds_max = slot_data.bounds[slot_data.member][2];
 
-    GuiZSetForNextWidget(gui, _layer(layer));
+    GuiZSetForNextWidget(gui, __layer(layer));
     GuiColorNextWidgetEnum(gui, COLORS.White);
     GuiText(gui, x_base + margin, y_base, slot_data.label, small_text_scale); ---- LABEL
     local _x_min, _y_min = select(8, GuiGetPreviousWidgetInfo(gui));
 
+    GuiZSetForNextWidget(gui, __layer(layer));  ---- SLIDER
+    local _ret = math.floor(GuiSlider(gui, _nid(), x_base + margin, y_base + 10, "", slot_data.wand[slot_data.member], _bounds_min, _bounds_max, 0, 1, " ", panel_width ) + 0.5);
+    GuiGuideTip(gui, "Scroll Mouse Wheel to quickly adjust", "Hold Shift for 5x\nHold Ctrl for 10x");
+
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+    GuiZSetForNextWidget(gui, __layer(layer));
+    GuiColorNextWidgetEnum(gui,  _mouse_hover and COLORS.Green or COLORS.Yellow);
+    GuiText(gui, x_base + (panel_width / 2), y_base, slot_data.value, small_text_scale); ---- VALUE
+    GuiGuideTip(gui, "Scroll Mouse Wheel to quickly adjust", "Hold Shift for 5x\nHold Ctrl for 10x");
+
+    local _cost = math.ceil((slot_data.cost_func(_ret) or 0) * mod_setting.buy_wand_price_multiplier);
+
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
     GuiColorNextWidgetEnum(gui, COLORS.Tip);
-    GuiZSetForNextWidget(gui, _layer(layer));
-    GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", math.ceil(slot_data.cost[slot_data.member] * mod_setting.buy_wand_price_multiplier)), small_text_scale); ---- COST
+    GuiZSetForNextWidget(gui, __layer(layer));
+    GuiText(gui, x_base + panel_width, y_base, string.format(" $ %1.0f", _cost), small_text_scale); ---- COST
     GuiGuideTip(gui, "Cost contribution from this stat", "");
     local _x_offset, _, _width = select(8, GuiGetPreviousWidgetInfo(gui));
 
@@ -315,16 +323,6 @@ if gui_subfunc_loaded~=true then
         _mouse_hover = true;
       end
     end
-
-    GuiZSetForNextWidget(gui, _layer(layer));  ---- SLIDER
-    local _ret = math.floor(GuiSlider(gui, _nid(), x_base + margin, y_base + 10, "", slot_data.wand[slot_data.member], _bounds_min, _bounds_max, 0, 1, " ", panel_width ) + 0.5);
-    GuiGuideTip(gui, "Scroll Mouse Wheel to quickly adjust", "Hold Shift for 5x\nHold Ctrl for 10x");
-
-    GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-    GuiZSetForNextWidget(gui, _layer(layer));
-    GuiColorNextWidgetEnum(gui,  _mouse_hover and COLORS.Green or COLORS.Yellow);
-    GuiText(gui, x_base + (panel_width / 2), y_base, slot_data.value, small_text_scale); ---- VALUE
-    GuiGuideTip(gui, "Scroll Mouse Wheel to quickly adjust", "Hold Shift for 5x\nHold Ctrl for 10x");
 
     if _mouse_hover and _mouse_scroll~=0 then
       local _factor = 1;

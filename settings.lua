@@ -124,7 +124,7 @@ mod_settings =
         ui_name = "Load-Save behavior",
         ui_description = "Manually or automatically load a save (or not)",
         value_default = "-1",
-        values = { {"-1","Manual"}, {"0","Disable mod"}, {"1","Use Slot 1"}, {"2","Use Slot 2"}, {"3","Use Slot 3"}, {"4","Use Slot 4"}, {"5","Use Slot 5"} },
+        values = { {"-1","Manual"}, {"0","Disable mod"}, {"1","Use Slot 1"}, {"2","Use Slot 2"}, {"3","Use Slot 3"}, {"4","Use Slot 4"} },
         scope = MOD_SETTING_SCOPE_RUNTIME_RESTART,
       },
       {

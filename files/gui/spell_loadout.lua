@@ -71,16 +71,16 @@ if spell_loadouts_loaded~=true then
       if _reload_data==true then _wands = get_player_wands(); _saved_spell_loadouts = _get_stored_loadouts(); _reload_data=false; end;
 
 
-      GuiZSetForNextWidget(gui, _layer(2));
+      GuiZSetForNextWidget(gui, __layer(2));
       GuiBeginScrollContainer(gui, _nid(), x_base, y_base, _panel_width, _panel_height);
 
       for _loadout_idx = 1, 10 do
         if _saved_spell_loadouts[_loadout_idx]~=nil and _saved_spell_loadouts[_loadout_idx].name~=nil then
           _loadout_data = _saved_spell_loadouts[_loadout_idx];
-          GuiZSetForNextWidget(gui, _layer(2));
+          GuiZSetForNextWidget(gui, __layer(2));
           GuiText(gui, 0, _y_offset, string.format("#%i: %s", _loadout_idx, _loadout_data.name), 1);
           _y_offset = _y_offset + 10;
-          GuiZSetForNextWidget(gui, _layer(3));
+          GuiZSetForNextWidget(gui, __layer(3));
           GuiColorNextWidgetEnum(gui, COLORS.Yellow);
           if _list_confirm==-_loadout_idx then
             if GuiButton(gui, _nid(), 15, _y_offset, "CONFIRM", 1) then
@@ -94,7 +94,7 @@ if spell_loadouts_loaded~=true then
             end
             GuiGuideTip(gui, "Erase Loadout", "(Requires confirmation)");
           end
-          GuiZSetForNextWidget(gui, _layer(3));
+          GuiZSetForNextWidget(gui, __layer(3));
           GuiColorNextWidgetBool(gui, _loadout_data.price<=last_known_money);
           if GuiButton(gui, _nid(), 60, _y_offset, string.format("Purchase: $ %i",  _loadout_data.price), 1) and _loadout_data.price<=last_known_money then
             for _, _spell in pairs(_loadout_data.spells) do
@@ -119,13 +119,13 @@ if spell_loadouts_loaded~=true then
           _y_offset = _y_loc + _unit_height + (_unit_margin * 3);
         else
           _y_offset = _y_offset + 2 + _unit_margin;
-          GuiZSetForNextWidget(gui, _layer(3));
+          GuiZSetForNextWidget(gui, __layer(3));
           GuiText(gui, 0, _y_offset, string.format("#%i:   Create from Wand:", _loadout_idx), 1);
           _y_offset = _y_offset + 9;
           if _list_confirm~=_loadout_idx then
             for _slot_idx = 1, 4 do -- save loadout from slot buttons
               local _slot_exists = _wands[_slot_idx].e_id~=nil and _wands[_slot_idx].e_id~=0 and #_wands[_slot_idx].wand.spells>0;
-              GuiZSetForNextWidget(gui, _layer(3));
+              GuiZSetForNextWidget(gui, __layer(3));
               GuiColorNextWidgetEnum(gui, _slot_exists and COLORS.White or COLORS.Dark);
               if GuiButton(gui, _nid(), _unit_margin + (35 * (_slot_idx-1)), _y_offset, "Slot " .. _slot_idx, 1) then
                 if _slot_exists then
@@ -138,10 +138,10 @@ if spell_loadouts_loaded~=true then
             end
           else
             _y_offset = _y_offset + 2;
-            GuiZSetForNextWidget(gui, _layer(3));
+            GuiZSetForNextWidget(gui, __layer(3));
             _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 32, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 -/+");
             GuiGuideTip(gui, "Name your loadout", "Must be 1 ~ 32 chars");
-            GuiZSetForNextWidget(gui, _layer(4));
+            GuiZSetForNextWidget(gui, __layer(4));
             if GuiButton(gui, _nid(), 86, _y_offset, "Save", 1) or InputIsKeyJustDown(Key_RETURN) then
               if #_name_temp>0 then
                 save_spell_loadout(_loadout_idx, {name = _name_temp, spells = _new_loadout_spells});
@@ -150,7 +150,7 @@ if spell_loadouts_loaded~=true then
               end
             end
             GuiGuideTip(gui, "Save loadout", "HOTKEY: Return");
-            GuiZSetForNextWidget(gui, _layer(4));
+            GuiZSetForNextWidget(gui, __layer(4));
             GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
             if GuiButton(gui, _nid(), _panel_width - _unit_margin, _y_offset, "Cancel", 1) then
               _list_confirm = 0;

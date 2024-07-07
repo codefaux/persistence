@@ -37,7 +37,7 @@ if scan_nearby_entities_loaded~=true then
             -- for _, _wand_card_e_id in ipairs(_wand_card_pool) do
             --   if _wand_card_e_id~=0 then table.insert(_nearby_card_pool, _wand_card_e_id); end
             -- end
-            local _result = research_wand_is_new(_wand_e_id);
+            local _result = get_wand_entity_research(_wand_e_id);
 
             if _result.b_spells==true then _nearby_wand_spell_new=true; end
             if _result.is_new then
@@ -87,11 +87,11 @@ if scan_nearby_entities_loaded~=true then
       if _show_tip_frames>0 then
         if _nearby_spell_new or _nearby_spell_old then
           local _color = _nearby_spell_new and COLORS.Tip or COLORS.Yellow;
-          GuiZSet(gui, _layer(1));
+          GuiZSet(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
           GuiText(gui, x_base - x_offset, y_base - 10, _nearby_spell_new and "unresearched" or "researched", _nearby_spell_new and 1 or small_text_scale);
-          GuiZSet(gui, _layer(1));
+          GuiZSet(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
           GuiText(gui, x_base - x_offset, y_base, "spell", _nearby_spell_new and 1 or small_text_scale);
@@ -99,15 +99,15 @@ if scan_nearby_entities_loaded~=true then
 
         if _nearby_wand_new or _nearby_wand_old then
           local _color = _nearby_wand_new and COLORS.Tip or COLORS.Yellow;
-          GuiZSet(gui, _layer(1));
+          GuiZSet(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
           GuiText(gui, x_base + x_offset, y_base - 10, _nearby_wand_new and "unresearched" or "researched", _nearby_wand_new and 1 or small_text_scale);
-          GuiZSet(gui, _layer(1));
+          GuiZSet(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
           GuiText(gui, x_base + x_offset, y_base, "wand", _nearby_wand_new and 1 or small_text_scale);
-          GuiZSet(gui, _layer(1));
+          GuiZSet(gui, __layer(1));
           if _nearby_wand_new_type>0 then
             GuiColorNextWidgetEnum(gui, _color);
             GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
@@ -117,11 +117,11 @@ if scan_nearby_entities_loaded~=true then
 
         if _nearby_wand_spell_new then
           local _color = COLORS.Tip;
-          GuiZSet(gui, _layer(1));
+          GuiZSet(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
           GuiText(gui, x_base, y_base, "unresearched", 1);
-          GuiZSet(gui, _layer(1));
+          GuiZSet(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, _color);
           GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
           GuiText(gui, x_base, y_base + 10, "spell ON wand", 1);

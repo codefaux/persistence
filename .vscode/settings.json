@@ -7,6 +7,7 @@
     "persistence_active",
     "_nid",
     "small_text_scale",
-    "gui"
+    "gui",
+    "__layer"
   ]
 }

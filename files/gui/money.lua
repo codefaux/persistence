@@ -19,10 +19,10 @@ if money_loaded~=true then
       if InputIsKeyDown(Key_LSHIFT) then _multiplier = _multiplier * 5; end
       if InputIsKeyDown(Key_LCTRL) then _multiplier = _multiplier * 10; end
 
-      GuiZSetForNextWidget(gui, _layer(0));
+      GuiZSetForNextWidget(gui, __layer(0));
       GuiImageNinePiece(gui, _nid(), base_x, base_y, 140, 75);
 
-      GuiZSetForNextWidget(gui, _layer(1));
+      GuiZSetForNextWidget(gui, __layer(1));
       GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Player: $ %1.0f", player_money));
       idx = idx + 1;
 
@@ -30,11 +30,11 @@ if money_loaded~=true then
         _new_money_amt = _money_amt * _multiplier;
 
         if stash_money < _new_money_amt or mod_setting.allow_stash~=1 then
-          GuiZSetForNextWidget(gui, _layer(1));
+          GuiZSetForNextWidget(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Dark);
           GuiText(gui, col_a, offset_y + (idx * 10), string.format("Take $ %1.0f", _new_money_amt));
         else
-          GuiZSetForNextWidget(gui, _layer(1));
+          GuiZSetForNextWidget(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Green);
           if GuiButton(gui, _nid(), col_a, offset_y + (idx * 10), string.format("Take $ %1.0f", _new_money_amt)) then
             transfer_money_stash_to_player(_new_money_amt);
@@ -43,11 +43,11 @@ if money_loaded~=true then
         GuiGuideTip(gui, "Hold Shift for 5x", "Hold Ctrl for 10x");
 
         if player_money < _new_money_amt then
-          GuiZSetForNextWidget(gui, _layer(1));
+          GuiZSetForNextWidget(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Dark);
           GuiText(gui, col_b, offset_y + (idx * 10), string.format("Stash $ %1.0f", _new_money_amt));
         else
-          GuiZSetForNextWidget(gui, _layer(1));
+          GuiZSetForNextWidget(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Green);
           if GuiButton(gui, _nid(), col_b, offset_y + (idx * 10), string.format("Stash $ %1.0f", _new_money_amt)) then
             transfer_money_player_to_stash(_new_money_amt);
@@ -58,7 +58,7 @@ if money_loaded~=true then
       end
 
       if mod_setting.allow_stash==1 then
-        GuiZSetForNextWidget(gui, _layer(1));
+        GuiZSetForNextWidget(gui, __layer(1));
         GuiColorNextWidgetEnum(gui, COLORS.Green);
         if GuiButton(gui, _nid(), col_a, offset_y + (idx * 10), "Take ALL") then
           transfer_money_stash_to_player(stash_money);
@@ -67,19 +67,19 @@ if money_loaded~=true then
           set_player_money(get_stash_money() * _multiplier);
         end
       else
-        GuiZSetForNextWidget(gui, _layer(1));
+        GuiZSetForNextWidget(gui, __layer(1));
         GuiColorNextWidgetEnum(gui, COLORS.Dark);
         GuiText(gui, col_a, offset_y + (idx * 10), "Take ALL");
       end
 
-      GuiZSetForNextWidget(gui, _layer(1));
+      GuiZSetForNextWidget(gui, __layer(1));
       GuiColorNextWidgetEnum(gui, COLORS.Green);
       if GuiButton(gui, _nid(), col_b, offset_y + (idx * 10), "Stash ALL") then
         transfer_money_player_to_stash(player_money);
       end
 
       idx = idx + 1;
-      GuiZSetForNextWidget(gui, _layer(1));
+      GuiZSetForNextWidget(gui, __layer(1));
       GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Stashed: $ %1.0f", stash_money));
       GuiGuideTip(gui, "Stashed money from previous runs", "See Mod Options for auomatic withdrawals");
     end

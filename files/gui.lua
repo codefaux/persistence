@@ -16,8 +16,8 @@ if persistence_gui_loaded~=true then
 
   window_open=false;
 
-  function _nil(...) return; end
-  function _layer(n) return 1000 - ((n+1) * 50); end
+  function __nil(...) return; end
+  function __layer(n) return 1000 - ((n+1) * 50); end
 
   dofile_once(mod_dir .. "files/gui/fourslot.lua");
   dofile_once(mod_dir .. "files/gui/modify_wand.lua");

@@ -27,10 +27,6 @@ if persistence_helper_loaded~=true then
     return out_table;
   end
 
-  function cast_time_to_time(value)
-    return math.floor((value / 60) * 100 + 0.5) / 100;
-  end
-
   function wand_type_to_sprite_file(wand_type)
     ---TODO: Debug this and see what actually happens here, intent: remove dependence on default_wands
     if string.sub(wand_type, 1, #"default") == "default" then
@@ -115,9 +111,10 @@ if persistence_helper_loaded~=true then
           end
         end
       end
+      wand_data["always_cast_count"] = #wand_data["always_cast_spells"];
       wand_data["capacity"] = wand_data["capacity"] - #wand_data["always_cast_spells"];
-      end
-  return wand_data;
+    end
+    return wand_data;
   end
 
   function get_spell_entity_action_id(entity_id)
@@ -132,39 +129,6 @@ if persistence_helper_loaded~=true then
   function delete_spell_entity(entity_id)
     if not EntityHasTag(entity_id, "card_action") then return; end
     EntityKill(entity_id);
-  end
-
-  function cost_func_wand_type(_) return 200; end
-  function cost_func_shuffle(_shuffle) return _shuffle and 0 or 100; end
-  function cost_func_spells_per_cast(a_p_c) return math.max(a_p_c-1,0)*500; end
-  function cost_func_cast_delay(_castdelay) return (0.01 ^ ((_castdelay/60) - 1.8) + 200) * 0.1; end
-  function cost_func_recharge_time(_rechargetime) return (0.01 ^ ((_rechargetime/60) - 1.8) + 200) * 0.1; end
-  function cost_func_mana_max(_manamax) return _manamax; end
-  function cost_func_mana_charge_speed(_manachargespeed) return _manachargespeed * 2; end
-  function cost_func_capacity(_capacity) return (math.max(_capacity - 1, 0)) * 50; end
-  function cost_func_spread(_spread) return math.abs(10 - _spread) * 5; end
-  function cost_func_always_cast_spells(_alwayscasts) local _val = 0; for _, _a_c_id in ipairs(_alwayscasts) do if (_a_c_id~=nil and actions_by_id[_a_c_id]~=nil and actions_by_id[_a_c_id].price~=nil) then _val = _val + get_ac_cost(_a_c_id); end; end; return _val; end
-
-
-
-
-  function get_wand_price(wand_data)
-    local price = 0;
-    price = price + math.ceil(cost_func_wand_type(wand_data["wand_type"]));
-    price = price + math.ceil(cost_func_shuffle(wand_data["shuffle"]));
-    price = price + math.ceil(cost_func_spells_per_cast(wand_data["spells_per_cast"]));
-    price = price + math.ceil(cost_func_cast_delay(wand_data["cast_delay"]));
-    price = price + math.ceil(cost_func_recharge_time(wand_data["recharge_time"]));
-    price = price + math.ceil(cost_func_mana_max(wand_data["mana_max"]));
-    price = price + math.ceil(cost_func_mana_charge_speed(wand_data["mana_charge_speed"]));
-    price = price + math.ceil(cost_func_capacity(wand_data["capacity"]));
-    price = price + math.ceil(cost_func_spread(wand_data["spread"]));
-
-    price = math.ceil(price * mod_setting.buy_wand_price_multiplier);
-
-    price = price + cost_func_always_cast_spells(wand_data["always_cast_spells"]);
-
-    return math.ceil(price);
   end
 
   function modify_wand_entity(slot_data)
@@ -213,7 +177,7 @@ if persistence_helper_loaded~=true then
     end
     SetWandSprite(slot_data.origin_e_id, ability_comp, basewand.file, basewand.grip_x, basewand.grip_y, (basewand.tip_x - basewand.grip_x), (basewand.tip_y - basewand.grip_y));
 
-    set_player_money(get_player_money() - _price);
+    decrement_player_money(_price);
   end
 
   function purchase_wand(wand_data)
@@ -253,16 +217,14 @@ if persistence_helper_loaded~=true then
     end
     SetWandSprite(_new_wand_e_id, ability_comp, wand.file, wand.grip_x, wand.grip_y, (wand.tip_x - wand.grip_x), (wand.tip_y - wand.grip_y));
 
-    set_player_money(get_player_money() - _price);
+    decrement_player_money(_price);
     return true;
-  end
-
-  function get_spell_purchase_price(action_id)
-    return math.ceil(actions_by_id[action_id].price * mod_setting.buy_spell_price_multiplier);
   end
 
   function purchase_spell(action_id)
     local price = get_spell_purchase_price(action_id);
+    if price==nil then return false; end
+
     if get_player_money() < price then return false; end
 
     local x, y = EntityGetTransform(player_e_id);
@@ -271,9 +233,9 @@ if persistence_helper_loaded~=true then
       local _inv_full_e_id = EntityGetWithName("inventory_full");
       EntitySetComponentsWithTagEnabled(_spell_e_id, "enabled_in_world", false);
       EntityAddChild(_inv_full_e_id, _spell_e_id);
-      local _spell_item_c_id = EntityGetFirstComponentIncludingDisabled(_spell_e_id, "ItemComponent");
+      local _spell_item_c_id = EntityGetFirstComponentIncludingDisabled(_spell_e_id, "ItemComponent") or 0;
       ComponentSetValue2(_spell_item_c_id, "inventory_slot", 0, 1);
-      set_player_money(get_player_money() - price);
+      decrement_player_money(price);
     end
     return true;
   end
@@ -300,9 +262,7 @@ if persistence_helper_loaded~=true then
           local inv_slot = ComponentGetValue2(inventory_comp, "inventory_slot") + 1;
           wands[inv_slot] = {};
           wands[inv_slot].e_id = item;
-          wands[inv_slot].wand = read_wand_entity(item);
-          wands[inv_slot].research = research_wand_is_new(item);
-          wands[inv_slot].price = get_wand_price(wands[inv_slot].wand);
+          wands[inv_slot].research, wands[inv_slot].cost, wands[inv_slot].wand = get_wand_entity_research(item);
         end
       end
     end
@@ -458,18 +418,6 @@ if persistence_helper_loaded~=true then
     return EntityGetFirstComponentIncludingDisabled(player_e_id, "GameStatsComponent");
   end
 
-  function get_inventory_gui()
-    return EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent");
-  end
-
-  function get_inventory2()
-    return EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component");
-  end
-
-  function get_controls_component()
-    return EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent");
-  end
-
   function simple_string_hash(text) --don't use it for storing passwords...
     local sum = 0;
     for i = 1, #text do
@@ -484,6 +432,20 @@ if persistence_helper_loaded~=true then
 
   function set_player_money(value)
     ComponentSetValue2(EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0, "money", value);
+  end
+
+  function decrement_player_money(amount)
+    local _c_id = EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0;
+    local _money = ComponentGetValue2(_c_id, "money") or 0;
+    _money = math.max(_money - amount, 0);
+    ComponentSetValue2(_c_id, "money", _money);
+  end
+
+  function increment_player_money(amount)
+    local _c_id = EntityGetFirstComponentIncludingDisabled(player_e_id, "WalletComponent") or 0;
+    local _money = ComponentGetValue2(_c_id, "money") or 0;
+    local _amount = _money + amount;
+    ComponentSetValue2(_c_id, "money", math.max(_money, _amount));
   end
 
   function get_root_entity(entity_id)

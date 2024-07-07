@@ -13,14 +13,14 @@ if fourslot_loaded~=true then
         local row2_y_offset = 14;
         local x_offset = 16;
 
-        GuiZSetForNextWidget(gui, _layer(layer));
+        GuiZSetForNextWidget(gui, __layer(layer));
         GuiColorNextWidgetEnum(gui, COLORS.Green);
         if slot_data.quickloaded~=nil and slot_data.quickloaded==true then
           if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "- Load Profile") then
             selected_profile_id = slot_data.id;
           end
           if fourslot_confirmation == slot_data.id then
-            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiZSetForNextWidget(gui, __layer(layer));
             GuiColorNextWidgetEnum(gui, COLORS.Yellow);
             if GuiButton(gui, _nid(), x_base + x_offset, y_base + row2_y_offset, "- Press again to delete") then
               fourslot_confirmation = 0;
@@ -28,14 +28,14 @@ if fourslot_loaded~=true then
               slot_data.quickloaded = nil;
             end
           else
-            GuiZSetForNextWidget(gui, _layer(layer));
+            GuiZSetForNextWidget(gui, __layer(layer));
             GuiColorNextWidgetEnum(gui, COLORS.Yellow);
             if GuiButton(gui, _nid(), x_base + x_offset, y_base + row2_y_offset, "- Delete profile") then
               fourslot_confirmation = slot_data.id;
             end
           end
         else
-          GuiZSetForNextWidget(gui, _layer(layer));
+          GuiZSetForNextWidget(gui, __layer(layer));
           if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "- Create new profile") then
             create_new_profile(slot_data.id)
           end
@@ -68,9 +68,9 @@ if fourslot_loaded~=true then
 
         if slot_data.e_id~=nil then
           if slot_data.research.is_new then
-            GuiZSetForNextWidget(gui, _layer(layer));
-            GuiColorNextWidgetBool(gui, last_known_money >= slot_data.price);
-            if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, string.format("- Research for $ %1.0f", slot_data.price)) and slot_data.price < last_known_money then
+            GuiZSetForNextWidget(gui, __layer(layer));
+            GuiColorNextWidgetBool(gui, last_known_money >= slot_data.cost._sum);
+            if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, string.format("- Research for $ %1.0f", slot_data.cost._sum)) and slot_data.cost._sum < last_known_money then
               research_wand(slot_data.e_id);
               slot_data = {};
               GamePrintImportant("Wand Researched");
@@ -78,7 +78,7 @@ if fourslot_loaded~=true then
             end
           else
             if fourslot_confirmation~=slot_data.id and EntityHasTag(slot_data.e_id, "persistence") then
-              GuiZSetForNextWidget(gui, _layer(layer));
+              GuiZSetForNextWidget(gui, __layer(layer));
               GuiColorNextWidgetEnum(gui, COLORS.Green);
               if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "- Modify wand") then
                 GamePrint("Modify Wand");
@@ -90,7 +90,7 @@ if fourslot_loaded~=true then
               end
             else
               if fourslot_confirmation == slot_data.id then
-                GuiZSetForNextWidget(gui, _layer(layer));
+                GuiZSetForNextWidget(gui, __layer(layer));
                 GuiColorNextWidgetEnum(gui, COLORS.Yellow);
                 if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "- Click to recycle") then
                   fourslot_confirmation = 0;
@@ -100,7 +100,7 @@ if fourslot_loaded~=true then
                   return true;
                 end
               else
-                GuiZSetForNextWidget(gui, _layer(layer));
+                GuiZSetForNextWidget(gui, __layer(layer));
                 GuiColorNextWidgetEnum(gui, COLORS.Dim);
                 if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "No improved stats") then
                   fourslot_confirmation = slot_data.id;
@@ -112,24 +112,24 @@ if fourslot_loaded~=true then
           if #slot_data.wand["spells"]>0 then
             if slot_data.research.b_spells then
               GuiColorNextWidgetEnum(gui, COLORS.Red);
-              GuiZSetForNextWidget(gui, _layer(layer));
+              GuiZSetForNextWidget(gui, __layer(layer));
               GuiText(gui, x_base + 0 + x_offset, y_base + row2_y_offset, "WAND CONTAINS", small_text_scale);
               GuiColorNextWidgetEnum(gui, COLORS.Red);
-              GuiZSetForNextWidget(gui, _layer(layer));
+              GuiZSetForNextWidget(gui, __layer(layer));
               GuiText(gui, x_base + 2 + x_offset, y_base + row3_y_offset, "UNRESEARCHED SPELLS", small_text_scale);
               GuiGuideTip(gui, "Spells on wands are destroyed", "At least one spell is unresearched");
             else
               GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-              GuiZSetForNextWidget(gui, _layer(layer));
+              GuiZSetForNextWidget(gui, __layer(layer));
               GuiText(gui, x_base + 0 + x_offset, y_base + row2_y_offset, "Wand contains spells which", small_text_scale);
               GuiColorNextWidgetEnum(gui, COLORS.Yellow);
-              GuiZSetForNextWidget(gui, _layer(layer));
+              GuiZSetForNextWidget(gui, __layer(layer));
               GuiText(gui, x_base + 2 + x_offset, y_base + row3_y_offset, "will be lost on research", small_text_scale);
               GuiGuideTip(gui, "Spells on wands are destroyed", "These spells are all researched");
             end
           end
         else
-          GuiZSetForNextWidget(gui, _layer(layer));
+          GuiZSetForNextWidget(gui, __layer(layer));
           GuiColorNextWidgetEnum(gui, COLORS.Green);
           if GuiButton(gui, _nid(), x_base + x_offset, y_base + row1_y_offset, "- Create new wand") then
             GamePrint("Create Wand");
@@ -177,13 +177,13 @@ if fourslot_loaded~=true then
       local y_offset = y_base + margin;
       local panel_width = 104;
       local panel_height = height - (margin * 2);
-      GuiZSet(gui, _layer(0)); ---gui frame
+      GuiZSet(gui, __layer(0)); ---gui frame
       GuiImageNinePiece(gui, _nid(), x_base, y_base, width, height);
 
       for _panel_id = 1, 4 do
         fourslot_table.slots_data[_panel_id].id = _panel_id;
         local panel_x_offset = x_offset + ((_panel_id-1) * (panel_width + (margin*2)));
-        GuiZSet(gui, _layer(1)); ---per-panel border
+        GuiZSet(gui, __layer(1)); ---per-panel border
         GuiImageNinePiece(gui, _nid(), panel_x_offset, y_offset, panel_width, panel_height);
 
         local panel_sub_width = panel_width - (margin*2);
@@ -199,7 +199,7 @@ if fourslot_loaded~=true then
 
         local label_x_pos = panel_x_offset + 23;
         local label_y_pos = header_y_pos + 27;
-        GuiZSetForNextWidget(gui, _layer(2)); ---slot label
+        GuiZSetForNextWidget(gui, __layer(2)); ---slot label
         GuiText(gui, label_x_pos, label_y_pos, string.format(fourslot_table.slot_title, _panel_id), 1);
 
         local slot_x_pos = panel_x_offset + margin;

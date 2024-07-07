@@ -19,7 +19,7 @@ if wand_template_loaded~=true then
 
       if _reload_data then template_previews = get_templates(); _reload_data=false; end
 
-      GuiZSetForNextWidget(gui, _layer(0));
+      GuiZSetForNextWidget(gui, __layer(0));
       GuiImageNinePiece(gui, _nid(), x_base, y_base, width, height);
       template_hover = 0;
       for i = 1, get_template_count() do
@@ -27,11 +27,11 @@ if wand_template_loaded~=true then
         local y_offset = y_base + margin + ((i - 1) * block_height);
         local col_a = 45;
         local col_b = 90;
-        GuiZSetForNextWidget(gui, _layer(1));
+        GuiZSetForNextWidget(gui, __layer(1));
         GuiText(gui, x_offset, y_offset, "Template Slot " .. i .. ":");
         if modify_wand_open then
           if template_previews[i]==nil or template_previews[i].capacity==nil then  -- Template empty
-            GuiZSetForNextWidget(gui, _layer(1));
+            GuiZSetForNextWidget(gui, __layer(1));
             GuiColorNextWidgetEnum(gui, COLORS.Green);
             if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 1), "Save") then
               set_template(i, modify_wand_table.slot_data.wand);
@@ -40,14 +40,14 @@ if wand_template_loaded~=true then
             GuiGuideTip(gui, "Save active wand as template", "");
           else
             if template_confirmation~=i then
-              GuiZSetForNextWidget(gui, _layer(1));
+              GuiZSetForNextWidget(gui, __layer(1));
               GuiColorNextWidgetEnum(gui, COLORS.Yellow);
               if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 2), "Update") then
                 template_confirmation = i;
               end
               GuiGuideTip(gui, "Update template with active wand", "(Requires confirmation)");
             else
-              GuiZSetForNextWidget(gui, _layer(1));
+              GuiZSetForNextWidget(gui, __layer(1));
               GuiColorNextWidgetEnum(gui, COLORS.Green);
               if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 2), "CONFIRM") then
                 set_template(i, modify_wand_table.slot_data.wand);
@@ -55,7 +55,7 @@ if wand_template_loaded~=true then
                 _reload_data = true;
               end
             end
-            GuiZSetForNextWidget(gui, _layer(1));
+            GuiZSetForNextWidget(gui, __layer(1));
             GuiColorNextWidgetEnum(gui, COLORS.Green);
             if GuiButton(gui, _nid(), x_offset + col_b, y_offset + (line_height * 1), "Load") then
               -- GamePrint("Load Template");
@@ -66,36 +66,31 @@ if wand_template_loaded~=true then
         end
 
         if template_previews~=nil and template_previews[i]~=nil and template_previews[i].capacity~=nil then        
-          local _affordable = template_previews[i].price<=last_known_money;
+          local _is_affordable = template_previews[i].price<=last_known_money;
+          local _do_purchase = false;
 
-          GuiZSetForNextWidget(gui, _layer(1));
+          GuiZSetForNextWidget(gui, __layer(1));
           GuiImage(gui, _nid(), x_offset + 10, y_offset + 12, wand_type_to_sprite_file(template_previews[i].wand_type), 1, 1, 1, math.rad(0)); -- radians are annoying
 
-          GuiZSetForNextWidget(gui, _layer(1));
-          GuiColorNextWidgetBool(gui, _affordable);
-          if GuiButton(gui, _nid(), x_offset, y_offset + (line_height * 2), string.format(" $ %i", template_previews[i].price)) then
-            -- GamePrint("Buy Template");
-            purchase_wand(get_template(i));
-          end
+          GuiZSetForNextWidget(gui, __layer(1));
+          GuiColorNextWidgetBool(gui, _is_affordable);
+          _do_purchase = _do_purchase or GuiButton(gui, _nid(), x_offset, y_offset + (line_height * 2), string.format(" $ %i", template_previews[i].price));
           GuiGuideTip(gui, "Click to buy", "Wands drop at your feet");
 
-          GuiZSetForNextWidget(gui, _layer(1));
-          GuiColorNextWidgetBool(gui, _affordable);
-          if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 1), "Buy") then
-            -- GamePrint("Buy Template");
-            purchase_wand(get_template(i));
-          end
+          GuiZSetForNextWidget(gui, __layer(1));
+          GuiColorNextWidgetBool(gui, _is_affordable);
+          _do_purchase = _do_purchase or GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 1), "Buy");
           GuiGuideTip(gui, "Click to buy", "Wands drop at your feet");
 
           if template_confirmation ~= -i then
-            GuiZSetForNextWidget(gui, _layer(1));
+            GuiZSetForNextWidget(gui, __layer(1));
             GuiColorNextWidgetEnum(gui, COLORS.Yellow);
             if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 2), "Delete") then
               template_confirmation = -i;
             end
             GuiGuideTip(gui, "Delete template", "(Requires confirmation)");
           else
-            GuiZSetForNextWidget(gui, _layer(1));
+            GuiZSetForNextWidget(gui, __layer(1));
             GuiColorNextWidgetEnum(gui, COLORS.Yellow);
             if GuiButton(gui, _nid(), x_offset + col_a, y_offset + (line_height * 2), "CONFIRM") then
               template_confirmation = 0;
@@ -103,6 +98,11 @@ if wand_template_loaded~=true then
               _reload_data = true;
               -- GamePrint("Delete Template");
             end
+          end
+
+          if _do_purchase==true then
+            -- GamePrint("Buy Template");
+            purchase_wand(get_template(i));
           end
 
           local _x_mouse, _y_mouse = InputGetMousePosOnScreen();
@@ -125,7 +125,7 @@ if wand_template_loaded~=true then
           local _preview_y_loc = 240;
           local _preview_panel_width = 90;
           local _preview_panel_height = 105;
-          GuiZSetForNextWidget(gui, _layer(2));
+          GuiZSetForNextWidget(gui, __layer(2));
           GuiBeginScrollContainer(gui, _nid(), _preview_x_loc, _preview_y_loc, _preview_panel_width, _preview_panel_height);
           for ii = 2, modify_wand_table.datum_translation._index[0] do
             local _member = modify_wand_table.datum_translation._index[ii];

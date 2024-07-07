@@ -269,18 +269,32 @@ if persistence_data_store_loaded~=true then
     write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
   end
 
+  ---increments stash money, returns success
+  ---@param profile_id integer profile
+  ---@param amount integer money
+  ---@return boolean success
   local function _increment_stash_money(profile_id, amount)
     local _stash = data_store[profile_id]["money"] or 0;
-    local _amount = _stash + amount;
-    data_store[profile_id]["money"] = math.max(_stash, _amount);
+    local _target = _stash + amount;
+    if _stash < _target then return false; end
+
+    data_store[profile_id]["money"] = _target;
     write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
+    return true;
   end
 
+  ---decrements stash money, returns success
+  ---@param profile_id integer profile
+  ---@param amount integer money
+  ---@return boolean success
   local function _decrement_stash_money(profile_id, amount)
     local _stash = data_store[profile_id]["money"] or 0;
-    _stash = math.max(_stash - amount, 0);
-    data_store[profile_id]["money"] = _stash;
+    local _target = _stash - amount;
+    if _stash > _target then return false; end
+
+    data_store[profile_id]["money"] = _target;
     write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
+    return true;
   end
 
   -- always_cast_count
@@ -313,9 +327,8 @@ if persistence_data_store_loaded~=true then
     local _newtarget = math.min(_money + amount, (2^29));
     local _difference = _newtarget - _money;
 
-    if set_player_money( _newtarget )==true then
-      _decrement_stash_money(profile_id, _difference);
-      return true;
+    if set_player_money( _newtarget ) then
+      return _decrement_stash_money(profile_id, _difference);
     else
       return false;
     end
@@ -672,7 +685,13 @@ if persistence_data_store_loaded~=true then
 
   function get_stash_money() return _get_stash_money(loaded_profile_id); end
   function set_stash_money(value) return _set_stash_money(loaded_profile_id, value); end
+  ---increments stash money, returns success
+  ---@param amount integer money
+  ---@return boolean success
   function increment_stash_money(amount) return _increment_stash_money(loaded_profile_id, amount); end
+  ---increments stash money, returns success
+  ---@param amount integer money
+  ---@return boolean success
   function decrement_stash_money(amount) return _decrement_stash_money(loaded_profile_id, amount); end
   function transfer_money_player_to_stash(value) return _transfer_money_player_to_stash(loaded_profile_id, value); end
   function transfer_money_stash_to_player(value) return _transfer_money_stash_to_player(loaded_profile_id, value); end

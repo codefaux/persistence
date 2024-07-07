@@ -458,16 +458,95 @@ if persistence_helper_loaded~=true then
     return _prev_e_id;
   end
 
+  function levenshtein(str1, str2)
+    local matrix = {}
+
+    for i = 0, #str1 do
+      matrix[i] = {[0] = i}
+    end
+    for j = 0, #str2 do
+      matrix[0][j] = j
+    end
+    for i = 1, #str1 do
+      for j = 1, #str2 do
+        local cost = (str1:sub(i, i) == str2:sub(j, j) and 0 or 1)
+        matrix[i][j] = math.min(matrix[i-1][j] + 1, matrix[i][j-1] + 1, matrix[i-1][j-1] + cost)
+      end
+    end
+    return matrix[#str1][#str2]
+  end
+
+  function closest_match(target, strings)
+    local closest, distance = nil, math.huge
+
+    for _, str in pairs(strings) do
+      local d = levenshtein(target, str)
+      if d < distance then
+        closest, distance = str, d
+      end
+    end
+
+    return closest
+  end
+
+  local execute = {
+    ["="] = function (x, y) return x==y; end,
+    ["=="] = function (x, y) return x==y; end,
+    ["<"] = function (x, y) return x<y; end,
+    [">"] = function (x, y) return x>y; end,
+    ["<="] = function (x, y) return x<=y; end,
+    [">="] = function (x, y) return x>=y; end,
+    ["~="] = function (x, y) return x~=y; end,
+    ["!="] = function (x, y) return x~=y; end
+  }
+
+  local _spell_object_long_to_member = {};
+  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_actiontype_drawmany"))] = "draw_actions";
+  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_usesremaining"))] = "max_uses";
+  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_manadrain"))] = "mana";
+  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_castdelay"))] = "fire_rate_wait";
+  _spell_object_long_to_member[string.lower(GameTextGetTranslatedOrNot("$inventory_rechargetime"))] = "reload_time";
+
+  local _spell_object_members = {
+    "draw_actions",    string.lower(GameTextGetTranslatedOrNot("$inventory_actiontype_drawmany")),
+    "max_uses",        string.lower(GameTextGetTranslatedOrNot("$inventory_usesremaining")),
+    "mana",            string.lower(GameTextGetTranslatedOrNot("$inventory_manadrain")),
+    "fire_rate_wait",  string.lower(GameTextGetTranslatedOrNot("$inventory_castdelay")),
+    "reload_time",     string.lower(GameTextGetTranslatedOrNot("$inventory_rechargetime")),
+  }
+
+
   function check_search_for(spell_object, search_string)
     if spell_object==nil or spell_object.description==nil or spell_object.name==nil then return false; end
 
     local _show_item = true;
-      for _search_word in string.gmatch(search_string,'([^, ]+)') do
+    for _search_word in string.gmatch(search_string,'([^, ]+)') do
       if string.sub(_search_word, 1, 1)=="#" then
         local _search_sub = string.sub(_search_word, 2, -1);
         if string.find(string.lower(GameTextGetTranslatedOrNot(spell_object.description)), string.lower(_search_sub), 1, true)==nil then _show_item = false; end
+      elseif string.sub(_search_word, 1, 1)=="." then
+        local _search_sub = string.sub(_search_word, 2, -1);
+        local _regex = "([a-z]+)([<>=!]+)([0-9-]+)";
+        if string.match(_search_sub, _regex) then
+          for _cmd, _op, _val in string.gmatch(_search_sub, _regex) do
+            if _cmd~=nil and _op~=nil and _val~=nil then
+              local _target_member = closest_match(_cmd, _spell_object_members);
+              if _target_member~=nil then
+                local _spell = actions_by_id[spell_object.a_id];
+                if _spell[_target_member]~=nil and execute[_op](_spell[_target_member], tonumber(_val))==false then
+                  _show_item = false;
+                elseif _spell_object_long_to_member[_target_member]~=nil then
+                  local _short_member = _spell_object_long_to_member[_target_member];
+                  if _spell[_short_member]~=nil and execute[_op](_spell[_short_member], tonumber(_val))==false then
+                    _show_item = false;
+                  end
+                end
+              end
+            end
+          end
+        end
       else
-        if string.find(string.lower(GameTextGetTranslatedOrNot(spell_object.name)),        string.lower(_search_word), 1, true)==nil then _show_item = false; end
+        if string.find(string.lower(GameTextGetTranslatedOrNot(spell_object.name)), string.lower(_search_word), 1, true)==nil then _show_item = false; end
       end
     end
     return _show_item;

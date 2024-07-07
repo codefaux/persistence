@@ -187,7 +187,7 @@ if spell_list_loaded~=true then
       GuiText(gui, 240, 6, "Search:", 1);
       GuiZSetForNextWidget(gui, __layer(2));
       _search_for = GuiTextInput(gui, _nid(), 270, 5, _search_for, 100, 20);
-      GuiGuideTip(gui, "Search by name or #description, right-click to clear", "Multiple search (AND) by space or comma");
+      GuiGuideTip(gui, "Search by name, #description, .variable[=,<,>]value\nRight-click to clear", "Multiple search (AND) by space or comma");
       if select(2, GuiGetPreviousWidgetInfo(gui))  then _search_for = ""; end
 
       local _f_idx = 1;

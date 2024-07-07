@@ -659,7 +659,7 @@ if persistence_data_store_loaded~=true then
 
       if _wand_bounds.wand_types == nil or _wand_bounds.wand_types[_in_wand_data["wand_type"]] == nil then
         if wand_type_to_base_wand(_in_wand_data["wand_type"]) ~= nil then
-          b_new_is_only_type = not _research.is_new;
+          _research.b_new_is_only_type = not _research.is_new;
           _research.b_wand_types = true;
           _research.is_new = true;
           _cost.wand_type = math.ceil(__cost_func_wand_type(_in_wand_data["wand_type"]));

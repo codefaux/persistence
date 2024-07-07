@@ -43,10 +43,10 @@ if persistence_data_store_loaded~=true then
     if not EntityHasTag(_workshop_e_id, "persistence_unpaid") then return; end
     if     EntityHasTag(_workshop_e_id, "persistence_paid") then return; end
 
-        ---@diagnostic disable-next-line: param-type-mismatch
-        local _withdraw = math.min(get_stash_money(), mod_setting.holy_mountain_money);
-    transfer_money_stash_to_player(_withdraw);
+    ---@diagnostic disable-next-line: param-type-mismatch
+    local _withdraw = math.min(get_stash_money(), mod_setting.holy_mountain_money);
     GamePrint(string.format("Persistence: Holy Mountain paycheck, $ %i from Stash", _withdraw));
+    transfer_money_stash_to_player(_withdraw);
     local _ent_x, _ent_y = EntityGetTransform(_workshop_e_id);
 
     local _workshops_here = EntityGetInRadiusWithTag(_ent_x, _ent_y, 500, "persistence_workshop");
@@ -321,7 +321,7 @@ if persistence_data_store_loaded~=true then
 
   -- money
   local function _get_stash_money(profile_id)
-    return data_store[profile_id]["money"] == nil and 0 or data_store[profile_id]["money"];
+    return data_store[profile_id]["money"] or 0;
   end
 
   local function _set_stash_money(profile_id, value)
@@ -330,14 +330,14 @@ if persistence_data_store_loaded~=true then
   end
 
   local function _increment_stash_money(profile_id, amount)
-    local _stash = data_store[profile_id]["money"] == nil and 0 or data_store[profile_id]["money"];
+    local _stash = data_store[profile_id]["money"] or 0;
     local _amount = _stash + amount;
     data_store[profile_id]["money"] = math.max(_stash, _amount);
     write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
   end
 
   local function _decrement_stash_money(profile_id, amount)
-    local _stash = data_store[profile_id]["money"] == nil and 0 or data_store[profile_id]["money"];
+    local _stash = data_store[profile_id]["money"] or 0;
     _stash = math.max(_stash - amount, 0);
     data_store[profile_id]["money"] = _stash;
     write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
@@ -635,7 +635,7 @@ if persistence_data_store_loaded~=true then
       if _in_wand_data["always_cast_spells"] ~= nil and #_in_wand_data["always_cast_spells"] > 0 then
         for _, _always_cast_id in pairs(_in_wand_data["always_cast_spells"]) do
           if actions_by_id[_always_cast_id] ~= nil and (_wand_bounds.always_casts == nil or _wand_bounds.always_casts[_always_cast_id] == nil) then
-            i_always_cast_spells = i_always_cast_spells + 1;
+            _research.i_always_cast_spells = _research.i_always_cast_spells + 1;
             _research.b_always_cast_spells = true;
             _research.is_new = true;
             _cost.always_cast_spells = _cost.always_cast_spells + math.ceil(__cost_func_always_cast_spell(_always_cast_id));

@@ -74,7 +74,7 @@ if money_loaded~=true then
         GuiColorNextWidgetEnum(gui, COLORS.Dark);
         GuiText(gui, col_a, offset_y + (idx * 10), "Take ALL");
       end
-      GuiGuideTip(gui, "Withdraw limited to " .. (2^28));
+      GuiGuideTip(gui, "Withdraw limited to " .. (2^28), "");
 
       if _allow_deposit==true then
         GuiZSetForNextWidget(gui, __layer(1));

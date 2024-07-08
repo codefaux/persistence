@@ -33,7 +33,7 @@ if gui_subfunc_loaded~=true then
 
   function GuiGuideTip(gui, text, subtext)
     if mod_setting.show_guide_tips==true then
-      GuiTooltip(gui, text, subtext);
+      GuiTooltip(gui, text or "", subtext or "");
     end
   end
 

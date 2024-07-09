@@ -12,26 +12,9 @@ persistence_active=false;
 
 player_e_id=0;
 last_known_money=0;
-mod_setting = {
-  show_guide_tips =                   ModSettingGet("persistence.show_guide_tips"),
-  start_with_money =                  ModSettingGet("persistence.start_with_money"), --- see profile load
-  holy_mountain_money =               ModSettingGet("persistence.holy_mountain_money"), --- see entity_mgr
-  cap_money_saved_on_death =          ModSettingGet("persistence.cap_money_saved_on_death") * 1000,
-  allow_stash =              tonumber(ModSettingGet("persistence.allow_stash")), --- 1, allow   0, disable  -1, deposit only
-  buy_wand_price_multiplier =         ModSettingGet("persistence.buy_wand_price_multiplier"),
-  buy_spell_price_multiplier =        ModSettingGet("persistence.buy_spell_price_multiplier"),
-  research_wand_price_multiplier =    ModSettingGet("persistence.research_wand_price_multiplier"),
-  research_spell_price_multiplier =   ModSettingGet("persistence.research_spell_price_multiplier"),
-  money_saved_on_death =              ModSettingGet("persistence.money_saved_on_death"),
-  always_choose_save_id =             ModSettingGet("persistence.always_choose_save_id"),
-  enable_edit_wands_in_lobby =        ModSettingGet("persistence.enable_edit_wands_in_lobby"),
-  reusable_holy_mountain =            ModSettingGet("persistence.reusable_holy_mountain"),
-};
+mod_setting = {};
 
-local _paused = false;
-function OnPausedChanged(is_paused, _)
-  if is_paused~=false then return; end
-
+function ReadModSettings()
   mod_setting = {
     show_guide_tips =                   ModSettingGet("persistence.show_guide_tips"),
     start_with_money =                  ModSettingGet("persistence.start_with_money"), --- see profile load
@@ -47,6 +30,14 @@ function OnPausedChanged(is_paused, _)
     enable_edit_wands_in_lobby =        ModSettingGet("persistence.enable_edit_wands_in_lobby"),
     reusable_holy_mountain =            ModSettingGet("persistence.reusable_holy_mountain"),
   };
+end; ReadModSettings(); -- do it now
+
+
+local _paused = false;
+function OnPausedChanged(is_paused, _)
+  if is_paused~=false then return; end
+
+  ReadModSettings();
 end
 
 function create_lobby_effect_entity()
@@ -66,8 +57,32 @@ end
 function teleport_back_to_lobby()
   local lobby_x = tonumber(GlobalsGetValue("first_spawn_x", "0")) or 0;
   local lobby_y = tonumber(GlobalsGetValue("first_spawn_y", "0")) or 0;
+  if lobby_x==0 and lobby_y==0 then
+    local _collider_e_id = EntityGetWithName("persistence_lobby_collider");
+    if lobby_x==0 and lobby_y==0 then _collider_e_id=0; end
+    if _collider_e_id==0 then _collider_e_id = EntityGetWithTag("controls_mouse")[1]; end
+    if lobby_x==0 and lobby_y==0 then _collider_e_id=0; end
+    if _collider_e_id==0 then _collider_e_id = EntityGetWithTag("controls_wasd")[1]; end
+    if lobby_x==0 and lobby_y==0 then _collider_e_id=0; end
 
+    if _collider_e_id~=0 then
+      lobby_x, lobby_y = EntityGetTransform(_collider_e_id);
+    end
+
+    if lobby_x==0 and lobby_y==0 then
+      GamePrintImportant("Unable to find Persistence lobby", "-- must assume location. Use with caution, be ready to dig.");
+      GamePrint(" ");
+      GamePrint(" ");
+      GamePrint("Unable to find Persistence lobby -- must assume location. Use with caution, be ready to dig.");
+      GamePrint(" ");
+      GamePrint(" ");
+      GlobalsSetValue("first_spawn_x", "225");
+      GlobalsSetValue("first_spawn_y", "-225");
+      return false;
+    end
+  end
   EntitySetTransform(player_e_id, lobby_x, lobby_y);
+  return true;
 end
 
 function OnModPreInit()
@@ -84,7 +99,7 @@ function OnWorldPostUpdate()
 
   if not actions_by_id_loaded then return; end
 
-  persistence_active = GlobalsGetValue("persistence_active", "false")=="true";
+  persistence_active = GlobalsGetValue("persistence_active", "false")=="true" or GameHasFlagRun("persistence_using_mod");
 
   if GameGetFrameNum()%_frame_skip==0 then
     local _e_id = EntityGetWithTag("player_unit")[1];

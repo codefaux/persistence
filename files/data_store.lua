@@ -860,15 +860,15 @@ if persistence_data_store_loaded~=true then
 
     local _game_frame = GameGetFrameNum();
 
-    if _game_frame%120 then
+    if _game_frame%60 then
       _do_startup_paycheck_check();
     end
 
-    if _game_frame%10==0 and _in_workshop then
+    if _game_frame%30==0 and _in_workshop then
       _do_holy_mountain_paycheck_check();
     end
   end
-  ---end function declarations, run code here;
+  ---end function declarations, first-run code here;
 
   for profile_idx = 1, get_profile_count() do
     data_store[profile_idx]=data_store[profile_idx] or {};
@@ -879,6 +879,13 @@ if persistence_data_store_loaded~=true then
 
   if GlobalsGetValue("persistence_profile", "0")~="0" then
     selected_profile_id = tonumber(GlobalsGetValue("persistence_profile", "0"));
+  elseif GameHasFlagRun("persistence_using_mod") then
+    for i = 1, get_profile_count() do
+      if GameHasFlagRun("persistence_selected_profile_" .. tostring(i)) then
+				selected_profile_id = i;
+        break;
+			end
+		end
   elseif default_profile_id>0 then
     selected_profile_id = default_profile_id;
   end
@@ -887,6 +894,3 @@ if persistence_data_store_loaded~=true then
   print("persistence: Datastore loaded.");
   persistence_data_store_loaded = true;
 end -- if persistence_data_store_loaded==false;
-
-
--- every frame:

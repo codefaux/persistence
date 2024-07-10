@@ -138,6 +138,8 @@ if persistence_helper_loaded~=true then
     local _price = slot_data.price - _origin_price;
     if get_player_money() < _price then return false; end
 
+    ComponentSetValue2(_var_comp, "value_int", slot_data.price);
+
     local ability_comp = EntityGetFirstComponentIncludingDisabled(slot_data.origin_e_id, "AbilityComponent") or 0;
     local basewand = wand_type_to_base_wand(slot_data.wand["wand_type"]);
 

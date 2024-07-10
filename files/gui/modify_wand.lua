@@ -327,7 +327,7 @@ if modify_wand_loaded~=true then
         for _ac_idx = 1, modify_wand_table.slot_data.ac_spells._index.count do
           local _ac_name = modify_wand_table.slot_data.ac_spells[_ac_idx].a_id;
           local show_curr_spell = true;
-          if _search_for~="" then show_curr_spell=check_search_for(modify_wand_table.slot_data.ac_spells, _search_for); end
+          if _search_for~="" then show_curr_spell=check_search_for(modify_wand_table.slot_data.ac_spells[_ac_idx], _search_for); end
           if _active_filter~=99 and _active_filter~=actions_by_id[_ac_name].type then
             show_curr_spell = false;
           end

@@ -1,6 +1,6 @@
 dofile_once("data/scripts/lib/mod_settings.lua");
 ---mod files dir. ALSO UPDATE IN XMLs
-mod_dir = "mods/persistence_staging/";
+mod_dir = "mods/persistence/";
 
 dofile_once(mod_dir .. "files/meta.lua");
 dofile_once(mod_dir .. "files/cost.lua");

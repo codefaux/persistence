@@ -10,19 +10,28 @@
 -- Condense spell list, other modes?
 -- Mod setting for "allow research spells inside wands"?
 -- Translation table for translation mods, translation helper Mod Options setting for tooltips indicating strings and meanings
-
-
+-- Config option: Replace starter wand w/ templates 1, 2?
+-- Apply loadouts to replacement wands?
+-- Z order w/ blinking cursor, spell tooltip re: wand stats
+-- stash overflows; split into two variables, store w/ data_store into big_money, bigger_money?
 
 
 -- =====================
 --  BUGS / TOP PRIORITY
 -- =====================
--- stash overflows; split into two variables, store w/ data_store into big_money, bigger_money?
+-- Options to disable persistent wand stat memory, spell memory, allowing per-run "fresh profile" with stashed money
+-- PRUNE DATASTORE/HELPER/WAND_SPELL_HELPER (second wave done)
+-- Enable in parallel worlds -- look for controls_mouse and controls_wasd for new "lobby" area
+-- Flesh out and implement meta.lua rigorously
+
 
 -- ====================
 --  REQUESTS / IDEAS
 -- ====================
--- Character stat buffs
+-- "Builds" - Match template to Loadout
+--    check fit, can cast, etc
+--    auto-load spells onto wand when purhcased
+-- "Training" - Character stat buffs
 -- PlayerEntity;
 --  CharacterDataComponent
 --    fly_time_max=3 -- adjusts as expected
@@ -52,6 +61,7 @@
 --    barrel_size
 --    num_cells_sucked_per_frame
 
+
 -- ====================
 --  DONE? NEEDS VERIFY
 -- ====================
@@ -60,7 +70,10 @@
 -- ==============
 --  KNOWN ISSUES
 -- ==============
--- Holy Mountain pays out twice when configured
+-- Spell overlap due to game item placement bug re: overfilled inventory. Worth fixing? Drop purchases on ground?
+-- Inventory spells on wands visibly offset due to wand changes. Seems ingame bug? Unlock during manipulation?
+-- Potential wand cost overlap in thoroughly broken gamestage. Clamp?
+-- Too easy to research "ultimate tier wand." Weighted research? One stat at a time?
 
 
 -- ==============
@@ -91,3 +104,6 @@
 -- function GlobalsSetValue(_) end
 -- function find_the_wand_held() return nil; end
 -- function EntityGetFirstComponentIncludingDisabled(_) end
+
+-- local biome = BiomeMapGetName( pos_x, pos_y )
+--	if ( string.find( biome, "holymountain" ) == nil ) and ( string.find( biome, "victoryroom" ) == nil ) then

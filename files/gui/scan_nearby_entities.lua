@@ -52,9 +52,9 @@ if scan_nearby_entities_loaded~=true then
 
         for _, _card_e_id in pairs(_nearby_card_pool) do
           local _card_parent_e_id = EntityGetParent(_card_e_id);
-          local _parent_is_full_inv = EntityGetName(_card_parent_e_id)=="inventory_full";
+          local _parent_is_player_inv = EntityGetName(_card_parent_e_id)=="inventory_full" or EntityGetName(_card_parent_e_id)=="inventory_quick";
           local _parent_is_wand = EntityHasTag(_card_parent_e_id, "wand");
-          if not _parent_is_full_inv then
+          if not _parent_is_player_inv then
             local _action_c_id = EntityGetFirstComponentIncludingDisabled(_card_e_id, "ItemActionComponent") or 0;
             local _action_id = ComponentGetValue(_action_c_id, "action_id");
             if does_profile_know_spell(_action_id) then

@@ -74,7 +74,7 @@ if spell_loadouts_loaded~=true then
       GuiZSetForNextWidget(gui, __layer(2));
       GuiBeginScrollContainer(gui, _nid(), x_base, y_base, _panel_width, _panel_height);
 
-      for _loadout_idx = 1, 10 do
+      for _loadout_idx = 1, #_saved_spell_loadouts do
         if _saved_spell_loadouts[_loadout_idx]~=nil and _saved_spell_loadouts[_loadout_idx].name~=nil then
           _loadout_data = _saved_spell_loadouts[_loadout_idx];
           GuiZSetForNextWidget(gui, __layer(2));
@@ -101,6 +101,8 @@ if spell_loadouts_loaded~=true then
               if does_profile_know_spell(_spell) then
                 purchase_spell(_spell);
                 GamePrintImportant("Purchased Spell", actions_by_id[_spell].name);
+              else
+                GamePrintImportant("Unresearched spell", "You don't know this spell.");
               end
             end
           end
@@ -111,7 +113,9 @@ if spell_loadouts_loaded~=true then
             local _x_loc = (((_loadout_spell_idx-1) % _unit_columns) * (_unit_width + _unit_margin)) + _unit_margin;
             _y_loc = (math.floor((_loadout_spell_idx-1) / _unit_columns) * (_unit_height + _unit_margin)) + _unit_margin + _y_offset;
             if actions_by_id[_loadout_spell_a_id]~=nil then
-              __render_spell_gridtile(_x_loc, _y_loc, 4, _panel_width, _panel_height, 3, get_spell_purchase_single(_loadout_spell_a_id), _nid );
+              local _spell_data = get_spell_purchase_single(_loadout_spell_a_id);
+              if does_profile_know_spell(_loadout_spell_a_id)==false then _spell_data.empty_slot=true; end
+              __render_spell_gridtile(_x_loc, _y_loc, 4, _panel_width, _panel_height, 3, _spell_data, _nid );
             else
               -- render blank tile?
             end
@@ -139,7 +143,7 @@ if spell_loadouts_loaded~=true then
           else
             _y_offset = _y_offset + 2;
             GuiZSetForNextWidget(gui, __layer(3));
-            _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 32, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 -/+");
+            _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 32, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 -/+()`[]!'");
             GuiGuideTip(gui, "Name your loadout", "Must be 1 ~ 32 chars");
             GuiZSetForNextWidget(gui, __layer(4));
             if GuiButton(gui, _nid(), 86, _y_offset, "Save", 1) or InputIsKeyJustDown(Key_RETURN) then

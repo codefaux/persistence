@@ -224,41 +224,42 @@ if gui_subfunc_loaded~=true then
     GuiZSetForNextWidget(gui, __layer(layer));
     GuiImage(gui, _nid(), x_base, y_base, _data.type_sprite, 1, 1.2, 1.2, 0); -- background type slot
 
-    GuiZSetForNextWidget(gui, __layer(layer+1));
-    GuiImage(gui, _nid(), x_base+4, y_base+4, _data.sprite, 1, 1, 1, 0); -- Icon
-    if select(3, GuiGetPreviousWidgetInfo(gui)) then
-      spell_tooltip_id = _data.a_id or "";
-      present_spell_tooltip();
-    end
+    if _data.empty_slot==nil or _data.empty_slot~=true then
+      GuiZSetForNextWidget(gui, __layer(layer+1));
+      GuiImage(gui, _nid(), x_base+4, y_base+4, _data.sprite, 1, 1, 1, 0); -- Icon
+      if select(3, GuiGetPreviousWidgetInfo(gui)) then
+        spell_tooltip_id = _data.a_id or "";
+        present_spell_tooltip();
+      end
 
-    if _data.max_uses ~= nil then
-      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-      GuiColorNextWidgetEnum(gui, COLORS.Black);
-      GuiZSetForNextWidget(gui, __layer(layer+2));
-      GuiText(gui, x_base + 12, y_base + 12, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+      if _data.max_uses ~= nil then
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+        GuiColorNextWidgetEnum(gui, COLORS.Black);
+        GuiZSetForNextWidget(gui, __layer(layer+2));
+        GuiText(gui, x_base + 12, y_base + 12, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
 
-      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-      GuiColorNextWidgetEnum(gui, COLORS.Black);
-      GuiZSetForNextWidget(gui, __layer(layer+2));
-      GuiText(gui, x_base + 11, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+        GuiColorNextWidgetEnum(gui, COLORS.Black);
+        GuiZSetForNextWidget(gui, __layer(layer+2));
+        GuiText(gui, x_base + 11, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
 
-      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-      GuiColorNextWidgetEnum(gui, COLORS.Black);
-      GuiZSetForNextWidget(gui, __layer(layer+2));
-      GuiText(gui, x_base + 12, y_base + 14, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+        GuiColorNextWidgetEnum(gui, COLORS.Black);
+        GuiZSetForNextWidget(gui, __layer(layer+2));
+        GuiText(gui, x_base + 12, y_base + 14, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
 
-      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-      GuiColorNextWidgetEnum(gui, COLORS.Black);
-      GuiZSetForNextWidget(gui, __layer(layer+2));
-      GuiText(gui, x_base + 13, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+        GuiColorNextWidgetEnum(gui, COLORS.Black);
+        GuiZSetForNextWidget(gui, __layer(layer+2));
+        GuiText(gui, x_base + 13, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
 
-      GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-      GuiColorNextWidgetEnum(gui, COLORS.White);
-      GuiZSetForNextWidget(gui, __layer(layer+3));
-      GuiText(gui, x_base + 12, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+        GuiColorNextWidgetEnum(gui, COLORS.White);
+        GuiZSetForNextWidget(gui, __layer(layer+3));
+        GuiText(gui, x_base + 12, y_base + 13, "(" .. _data.max_uses .. ")", small_text_scale); -- uses
+      end
     end
   end
-
 
 
   function __widget_toggle(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)

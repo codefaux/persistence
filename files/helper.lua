@@ -224,6 +224,8 @@ if persistence_helper_loaded~=true then
   end
 
   function purchase_spell(action_id)
+    if does_profile_know_spell(action_id)==false then return false; end
+
     local price = get_spell_purchase_price(action_id);
     if price==nil then return false; end
 

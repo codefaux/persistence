@@ -312,7 +312,7 @@ if modify_wand_loaded~=true then
           __render_spell_listentry(margin, spell_y_offset, margin, panel_width, panel_height, 3, get_spell_purchase_single(_sel_ac_name), _nid);
           GuiZSetForNextWidget(gui, __layer(3));
           GuiColorNextWidgetEnum(gui, COLORS.Dim);
-          GuiText(gui, margin, spell_y_offset + 10, string.format(" $ %1.0f", math.ceil(__get_ac_raw_cost(_ac_name) * mod_setting.buy_spell_price_multiplier)) );
+          GuiText(gui, margin, spell_y_offset + 10, string.format(" $ %1.0f", math.ceil(__get_ac_raw_cost(_sel_ac_name) * mod_setting.buy_spell_price_multiplier)) );
           GuiZSetForNextWidget(gui, __layer(3));
           GuiColorNextWidgetEnum(gui, COLORS.Yellow);
           if GuiButton(gui, _nid(), margin, spell_y_offset, __yesno(true)) then

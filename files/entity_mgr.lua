@@ -96,7 +96,7 @@ if GameGetFrameNum()%_frame_skip==0 then -- every five frames, for performance
           local _width = workshop_hitbox["aabb_max_x"] - workshop_hitbox["aabb_min_x"];
           local _height = workshop_hitbox["aabb_max_y"] - workshop_hitbox["aabb_min_y"];
           local _xloc, _yloc = EntityGetFirstHitboxCenter(workshop_e_id);
-          local new_workshop_id = EntityLoad(mod_dir .. "files/entity/workshop.xml", _xloc, _yloc);
+          local new_workshop_id = EntityLoad(mod_dir .. "files/entity/persistence_workshop.xml", _xloc, _yloc);
           EntityAddComponent2(new_workshop_id, "CollisionTriggerComponent", {width=_width, height=_height, radius=1000, destroy_this_entity_when_triggered=false, required_tag="player_unit", _enabled=true});
           EntityAddTag(workshop_e_id, "persistence_cloned");
           if mod_setting.reusable_holy_mountain~=true then

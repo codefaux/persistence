@@ -130,7 +130,7 @@ if spell_list_loaded~=true then
               -- table.remove(researchable_spell_entities, r_s_e_idx);
               return true;
             end
-            GuiGuideTip(gui, "Click to buy", "Spells might (safely) overlap in inventory");
+            GuiGuideTip(gui, "Click to research", "Researched spells are available for purchase");
           end -- Colorize Button
 
         elseif slot_data.recyclable~=nil and slot_data.recyclable==true then

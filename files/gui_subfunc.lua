@@ -16,6 +16,7 @@ if gui_subfunc_loaded~=true then
     Black = {0, 0, 0, 1}
   }
 
+---@diagnostic disable-next-line: deprecated
   table.unpack=table.unpack or unpack;
 
   ---@param value colors

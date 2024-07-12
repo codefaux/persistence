@@ -492,12 +492,12 @@ if actions_by_id__init_done~=true then
 
 	---return formatted action structure for parsing in gui routines
 	---@param in_action table|string action or action_id to be processed
-	---@return table
+	---@return table?
 	function get_action_struct(in_action)
 		if type(in_action)=="string" and actions_by_id[in_action]~=nil then in_action = actions_by_id[in_action]; end ---if passed action, switch to action_id string instead
 		if type(in_action)~="table" then return {}; end ---if still not string, exit
 
-		if actions_by_id[in_action]~=nil and actions_by_id[in_action].metadata~=nil and actions_by_id[in_action].c~=nil then return; end ---ensure action has not been simulated prior
+		if actions_by_id[in_action]~=nil and actions_by_id[in_action].metadata~=nil and actions_by_id[in_action].c~=nil then return nil; end ---ensure action has not been simulated prior
 
 		get_action_metadata(in_action.id);
 

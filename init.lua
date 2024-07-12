@@ -29,6 +29,7 @@ function ReadModSettings()
     always_choose_save_id =             ModSettingGet("persistence.always_choose_save_id"),
     enable_edit_wands_in_lobby =        ModSettingGet("persistence.enable_edit_wands_in_lobby"),
     reusable_holy_mountain =            ModSettingGet("persistence.reusable_holy_mountain"),
+    allow_scanner =                     ModSettingGet("persistence.allow_scanner"),
   };
 end; ReadModSettings(); -- do it now
 

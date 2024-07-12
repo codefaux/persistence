@@ -17,7 +17,7 @@ if scan_nearby_entities_loaded~=true then
     local _nearby_wand_new_type = 0;
 
     active_windows["scan_nearby_entities"] = function(_nid)
-      if GameGetFrameNum()%_frame_skip==0 then
+      if mod_setting.allow_scanner and GameGetFrameNum()%_frame_skip==0 then
         _nearby_spell_old = false;
         _nearby_spell_new = false;
         _nearby_wand_old = false;
@@ -33,10 +33,6 @@ if scan_nearby_entities_loaded~=true then
           local _parent_is_quick_inv = EntityGetName(_wand_parent_e_id)=="inventory_quick";
 
           if not _parent_is_quick_inv then
-            -- local _wand_card_pool = EntityGetAllChildren(_wand_e_id, "card_action");
-            -- for _, _wand_card_e_id in ipairs(_wand_card_pool) do
-            --   if _wand_card_e_id~=0 then table.insert(_nearby_card_pool, _wand_card_e_id); end
-            -- end
             local _result = get_wand_entity_research(_wand_e_id);
 
             if _result.b_spells==true then _nearby_wand_spell_new=true; end
@@ -81,7 +77,6 @@ if scan_nearby_entities_loaded~=true then
         end
       elseif _show_tip_frames>0 then
         _show_tip_frames = _show_tip_frames - 1;
-      -- else
       end
 
       if _show_tip_frames>0 then

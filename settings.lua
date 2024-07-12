@@ -235,6 +235,13 @@ mod_settings =
         scope = MOD_SETTING_SCOPE_RUNTIME,
       },
       {
+        id = "allow_scanner",
+        ui_name = "Entity Scanner",
+        ui_description = "The Entity Scanner watches for nearby spells and wands, and indicates wether or not they have been researched.",
+        value_default = true,
+        scope = MOD_SETTING_SCOPE_RUNTIME,
+      },
+      {
         hidden = true, -- Unused, keep for future need?
         id = "move_lobby_to_spawn",
         ui_name = "Move Lobby to Spawn location",

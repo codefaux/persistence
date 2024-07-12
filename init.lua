@@ -70,10 +70,10 @@ function teleport_back_to_lobby()
     end
 
     if lobby_x==0 and lobby_y==0 then
-      GamePrintImportant("Unable to find Persistence lobby", "-- must assume location. Use with caution, be ready to dig.");
+      GamePrintImportant("Unable to find Persistence lobby", "-- must assume location. USE WITH CAUTION, BE READY TO DIG.");
       GamePrint(" ");
       GamePrint(" ");
-      GamePrint("Unable to find Persistence lobby -- must assume location. Use with caution, be ready to dig.");
+      GamePrint("Unable to find Persistence lobby -- must assume location. USE WITH CAUTION, BE READY TO DIG.");
       GamePrint(" ");
       GamePrint(" ");
       GlobalsSetValue("first_spawn_x", "225");

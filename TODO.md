@@ -23,6 +23,7 @@
 -- PRUNE DATASTORE/HELPER/WAND_SPELL_HELPER (second wave done)
 -- Enable in parallel worlds -- look for controls_mouse and controls_wasd for new "lobby" area
 -- Flesh out and implement meta.lua rigorously
+-- Sort order drop-down
 
 
 -- ====================

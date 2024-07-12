@@ -1,4 +1,6 @@
-Add some Lite to your Rogue
+<Mod
+	name="Persistence"
+	description="Add some Lite to your Rogue
 
 Credit to the original author; https://steamcommunity.com/sharedfiles/filedetails/?id=2144130266
 The mod has undergone a near full rewrite, but without their work this wouldn't have existed.
@@ -63,3 +65,8 @@ A scanner runs while you explore the world. The scanner is a quality of life fea
 Many thanks to everyone using the mod, and doubly so to anyone who reports an issue, suggests a feature, or just says thanks.
 I'd like to thank people directly, but I don't want to violate anyone's privacy.
 If you've made a suggestion I've implemented or reported an issue and would like credit, contact me and tell me how to address you.
+"
+	tags="gameplay,game modes,tweaks"
+	dont_upload_folders=".vscode|.git"
+	dont_upload_files=".gitignore|README.md|files/debug.lua|persistence.pdn">
+</Mod>

@@ -41,6 +41,8 @@
     "mod_settings_get_version",
     "mod_settings_update",
     "mod_settings_gui",
-    "mod_settings_gui_count"
+    "mod_settings_gui_count",
+    "loaded_profile_id",
+    "data_store_everyframe"
   ]
 }

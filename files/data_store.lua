@@ -276,7 +276,7 @@ if persistence_data_store_loaded~=true then
   local function _increment_stash_money(profile_id, amount)
     local _stash = data_store[profile_id]["money"] or 0;
     local _target = _stash + amount;
-    if _stash < _target then return false; end
+    if _stash > _target then return false; end
 
     data_store[profile_id]["money"] = _target;
     write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
@@ -290,7 +290,7 @@ if persistence_data_store_loaded~=true then
   local function _decrement_stash_money(profile_id, amount)
     local _stash = data_store[profile_id]["money"] or 0;
     local _target = _stash - amount;
-    if _stash > _target then return false; end
+    if _stash < _target then return false; end
 
     data_store[profile_id]["money"] = _target;
     write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);

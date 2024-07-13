@@ -83,6 +83,7 @@ if persistence_helper_loaded~=true then
         capacity = 1,
         spells = {},
         always_cast_spells = {},
+        always_cast_count = 0;
       };
     else
       wand_data["shuffle"] = ComponentObjectGetValue2(comp, "gun_config", "shuffle_deck_when_empty") == 1 and true or false;
@@ -111,7 +112,7 @@ if persistence_helper_loaded~=true then
           end
         end
       end
-      wand_data["always_cast_count"] = #wand_data["always_cast_spells"];
+      wand_data["always_cast_count"] = #wand_data["always_cast_spells"] or 0;
       wand_data["capacity"] = wand_data["capacity"] - #wand_data["always_cast_spells"];
     end
     return wand_data;

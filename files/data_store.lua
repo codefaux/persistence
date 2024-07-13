@@ -313,9 +313,11 @@ if persistence_data_store_loaded~=true then
       return false;
     end
 
-    _increment_stash_money(profile_id, amount);
-    decrement_player_money(amount);
-    return true;
+    if _increment_stash_money(profile_id, amount) then
+      decrement_player_money(amount);
+      return true;
+    end
+    return false;
   end
 
   local function _transfer_money_stash_to_player(profile_id, amount)

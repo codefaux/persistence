@@ -603,7 +603,7 @@ if persistence_data_store_loaded~=true then
             _cost.always_cast_spells = _cost.always_cast_spells + math.ceil(__cost_func_always_cast_spell(_always_cast_id));
           end
         end
-        if #_in_wand_data["always_cast_spells"] > _wand_bounds.always_cast_count then
+        if (#_in_wand_data["always_cast_spells"] or 0) > (_wand_bounds.always_cast_count or 0) then
           _research.b_always_cast_count = true;
           _research.is_new = true;
           _cost.always_cast_count = math.ceil(__cost_func_always_cast_count(#_in_wand_data["always_cast_spells"]));

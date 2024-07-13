@@ -42,7 +42,8 @@ if teleport_loaded~=true then
   function present_teleport()
     if teleport_open==true then return; end
 
-    draw_teleport();
+    if mod_setting.enable_teleport_back_up then draw_teleport(); end;
+
     teleport_open = true;
   end
 

@@ -52,41 +52,50 @@ if persistence_gui_loaded~=true then
   print("persistence: GUI loaded.");
   persistence_gui_loaded=true;
 end
-
 -- every frame;
-_in_lobby = GlobalsGetValue("lobby_collider_triggered", "0")~="0";
-_in_workshop = GlobalsGetValue("workshop_collider_triggered", "0")~="0";
-_in_persistence_area = _in_lobby==true or _in_workshop==true;
+if selected_profile_id~=-1 then
+  _in_lobby = GlobalsGetValue("lobby_collider_triggered", "0")~="0";
+  _in_workshop = GlobalsGetValue("workshop_collider_triggered", "0")~="0";
+  _in_persistence_area = _in_lobby==true or _in_workshop==true;
 
-data_store_everyframe();
-if spell_tooltip_id=="" then close_spell_tooltip(); end
-spell_tooltip_id="";
+  data_store_everyframe();
+  if spell_tooltip_id=="" then close_spell_tooltip(); end
+  spell_tooltip_id="";
 
-if loaded_profile_id>0 then
-  ---profile loaded, proceed as normal
-  if profile_open then close_profile_select(); end
+  if loaded_profile_id>0 then
+    ---profile loaded, proceed as normal
+    if profile_open then close_profile_select(); end
 
-  if isLocked() then UnlockPlayer(); end
+    if isLocked() then UnlockPlayer(); end
 
-  present_scan_nearby_entities();
+    present_scan_nearby_entities();
 
-  if InputIsKeyJustDown(Key_TAB) or InputIsKeyJustDown(Key_ESCAPE) then
+    if InputIsKeyJustDown(Key_TAB) or InputIsKeyJustDown(Key_ESCAPE) then
+      close_open_windows();
+    end
+
+    if _in_workshop then
+      present_teleport();
+    else
+      close_teleport();
+    end
+    if _in_persistence_area then
+      present_persistence_menu();
+    else
+      close_persistence_menu();
+    end
+  elseif selected_profile_id==-1 then
+    if isLocked() then UnlockPlayer(); end
     close_open_windows();
-  end
-
-  if _in_workshop then
-    present_teleport();
+    close_profile_select();
   else
-    close_teleport();
-  end
-  if _in_persistence_area then
-    present_persistence_menu();
-  else
-    close_persistence_menu();
+    if not isLocked() then LockPlayer(); end
+    present_profile_select();
   end
 else
-  if not isLocked() then LockPlayer(); end
-  present_profile_select();
+  if isLocked() then UnlockPlayer(); end
+  close_open_windows();
+  close_profile_select();
 end
 
 window_open = profile_open or money_open or wands_open or inventory_spells_open or modify_wand_open;

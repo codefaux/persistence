@@ -26,16 +26,15 @@ function ReadModSettings()
     research_wand_price_multiplier =    ModSettingGet("persistence.research_wand_price_multiplier"),
     research_spell_price_multiplier =   ModSettingGet("persistence.research_spell_price_multiplier"),
     money_saved_on_death =              ModSettingGet("persistence.money_saved_on_death"),
-    always_choose_save_id =             ModSettingGet("persistence.always_choose_save_id"),
+    always_choose_save_id =    tonumber(ModSettingGet("persistence.always_choose_save_id")),
     enable_edit_wands_in_lobby =        ModSettingGet("persistence.enable_edit_wands_in_lobby"),
     reusable_holy_mountain =            ModSettingGet("persistence.reusable_holy_mountain"),
     allow_scanner =                     ModSettingGet("persistence.allow_scanner"),
   };
 end; ReadModSettings(); -- do it now
 
-
-local _paused = false;
 function OnPausedChanged(is_paused, _)
+  if mod_disabled then return; end
   if is_paused~=false then return; end
 
   ReadModSettings();
@@ -87,6 +86,7 @@ function teleport_back_to_lobby()
 end
 
 function OnModPreInit()
+  ReadModSettings();
   mod_disabled = mod_setting.always_choose_save_id==0;
 end
 
@@ -100,9 +100,8 @@ function OnWorldPostUpdate()
 
   if not actions_by_id_loaded then return; end
 
-  persistence_active = GlobalsGetValue("persistence_active", "false")=="true" or GameHasFlagRun("persistence_using_mod");
-
   if GameGetFrameNum()%_frame_skip==0 then
+    persistence_active = GlobalsGetValue("persistence_active", "false")=="true" or GameHasFlagRun("persistence_using_mod");
     local _e_id = EntityGetWithTag("player_unit")[1];
     if _e_id~=nil and _e_id~=0 then
       player_e_id = _e_id;
@@ -141,14 +140,13 @@ function OnPlayerSpawned(entity_id)
     x_loc, y_loc = EntityGetTransform(entity_id);
     GlobalsSetValue("first_spawn_x", tostring(x_loc));
     GlobalsSetValue("first_spawn_y", tostring(y_loc));
-    once=false;  ---set late so function repeats if not successful aka early exit
+    spawn_run_once=false;  ---set late so function repeats if not successful aka early exit
   end
 end
 
 
 function OnPlayerDied(entity_id)
-  if mod_disabled then return; end
-  -- if entity_id~=player_e_id then return; end
+  if mod_disabled or loaded_profile_id==0 then return; end
 
   local _money_to_save = math.floor(last_known_money * mod_setting.money_saved_on_death );
   local _mod_cap = mod_setting.cap_money_saved_on_death;

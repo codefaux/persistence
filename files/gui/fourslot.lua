@@ -8,6 +8,16 @@ if fourslot_loaded~=true then
     greentext = "See Auto-Load in Mod Options",
     redtext = "THERE IS NO UNDO",
     slot_title = "Profile slot %i:",
+    render_below_footer = function (x_base, y_base, width, height, fourslot_table, _nid)
+        GuiBeginAutoBox(gui);
+        GuiZSetForNextWidget(gui, __layer(5));
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+        if GuiButton(gui, _nid(), x_base + (width/2), y_base + height + 35, "Play without Persistence") then
+          selected_profile_id = -1;
+        end
+        GuiZSetForNextWidget(gui, __layer(4));
+        GuiEndAutoBoxNinePiece(gui, 10);
+      end,
     render_header_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
         local row1_y_offset = 4;
         local row2_y_offset = 14;
@@ -232,6 +242,7 @@ if fourslot_loaded~=true then
         end
       end
       __render_tricolor_footer(x_base, y_base, width, height, fourslot_table);
+      if fourslot_table.render_below_footer~=nil then fourslot_table.render_below_footer(x_base, y_base, width, height, fourslot_table, _nid); end
     end
   end
 

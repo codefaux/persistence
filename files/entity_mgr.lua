@@ -21,6 +21,8 @@ if entity_mgr_loaded==false then
 
   ---close out frame by disabling triggers
   function OnModEndFrame()
+    if mod_disabled then return; end
+
     local _lobby_frames = tonumber(GlobalsGetValue("lobby_collider_triggered", "0"));
     local _workshop_frames = tonumber(GlobalsGetValue("workshop_collider_triggered", "0"));
     local _game_frame = GameGetFrameNum();
@@ -39,7 +41,14 @@ if entity_mgr_loaded==false then
   end
 
   function LockPlayer()
-    if player_e_id==0 or not EntityGetIsAlive(player_e_id) then return; end
+    if player_e_id==0 or not EntityGetIsAlive(player_e_id) then
+      local _e_id = EntityGetWithTag("player_unit")[1];
+      if _e_id~=nil and _e_id~=0 then
+        player_e_id = _e_id;
+      else
+        return;
+      end
+    end
     EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "PlatformShooterPlayerComponent") or 0, false); --- Recenters camera
     EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "CharacterDataComponent") or 0, false);  --- Stops movement
     EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "DamageModelComponent") or 0, false); --- Prevents damage
@@ -49,7 +58,14 @@ if entity_mgr_loaded==false then
   end
 
   function UnlockPlayer()
-    if player_e_id==0 or not EntityGetIsAlive(player_e_id) then return; end
+    if player_e_id==0 or not EntityGetIsAlive(player_e_id) then
+      local _e_id = EntityGetWithTag("player_unit")[1];
+      if _e_id~=nil and _e_id~=0 then
+        player_e_id = _e_id;
+      else
+        return;
+      end
+    end
     EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "PlatformShooterPlayerComponent") or 0, true);
     EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "CharacterDataComponent") or 0, true);
     EntitySetComponentIsEnabled(player_e_id, EntityGetFirstComponentIncludingDisabled(player_e_id, "DamageModelComponent") or 0, true);
@@ -60,7 +76,10 @@ if entity_mgr_loaded==false then
 
   function isLocked()
     if player_e_id==0 or not EntityGetIsAlive(player_e_id) then return false; end
-    return not (ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "ControlsComponent") or 0) and ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "Inventory2Component") or 0) and ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent") or 0));
+    return not (ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "PlatformShooterPlayerComponent") or 0) and
+                ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "CharacterDataComponent") or 0) and
+                ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "DamageModelComponent") or 0) and
+                ComponentGetIsEnabled(EntityGetFirstComponentIncludingDisabled(player_e_id, "InventoryGuiComponent") or 0) );
   end
 
   ---end function declarations, run code here;

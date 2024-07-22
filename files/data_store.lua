@@ -562,7 +562,7 @@ if persistence_data_store_loaded~=true then
         _cost.mana_max = math.ceil(__cost_func_mana_max(_in_wand_data["mana_max"]));
       end
       if _in_wand_data["mana_charge_speed"] > _wand_bounds.mana_charge_speed[2] then
-        _research.b_mana_charge_speed = true;
+        _research.b_mana_charge_speed_max = true;
         _research.is_new = true;
         _cost.mana_charge_speed = math.ceil(__cost_func_mana_charge_speed(_in_wand_data["mana_charge_speed"]));
       end

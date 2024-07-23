@@ -655,7 +655,7 @@ if persistence_data_store_loaded~=true then
     if _research.b_recharge_time_min then               _set_recharge_time_min(profile_id, _wand_data["recharge_time"]);                 end
     if _research.b_recharge_time_max then               _set_recharge_time_max(profile_id, _wand_data["recharge_time"]);                 end
     if _research.b_mana_max then                        _set_mana_max(profile_id, _wand_data["mana_max"]);                               end
-    if _research.b_mana_charge_speed_max then           _set_mana_charge_speed(profile_id, _wand_data["mana_charge_speed"]);             end
+    if _research.b_mana_charge_speed then               _set_mana_charge_speed(profile_id, _wand_data["mana_charge_speed"]);             end
     if _research.b_capacity then                        _set_capacity(profile_id, _wand_data["capacity"]);                               end
     if _research.b_spread_min then                      _set_spread_min(profile_id, _wand_data["spread"]);                               end
     if _research.b_spread_max then                      _set_spread_max(profile_id, _wand_data["spread"]);                               end

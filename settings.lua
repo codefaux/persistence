@@ -297,6 +297,13 @@ mod_settings =
         value_default = false,
         scope = MOD_SETTING_SCOPE_NEW_GAME,
       },
+      {
+        id = "global_persistence",
+        ui_name = "Always allow Persistence menu access",
+        ui_description = "Because why not?",
+        value_default = false,
+        scope = MOD_SETTING_SCOPE_NEW_GAME,
+      },
     },
   },
 }

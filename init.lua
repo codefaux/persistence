@@ -30,7 +30,8 @@ function ReadModSettings()
     enable_edit_wands_in_lobby =        ModSettingGet("persistence.enable_edit_wands_in_lobby"),
     reusable_holy_mountain =            ModSettingGet("persistence.reusable_holy_mountain"),
     allow_scanner =                     ModSettingGet("persistence.allow_scanner"),
-    enable_teleport_back_up =           ModSettingGet("persistence.enable_teleport_back_up")
+    enable_teleport_back_up =           ModSettingGet("persistence.enable_teleport_back_up"),
+    global_persistence =                ModSettingGet("persistence.global_persistence")
   };
 end; ReadModSettings(); -- do it now
 

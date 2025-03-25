@@ -57,6 +57,7 @@ if selected_profile_id~=-1 then
   _in_lobby = GlobalsGetValue("lobby_collider_triggered", "0")~="0";
   _in_workshop = GlobalsGetValue("workshop_collider_triggered", "0")~="0";
   _in_persistence_area = _in_lobby==true or _in_workshop==true;
+  _persistence_available = _in_persistence_area or mod_setting.global_persistence==true;
 
   data_store_everyframe();
   if spell_tooltip_id=="" then close_spell_tooltip(); end
@@ -79,7 +80,7 @@ if selected_profile_id~=-1 then
     else
       close_teleport();
     end
-    if _in_persistence_area then
+    if _persistence_available then
       present_persistence_menu();
     else
       close_persistence_menu();

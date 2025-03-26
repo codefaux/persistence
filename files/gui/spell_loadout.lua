@@ -154,7 +154,7 @@ if spell_loadouts_loaded~=true then
                 _reload_data = true;
               end
             end
-            GuiGuideTip(gui, "Save loadout", "HOTKEY: Return");
+            GuiGuideTip(gui, "Save loadout. UNRESEARCHED SPELLS WILL BE STORED BUT UNPURCHASABLE.", "HOTKEY: Return");
             GuiZSetForNextWidget(gui, __layer(4));
             GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
             if GuiButton(gui, _nid(), _panel_width - _unit_margin, _y_offset, "Cancel", 1) then

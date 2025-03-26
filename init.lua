@@ -151,7 +151,7 @@ end
 function OnPlayerDied(entity_id)
   if mod_disabled or loaded_profile_id==0 then return; end
 
-  local _money_to_save = math.floor(last_known_money * mod_setting.money_saved_on_death );
+  local _money_to_save = math.floor(last_known_money * (mod_setting.money_saved_on_death/100) );
   local _mod_cap = mod_setting.cap_money_saved_on_death;
   local _pain = 0;
   if _mod_cap>0 then

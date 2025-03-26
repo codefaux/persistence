@@ -119,8 +119,8 @@ if spell_list_loaded~=true then
           local _price = math.ceil(slot_data.price * mod_setting.research_spell_price_multiplier);
 
           GuiColorNextWidgetBool(gui, last_known_money >= _price);
-            GuiZSetForNextWidget(gui, __layer(layer));
-            if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
+          GuiZSetForNextWidget(gui, __layer(layer));
+          if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
             if (last_known_money >= _price) then
               research_spell_entity(slot_data.e_id);
               GamePrintImportant("Spell Researched", slot_data.name);
@@ -229,8 +229,8 @@ if spell_list_loaded~=true then
         local _price = math.ceil(slot_data.price * mod_setting.buy_spell_price_multiplier);
 
         GuiColorNextWidgetBool(gui, last_known_money >= _price);
-          GuiZSetForNextWidget(gui, __layer(layer));
-          if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
+        GuiZSetForNextWidget(gui, __layer(layer));
+        if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
           if (last_known_money > _price) then
             purchase_spell(slot_data.a_id);
             GamePrintImportant("Spell Purchased", slot_data.name);

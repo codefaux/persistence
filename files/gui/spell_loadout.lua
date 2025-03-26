@@ -147,7 +147,7 @@ if spell_loadouts_loaded~=true then
             _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 32, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 -/+()`[]!'");
             GuiGuideTip(gui, "Name your loadout", "Must be 1 ~ 32 chars");
             GuiZSetForNextWidget(gui, __layer(4));
-            if GuiButton(gui, _nid(), 86, _y_offset, "Save", 1) or InputIsKeyJustDown(Key_RETURN) then
+            if GuiButton(gui, _nid(), 87, _y_offset, "Save", 1) or InputIsKeyJustDown(Key_RETURN) then
               if #_name_temp>0 then
                 save_spell_loadout(_loadout_idx, {name = _name_temp, spells = _new_loadout_spells});
                 _list_confirm = 0;

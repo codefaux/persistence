@@ -179,7 +179,6 @@ if modify_wand_loaded~=true then
       local widget_width = width - panel_width - (margin * 6);
 
       modify_wand_table.slot_data.cost = {};
-      GuiOptionsAddForNextWidget(gui, GUI_OPTION.GamepadDefaultWidget);
       for ii = 1, modify_wand_table.datum_translation._index[0] do
         local _member = modify_wand_table.datum_translation._index[ii];
         local _value = modify_wand_table.slot_data.wand[_member];
@@ -369,6 +368,7 @@ if modify_wand_loaded~=true then
       else
         GuiColorNextWidgetEnum(gui, COLORS.Yellow);
       end
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.GamepadDefaultWidget);
       if GuiButton(gui, _nid(), icon_x_base, icon_y_base, "[WAND TYPE]", small_text_scale) then
         _window_display = _window_display~=1 and 1 or 0;
         -- GamePrint("Pick wand type");

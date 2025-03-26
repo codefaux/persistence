@@ -179,6 +179,7 @@ if modify_wand_loaded~=true then
       local widget_width = width - panel_width - (margin * 6);
 
       modify_wand_table.slot_data.cost = {};
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.GamepadDefaultWidget);
       for ii = 1, modify_wand_table.datum_translation._index[0] do
         local _member = modify_wand_table.datum_translation._index[ii];
         local _value = modify_wand_table.slot_data.wand[_member];
@@ -240,8 +241,10 @@ if modify_wand_loaded~=true then
             local frame_offset_y = -11;
 
             GuiZSetForNextWidget(gui, __layer(3))
+            GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
             GuiImage(gui, _nid(), _type_x_offset, y_offset + _type_y_offset, gui_icon, 1, 1.5, 1.5, math.rad(-90)); -- radians are annoying
             GuiZSetForNextWidget(gui, __layer(4))
+            GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
             GuiImage(gui, _nid(), _type_x_offset + frame_offset_x + wand_offset_x, widget_y_pos + _type_y_offset + frame_offset_y - wand_offset_y, _type_data.file, 1, 1, 1, math.rad(-45)); -- radians are annoying
           end
         end
@@ -293,6 +296,7 @@ if modify_wand_loaded~=true then
               local _mark_offset_x = 10;
               local _mark_offset_y = 8;
               GuiZSetForNextWidget(gui, __layer(3));
+              GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
               GuiImage(gui, _nid(), _filter_x_offset + _mark_offset_x, _mark_offset_y, "data/ui_gfx/damage_indicators/explosion.png", 0.5, 1, 1, math.rad(45)); -- radians are annoying
             end
           end

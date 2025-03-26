@@ -309,7 +309,7 @@ if gui_subfunc_loaded~=true then
     local _x_min, _y_min = select(8, GuiGetPreviousWidgetInfo(gui));
 
     GuiZSetForNextWidget(gui, __layer(layer));  ---- SLIDER
-    local _ret = math.floor(GuiSlider(gui, _nid(), x_base + margin, y_base + 10, "", slot_data.wand[slot_data.member], _bounds_min, _bounds_max, 0, 1, " ", panel_width ) + 0.5);
+    local _ret = GuiSlider(gui, _nid(), x_base + margin, y_base + 10, "", slot_data.wand[slot_data.member], _bounds_min, _bounds_max, 0, 1, " ", panel_width );
     GuiGuideTip(gui, "Scroll Mouse Wheel to quickly adjust", "Hold Shift for 5x\nHold Ctrl for 10x");
 
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
@@ -341,7 +341,7 @@ if gui_subfunc_loaded~=true then
       _ret =  math.min(math.max( _ret + (_factor * _mouse_scroll), _bounds_min), _bounds_max);
     end
 
-    return math.floor(_ret);
+    return _ret;
   end
 
   print("=========================");

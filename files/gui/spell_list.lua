@@ -309,7 +309,8 @@ if spell_list_loaded~=true then
           if _type_nr==_active_filter then
             local _mark_offset_x = 10;
             local _mark_offset_y = 8;
-            GuiZSetForNextWidget(gui, __layer(2));
+            GuiZSetForNextWidget(gui, __layer(3));
+            GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
             GuiImage(gui, _nid(), _filter_x_offset + _mark_offset_x, _mark_offset_y, "data/ui_gfx/damage_indicators/explosion.png", 0.5, 1, 1, math.rad(45)); -- radians are annoying
           end
         end
@@ -318,6 +319,7 @@ if spell_list_loaded~=true then
       GuiZSet(gui, __layer(0)); ---gui frame
       GuiBeginScrollContainer(gui, _nid(), x_base, y_base, width, height);
       if spell_list_table.slots_data._index.count > 0 then  ---Main iteration loop for spell list UI
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.GamepadDefaultWidget);
         for _inv_spell_idx, _inv_spell_members in pairs(spell_list_table.slots_data) do
           if _inv_spell_idx~="_index" then
             local show_curr_spell = true;
@@ -328,10 +330,10 @@ if spell_list_loaded~=true then
 
             if show_curr_spell then
               _inv_spell_members.idx = _inv_spell_idx;
-              (spell_list_table.datum_render_func or _gui_nop)(x_offset, y_offset, margin, panel_width, panel_height, 2, _inv_spell_members, _nid);
               if (spell_list_table.action_render_func or _gui_nop)(x_offset, y_offset, margin, panel_width, panel_height, 2, _inv_spell_members, _nid) then
                 _reload_data = true;
               end
+              (spell_list_table.datum_render_func or _gui_nop)(x_offset, y_offset, margin, panel_width, panel_height, 2, _inv_spell_members, _nid);
               y_offset = y_offset + entry_height;
             end
           end

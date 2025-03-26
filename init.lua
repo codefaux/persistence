@@ -16,6 +16,7 @@ mod_setting = {};
 
 function ReadModSettings()
   mod_setting = {
+    gamepad_menu_trigger =              ModSettingGet("persistence.gamepad_menu_trigger"),
     show_guide_tips =                   ModSettingGet("persistence.show_guide_tips"),
     start_with_money =                  ModSettingGet("persistence.start_with_money"), --- see profile load
     holy_mountain_money =               ModSettingGet("persistence.holy_mountain_money"), --- see entity_mgr

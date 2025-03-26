@@ -19,6 +19,7 @@ if persistence_menu_loaded~=true then
 
   local function draw_persistence_menu()
     persistence_expanded = false;
+    local _gamepad_page = 0;
 
     active_windows["persistence"] = function (_nid)
       local _hotkey = 0;
@@ -30,6 +31,30 @@ if persistence_menu_loaded~=true then
           persistence_expanded=false;
         else
           persistence_expanded=true;
+        end
+      end
+
+      if persistence_expanded then
+        -- TRYING TO HANDLE GAMEPAD INPUT HERE
+        if InputIsJoystickButtonJustDown(0, JOY_BUTTON_LEFT_SHOULDER) then
+          _gamepad_page = (_gamepad_page - 1) % 3;
+          _hotkey = _gamepad_page + 1;
+        end
+
+        if InputIsJoystickButtonJustDown(0, JOY_BUTTON_RIGHT_SHOULDER) then
+          _gamepad_page = (_gamepad_page + 1) % 3;
+          _hotkey = _gamepad_page + 1;
+        end
+      end
+
+      if InputIsJoystickButtonJustDown(0, mod_setting.gamepad_menu_trigger) and not _keywait then
+        if persistence_expanded==false then
+          _keywait = true;
+          _toggle_state();
+          _hotkey = 1;
+          -- _hotkey = _gamepad_page + 1;
+        else
+          _toggle_state();
         end
       end
 
@@ -45,7 +70,7 @@ if persistence_menu_loaded~=true then
         end
       end
 
-      if _keywait and not InputIsKeyJustDown(Key_GRAVE) then
+      if _keywait and (not InputIsKeyJustDown(Key_GRAVE) and not InputIsJoystickButtonJustDown(0, mod_setting.gamepad_menu_trigger) ) then
         _keywait = false;
       end
 

@@ -46,7 +46,7 @@ end
 
 mod_id = "persistence" -- This should match the name of your mod's folder.
 
-mod_settings_version = 1; -- This is a magic global that can be used to migrate settings to new mod versions. call mod_settings_get_version() before mod_settings_update() to get the old value. 
+mod_settings_version = 2; -- This is a magic global that can be used to migrate settings to new mod versions. call mod_settings_get_version() before mod_settings_update() to get the old value. 
 mod_settings =
 {
   {
@@ -110,12 +110,10 @@ mod_settings =
         id = "money_saved_on_death",
         ui_name = "Money Saved on Death",
         ui_description = "How much money persists after you do not",
-        ui_fn = mod_setting_number_multiple,
-        round_to = 0.01,
-        value_default = 0.25,
+        ui_fn = mod_setting_integer,
+        value_default = 25,
         value_min = 0,
-        value_max = 1,
-        value_display_multiplier = 100,
+        value_max = 100,
         value_display_formatting = " $0 %",
         scope = MOD_SETTING_SCOPE_NEW_GAME,
       },
@@ -140,6 +138,16 @@ mod_settings =
     ui_description = "Run defaults",
     settings = {
       {
+        id = "gamepad_menu_trigger",
+        ui_name = "Gamepad Menu Trigger",
+        ui_description = "Which key the mod listens to in order to trigger the Persistence menu",
+        value_default = "25",
+        values = { {"23","A"}, {"24", "B"}, {"25", "X"}, {"26", "Y"}, {"11", "DPAD_UP"}, {"12", "DPAD_DOWN"}, {"13", "DPAD_LEFT"}, {"14", "DPAD_RIGHT"} },
+        -- value_default = JOY_BUTTON_X,
+        -- values = { {JOY_BUTTON_A,"A"}, {JOY_BUTTON_B , "B"}, {JOY_BUTTON_X , "X"}, {JOY_BUTTON_Y , "Y"}, {JOY_BUTTON_DPAD_UP , "DPAD_UP"}, {JOY_BUTTON_DPAD_DOWN , "DPAD_DOWN"}, {JOY_BUTTON_DPAD_LEFT , "DPAD_LEFT"}, {JOY_BUTTON_DPAD_RIGHT , "DPAD_RIGHT"} },
+        scope = MOD_SETTING_SCOPE_RUNTIME,
+      },
+      {
         id = "always_choose_save_id",
         ui_name = "Load-Save behavior",
         ui_description = "Manually or automatically load a save (or not)",
@@ -160,7 +168,7 @@ mod_settings =
         ui_name = "Start with money",
         ui_description = "Money to withdraw from your Stash at run start",
         ui_fn = mod_setting_number_multiple,
-        round_to = 100,
+        round_to = 25,
         value_default = 0,
         value_min = 0,
         value_max = 5000,
@@ -173,7 +181,7 @@ mod_settings =
         ui_name = "Holy Mountain Paycheck",
         ui_description = "Money to withdraw from your Stash at each Holy Mountain",
         ui_fn = mod_setting_number_multiple,
-        round_to = 100,
+        round_to = 25,
         value_default = 0,
         value_min = 0,
         value_max = 5000,
@@ -316,6 +324,11 @@ mod_settings =
 --    - at the end of an update when mod settings have been changed via ModSettingsSetNextValue() and the game is unpaused (init_scope will be MOD_SETTINGS_SCOPE_RUNTIME)
 function ModSettingsUpdate(init_scope)
   local old_version = mod_settings_get_version(mod_id) -- This can be used to migrate some settings between mod versions.
+  if old_version==1 then
+    -- need to update money_saved_on_death * 100
+    money_saved_on_death = ModSettingGet("persistence.money_saved_on_death");
+    ModSettingSet("persistence.money_saved_on_death", money_saved_on_death * 100, money_saved_on_death==25);
+  end
   mod_settings_update(mod_id, mod_settings, init_scope)
 end
 

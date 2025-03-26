@@ -203,6 +203,7 @@ if fourslot_loaded~=true then
 
         local header_x_pos = panel_x_offset;
         local header_y_pos = panel_y_offset;
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.GamepadDefaultWidget);
         if (fourslot_table.render_header_func or _gui_nop)(header_x_pos, header_y_pos, margin, panel_sub_width, panel_sub_height, 2, fourslot_table.slots_data[_panel_id], _nid) then
           _reload_data = true;
         end

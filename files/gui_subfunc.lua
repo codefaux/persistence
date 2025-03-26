@@ -76,6 +76,7 @@ if gui_subfunc_loaded~=true then
 
     local gui_icon = (slot_data.research~=nil and slot_data.research.is_new) and "data/ui_gfx/inventory/full_inventory_box_highlight.png" or "data/ui_gfx/inventory/full_inventory_box.png";
     GuiZSetForNextWidget(gui, __layer(layer+1));
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
     GuiImage(gui, _nid(), x_base, y_base, gui_icon, 1, 1.75, 1.75, 0);
   end
 
@@ -83,6 +84,7 @@ if gui_subfunc_loaded~=true then
   function __render_wand_sprite(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
     local wand_offset_x, wand_offset_y = get_wand_rotated_offset(0, 0, -45);
     GuiZSetForNextWidget(gui, __layer(layer+1));
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
     GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 6, y_base + (-wand_offset_y * 1.333) + 18, slot_data.value, 1, 1.333, 1.333, math.rad(-45));
 
     if slot_data.research~=nil and slot_data.research.b_wand_types then

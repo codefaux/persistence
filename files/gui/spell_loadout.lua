@@ -143,6 +143,7 @@ if spell_loadouts_loaded~=true then
           else
             _y_offset = _y_offset + 2;
             GuiZSetForNextWidget(gui, __layer(3));
+            _name_temp = "Loadout " .. _loadout_idx;
             _name_temp = GuiTextInput(gui, _nid(), _unit_margin, _y_offset, _name_temp, 80, 32, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789 -/+()`[]!'");
             GuiGuideTip(gui, "Name your loadout", "Must be 1 ~ 32 chars");
             GuiZSetForNextWidget(gui, __layer(4));

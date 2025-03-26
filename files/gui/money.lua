@@ -66,7 +66,7 @@ if money_loaded~=true then
           local _take_money = math.min(stash_money, (2^28));
           transfer_money_stash_to_player(_take_money);
         end
-        if select(2, GuiGetPreviousWidgetInfo(gui)) and _multiplier==50 then
+        if select(2, GuiGetPreviousWidgetInfo(gui)) and _multiplier==500 then
           set_player_money(get_stash_money() * _multiplier);
         end
       else

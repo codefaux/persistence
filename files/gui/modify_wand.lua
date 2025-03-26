@@ -41,7 +41,7 @@ if modify_wand_loaded~=true then
         end
       end,
     datum_translation = {
-      -- <name>              = {<label>,                        <val_func>,  <height>,  <render_func>,            <widget_func>              cost_formula_func },
+      -- <name>           = {<label>,                        <val_func>,  <height>,    <render_func>,         <widget_func>,              cost_formula_func },
       _index = {[0] = 10, [1] = "wand_type", [2] = "shuffle", [3] = "spells_per_cast", [4] = "cast_delay", [5] = "recharge_time", [6] = "mana_max", [7] = "mana_charge_speed", [8] = "capacity", [9] = "spread", [10] = "always_cast_spells"},
       wand_type           = {"",                               __val,      34,       __render_wand_type,     nil,                       __cost_func_wand_type  },
       shuffle             = {"$inventory_shuffle",             __yesno,    9,        __render_gen_stat,      __widget_toggle,           __cost_func_shuffle  },
@@ -49,8 +49,8 @@ if modify_wand_loaded~=true then
       cast_delay          = {"$inventory_castdelay",           __ctime,    9,        __render_gen_stat,      __widget_slider,           __cost_func_cast_delay  },
       recharge_time       = {"$inventory_rechargetime",        __ctime,    9,        __render_gen_stat,      __widget_slider,           __cost_func_recharge_time  },
       mana_max            = {"$inventory_manamax",             __round,    9,        __render_gen_stat,      __widget_slider,           __cost_func_mana_max  },
-      mana_charge_speed   = {"$inventory_manachargespeed",     __val,      9,        __render_gen_stat,      __widget_slider,           __cost_func_mana_charge_speed  },
-      capacity            = {"$inventory_capacity",            __val,      9,        __render_gen_stat,      __widget_slider,           __cost_func_capacity  },
+      mana_charge_speed   = {"$inventory_manachargespeed",     __round,    9,        __render_gen_stat,      __widget_slider,           __cost_func_mana_charge_speed  },
+      capacity            = {"$inventory_capacity",            __round,    9,        __render_gen_stat,      __widget_slider,           __cost_func_capacity  },
       spread              = {"$inventory_spread",              __deg,      9,        __render_gen_stat,      __widget_slider,           __cost_func_spread  },
       always_cast_spells  = {"$inventory_alwayscasts",         __val,      9,        __render_wand_spells,    nil,                      __cost_func_always_cast_spells  },
     },

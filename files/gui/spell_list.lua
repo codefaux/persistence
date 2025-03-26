@@ -117,21 +117,17 @@ if spell_list_loaded~=true then
     action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
         if slot_data.researchable~=nil and slot_data.researchable==true then
           local _price = math.ceil(slot_data.price * mod_setting.research_spell_price_multiplier);
-          if last_known_money < _price then
-            GuiColorNextWidgetEnum(gui, COLORS.Red);
-            GuiZSetForNextWidget(gui, __layer(layer));
-            GuiText(gui, x_base, 3 + y_base, string.format(" $ %1.0f", _price))
-          else
-            GuiColorNextWidgetEnum(gui, COLORS.Green);
+
+          GuiColorNextWidgetBool(gui, last_known_money >= _price);
             GuiZSetForNextWidget(gui, __layer(layer));
             if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
+            if (last_known_money >= _price) then
               research_spell_entity(slot_data.e_id);
               GamePrintImportant("Spell Researched", slot_data.name);
               -- table.remove(researchable_spell_entities, r_s_e_idx);
               return true;
             end
-            GuiGuideTip(gui, "Click to research", "Researched spells are available for purchase");
-          end -- Colorize Button
+          end
 
         elseif slot_data.recyclable~=nil and slot_data.recyclable==true then
           if spell_list_confirmation==slot_data.e_id then
@@ -231,19 +227,16 @@ if spell_list_loaded~=true then
     datum_render_func = __render_spell_listentry,
     action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
         local _price = math.ceil(slot_data.price * mod_setting.buy_spell_price_multiplier);
-        if last_known_money < _price then
-          GuiColorNextWidgetEnum(gui, COLORS.Red);
-          GuiZSetForNextWidget(gui, __layer(layer));
-          GuiText(gui, x_base, 3 + y_base, string.format(" $ %1.0f", _price));
-        else
-          GuiColorNextWidgetEnum(gui, COLORS.Green);
+
+        GuiColorNextWidgetBool(gui, last_known_money >= _price);
           GuiZSetForNextWidget(gui, __layer(layer));
           if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
+          if (last_known_money > _price) then
             purchase_spell(slot_data.a_id);
             GamePrintImportant("Spell Purchased", slot_data.name);
             return true;
           end
-        end -- Colorize Button
+        end
       end
   }
 

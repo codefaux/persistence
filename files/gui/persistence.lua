@@ -133,12 +133,12 @@ if persistence_menu_loaded~=true then
         GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
         if GuiButton(gui, _nid(), x_base + x_offset, y_base - 40, "wands", 1) or _hotkey==1 then
           if wands_open==false then
-            present_money();
-            present_wands();
-            right_panel_picker(1);
             close_purchase_spells();
             close_inventory_spells();
             close_modify_wand();
+            right_panel_picker(1);
+            present_money();
+            present_wands();
           else
             _toggle_state();
           end
@@ -156,12 +156,12 @@ if persistence_menu_loaded~=true then
         local _btn2 = GuiButton(gui, _nid(), x_base + x_offset, y_base - 19, "purchase", 1) or _hotkey==2
         if _btn1==true or _btn2==true then
           if purchase_spells_open==false then
-            present_money();
-            present_purchase_spells();
+            close_modify_wand();
             close_wands();
             close_inventory_spells();
             right_panel_picker(2);
-            close_modify_wand();
+            present_money();
+            present_purchase_spells();
           else
             _toggle_state();
           end
@@ -173,12 +173,12 @@ if persistence_menu_loaded~=true then
         GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
         if GuiButton(gui, _nid(), x_base + x_offset, y_base - 11, "research", 1) or _hotkey==3 then
           if inventory_spells_open==false then
-            present_money();
-            present_inventory_spells();
-            right_panel_picker(2);
             close_wands();
             close_purchase_spells();
             close_modify_wand();
+            right_panel_picker(2);
+            present_money();
+            present_inventory_spells();
           else
             _toggle_state();
           end

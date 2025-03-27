@@ -94,7 +94,7 @@ end
 
 -- every frame
 local _frame_skip=10;
-if GameGetFrameNum()%_frame_skip==0 then -- every five frames, for performance
+if GameGetFrameNum()%_frame_skip==0 then -- every ten frames, for performance
   if lobby_e_id==0 and player_e_id~=0 then
     lobby_e_id=EntityGetWithName("persistence_lobby");
     if lobby_e_id==0 then

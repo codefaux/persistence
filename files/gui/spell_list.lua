@@ -117,21 +117,17 @@ if spell_list_loaded~=true then
     action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
         if slot_data.researchable~=nil and slot_data.researchable==true then
           local _price = math.ceil(slot_data.price * mod_setting.research_spell_price_multiplier);
-          if last_known_money < _price then
-            GuiColorNextWidgetEnum(gui, COLORS.Red);
-            GuiZSetForNextWidget(gui, __layer(layer));
-            GuiText(gui, x_base, 3 + y_base, string.format(" $ %1.0f", _price))
-          else
-            GuiColorNextWidgetEnum(gui, COLORS.Green);
-            GuiZSetForNextWidget(gui, __layer(layer));
-            if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
+
+          GuiColorNextWidgetBool(gui, last_known_money >= _price);
+          GuiZSetForNextWidget(gui, __layer(layer));
+          if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
+            if (last_known_money >= _price) then
               research_spell_entity(slot_data.e_id);
               GamePrintImportant("Spell Researched", slot_data.name);
               -- table.remove(researchable_spell_entities, r_s_e_idx);
               return true;
             end
-            GuiGuideTip(gui, "Click to research", "Researched spells are available for purchase");
-          end -- Colorize Button
+          end
 
         elseif slot_data.recyclable~=nil and slot_data.recyclable==true then
           if spell_list_confirmation==slot_data.e_id then
@@ -231,19 +227,16 @@ if spell_list_loaded~=true then
     datum_render_func = __render_spell_listentry,
     action_render_func = function (x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
         local _price = math.ceil(slot_data.price * mod_setting.buy_spell_price_multiplier);
-        if last_known_money < _price then
-          GuiColorNextWidgetEnum(gui, COLORS.Red);
-          GuiZSetForNextWidget(gui, __layer(layer));
-          GuiText(gui, x_base, 3 + y_base, string.format(" $ %1.0f", _price));
-        else
-          GuiColorNextWidgetEnum(gui, COLORS.Green);
-          GuiZSetForNextWidget(gui, __layer(layer));
-          if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
+
+        GuiColorNextWidgetBool(gui, last_known_money >= _price);
+        GuiZSetForNextWidget(gui, __layer(layer));
+        if GuiButton(gui, _nid(), x_base, 3 + y_base, string.format(" $ %1.0f", _price)) then
+          if (last_known_money > _price) then
             purchase_spell(slot_data.a_id);
             GamePrintImportant("Spell Purchased", slot_data.name);
             return true;
           end
-        end -- Colorize Button
+        end
       end
   }
 
@@ -316,7 +309,8 @@ if spell_list_loaded~=true then
           if _type_nr==_active_filter then
             local _mark_offset_x = 10;
             local _mark_offset_y = 8;
-            GuiZSetForNextWidget(gui, __layer(2));
+            GuiZSetForNextWidget(gui, __layer(3));
+            GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
             GuiImage(gui, _nid(), _filter_x_offset + _mark_offset_x, _mark_offset_y, "data/ui_gfx/damage_indicators/explosion.png", 0.5, 1, 1, math.rad(45)); -- radians are annoying
           end
         end
@@ -325,6 +319,7 @@ if spell_list_loaded~=true then
       GuiZSet(gui, __layer(0)); ---gui frame
       GuiBeginScrollContainer(gui, _nid(), x_base, y_base, width, height);
       if spell_list_table.slots_data._index.count > 0 then  ---Main iteration loop for spell list UI
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.GamepadDefaultWidget);
         for _inv_spell_idx, _inv_spell_members in pairs(spell_list_table.slots_data) do
           if _inv_spell_idx~="_index" then
             local show_curr_spell = true;
@@ -335,10 +330,10 @@ if spell_list_loaded~=true then
 
             if show_curr_spell then
               _inv_spell_members.idx = _inv_spell_idx;
-              (spell_list_table.datum_render_func or _gui_nop)(x_offset, y_offset, margin, panel_width, panel_height, 2, _inv_spell_members, _nid);
               if (spell_list_table.action_render_func or _gui_nop)(x_offset, y_offset, margin, panel_width, panel_height, 2, _inv_spell_members, _nid) then
                 _reload_data = true;
               end
+              (spell_list_table.datum_render_func or _gui_nop)(x_offset, y_offset, margin, panel_width, panel_height, 2, _inv_spell_members, _nid);
               y_offset = y_offset + entry_height;
             end
           end

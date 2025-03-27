@@ -16,6 +16,7 @@ mod_setting = {};
 
 function ReadModSettings()
   mod_setting = {
+    gamepad_menu_trigger =              ModSettingGet("persistence.gamepad_menu_trigger"),
     show_guide_tips =                   ModSettingGet("persistence.show_guide_tips"),
     start_with_money =                  ModSettingGet("persistence.start_with_money"), --- see profile load
     holy_mountain_money =               ModSettingGet("persistence.holy_mountain_money"), --- see entity_mgr
@@ -25,7 +26,7 @@ function ReadModSettings()
     buy_spell_price_multiplier =        ModSettingGet("persistence.buy_spell_price_multiplier"),
     research_wand_price_multiplier =    ModSettingGet("persistence.research_wand_price_multiplier"),
     research_spell_price_multiplier =   ModSettingGet("persistence.research_spell_price_multiplier"),
-    money_saved_on_death =              ModSettingGet("persistence.money_saved_on_death"),
+    money_saved_on_death =              ModSettingGet("persistence.money_saved_on_death") / 100,
     always_choose_save_id =    tonumber(ModSettingGet("persistence.always_choose_save_id")),
     enable_edit_wands_in_lobby =        ModSettingGet("persistence.enable_edit_wands_in_lobby"),
     reusable_holy_mountain =            ModSettingGet("persistence.reusable_holy_mountain"),
@@ -150,7 +151,7 @@ end
 function OnPlayerDied(entity_id)
   if mod_disabled or loaded_profile_id==0 then return; end
 
-  local _money_to_save = math.floor(last_known_money * mod_setting.money_saved_on_death );
+  local _money_to_save = math.floor(last_known_money * mod_setting.money_saved_on_death);
   local _mod_cap = mod_setting.cap_money_saved_on_death;
   local _pain = 0;
   if _mod_cap>0 then

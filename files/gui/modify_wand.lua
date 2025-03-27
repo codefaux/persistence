@@ -41,7 +41,7 @@ if modify_wand_loaded~=true then
         end
       end,
     datum_translation = {
-      -- <name>              = {<label>,                        <val_func>,  <height>,  <render_func>,            <widget_func>              cost_formula_func },
+      -- <name>           = {<label>,                        <val_func>,  <height>,    <render_func>,         <widget_func>,              cost_formula_func },
       _index = {[0] = 10, [1] = "wand_type", [2] = "shuffle", [3] = "spells_per_cast", [4] = "cast_delay", [5] = "recharge_time", [6] = "mana_max", [7] = "mana_charge_speed", [8] = "capacity", [9] = "spread", [10] = "always_cast_spells"},
       wand_type           = {"",                               __val,      34,       __render_wand_type,     nil,                       __cost_func_wand_type  },
       shuffle             = {"$inventory_shuffle",             __yesno,    9,        __render_gen_stat,      __widget_toggle,           __cost_func_shuffle  },
@@ -49,8 +49,8 @@ if modify_wand_loaded~=true then
       cast_delay          = {"$inventory_castdelay",           __ctime,    9,        __render_gen_stat,      __widget_slider,           __cost_func_cast_delay  },
       recharge_time       = {"$inventory_rechargetime",        __ctime,    9,        __render_gen_stat,      __widget_slider,           __cost_func_recharge_time  },
       mana_max            = {"$inventory_manamax",             __round,    9,        __render_gen_stat,      __widget_slider,           __cost_func_mana_max  },
-      mana_charge_speed   = {"$inventory_manachargespeed",     __val,      9,        __render_gen_stat,      __widget_slider,           __cost_func_mana_charge_speed  },
-      capacity            = {"$inventory_capacity",            __val,      9,        __render_gen_stat,      __widget_slider,           __cost_func_capacity  },
+      mana_charge_speed   = {"$inventory_manachargespeed",     __round,    9,        __render_gen_stat,      __widget_slider,           __cost_func_mana_charge_speed  },
+      capacity            = {"$inventory_capacity",            __round,    9,        __render_gen_stat,      __widget_slider,           __cost_func_capacity  },
       spread              = {"$inventory_spread",              __deg,      9,        __render_gen_stat,      __widget_slider,           __cost_func_spread  },
       always_cast_spells  = {"$inventory_alwayscasts",         __val,      9,        __render_wand_spells,    nil,                      __cost_func_always_cast_spells  },
     },
@@ -240,8 +240,10 @@ if modify_wand_loaded~=true then
             local frame_offset_y = -11;
 
             GuiZSetForNextWidget(gui, __layer(3))
+            GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
             GuiImage(gui, _nid(), _type_x_offset, y_offset + _type_y_offset, gui_icon, 1, 1.5, 1.5, math.rad(-90)); -- radians are annoying
             GuiZSetForNextWidget(gui, __layer(4))
+            GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
             GuiImage(gui, _nid(), _type_x_offset + frame_offset_x + wand_offset_x, widget_y_pos + _type_y_offset + frame_offset_y - wand_offset_y, _type_data.file, 1, 1, 1, math.rad(-45)); -- radians are annoying
           end
         end
@@ -293,6 +295,7 @@ if modify_wand_loaded~=true then
               local _mark_offset_x = 10;
               local _mark_offset_y = 8;
               GuiZSetForNextWidget(gui, __layer(3));
+              GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
               GuiImage(gui, _nid(), _filter_x_offset + _mark_offset_x, _mark_offset_y, "data/ui_gfx/damage_indicators/explosion.png", 0.5, 1, 1, math.rad(45)); -- radians are annoying
             end
           end
@@ -365,6 +368,7 @@ if modify_wand_loaded~=true then
       else
         GuiColorNextWidgetEnum(gui, COLORS.Yellow);
       end
+      GuiOptionsAddForNextWidget(gui, GUI_OPTION.GamepadDefaultWidget);
       if GuiButton(gui, _nid(), icon_x_base, icon_y_base, "[WAND TYPE]", small_text_scale) then
         _window_display = _window_display~=1 and 1 or 0;
         -- GamePrint("Pick wand type");

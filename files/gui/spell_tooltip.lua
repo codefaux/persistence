@@ -24,6 +24,7 @@ if spell_tooltip_loaded~=true then
         -- GuiLayoutBeginLayer(gui);
         GuiZSetForNextWidget(gui, __layer(4));
         GuiBeginAutoBox(gui);
+        GuiOptionsAdd(gui, GUI_OPTION.NonInteractive);
 
         local action_struct_pool = get_action_struct(curr_spell);
         for _, action_struct in ipairs(action_struct_pool) do

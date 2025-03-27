@@ -76,6 +76,7 @@ if gui_subfunc_loaded~=true then
 
     local gui_icon = (slot_data.research~=nil and slot_data.research.is_new) and "data/ui_gfx/inventory/full_inventory_box_highlight.png" or "data/ui_gfx/inventory/full_inventory_box.png";
     GuiZSetForNextWidget(gui, __layer(layer+1));
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
     GuiImage(gui, _nid(), x_base, y_base, gui_icon, 1, 1.75, 1.75, 0);
   end
 
@@ -83,7 +84,8 @@ if gui_subfunc_loaded~=true then
   function __render_wand_sprite(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
     local wand_offset_x, wand_offset_y = get_wand_rotated_offset(0, 0, -45);
     GuiZSetForNextWidget(gui, __layer(layer+1));
-    GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 6, y_base + (-wand_offset_y * 1.333) + 18, slot_data.value, 1, 1.333, 1.333, math.rad(-45));
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
+    GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 5, y_base + (-wand_offset_y * 1.333) + 18, slot_data.value, 1, 1.333, 1.333, math.rad(-45));
 
     if slot_data.research~=nil and slot_data.research.b_wand_types then
       local new_icon = "data/ui_gfx/damage_indicators/explosion.png";
@@ -99,6 +101,7 @@ if gui_subfunc_loaded~=true then
   function __render_wand_type(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
     local wand_offset_x, wand_offset_y = get_wand_rotated_offset(0, 0, -45);
     GuiZSetForNextWidget(gui, __layer(layer+1));
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
     GuiImage(gui, _nid(), x_base + (wand_offset_x * 1.333) + 6, y_base + (-wand_offset_y * 1.333) + 18, wand_type_to_sprite_file(slot_data.value), 1, 1.333, 1.333, math.rad(-45));
 
     if slot_data.research~=nil and slot_data.research.b_wand_types then
@@ -114,7 +117,7 @@ if gui_subfunc_loaded~=true then
   function __render_wand_spells(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
     local _capacity = _data.wand["capacity"] or _data["capacity"];
     local grid_y_offset = _capacity>10 and -5 or 0;
-    local grid_x_offset = 34;
+    local grid_x_offset = 32;
     local grid_columns = 5;
     if _data.label~=nil and _data.label~="" then
       GuiZSetForNextWidget(gui, __layer(layer));
@@ -136,10 +139,11 @@ if gui_subfunc_loaded~=true then
       grid_columns = 8;
     end
     for cap_idx = 1, _data.render_slots_override or _capacity do
-      local grid_h = 12;
+      local grid_h = 13;
       local grid_x = (((cap_idx-1)%grid_columns) * grid_h);
       local grid_y = (math.floor((cap_idx-1)/grid_columns) * grid_h);
       GuiZSetForNextWidget(gui, __layer(layer));
+      -- GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive); -- blocks spell tooltip when enabled
       GuiImage(gui, _nid(), x_base + grid_x_offset + grid_x, y_base + grid_y_offset + grid_y, "data/ui_gfx/inventory/inventory_box.png", 1, 0.8, 0.8, 0);
       if _data.value[cap_idx] ~= nil then
         local curr_spell_id = _data.value[cap_idx];
@@ -175,9 +179,11 @@ if gui_subfunc_loaded~=true then
     local _after_icon_x = _offset_x + 20;
 
     GuiZSetForNextWidget(gui, __layer(layer));
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
     GuiImage(gui, _nid(), _offset_x-4, y_base -3, _data.type_sprite, 1, 1.2, 1.2); -- background type slot
 
     GuiZSetForNextWidget(gui, __layer(layer+1));
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
     GuiImage(gui, _nid(), _offset_x, y_base + 1, _data.sprite, (_data.recyclable~=nil and _data.recyclable==true) and 0.5 or 1, 1, 1, 0); -- Icon
     if _data.recyclable~=nil and _data.recyclable==true then
       GuiColorNextWidgetEnum(gui, COLORS.Dim);
@@ -223,6 +229,7 @@ if gui_subfunc_loaded~=true then
 
   function __render_spell_gridtile(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
     GuiZSetForNextWidget(gui, __layer(layer));
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
     GuiImage(gui, _nid(), x_base, y_base, _data.type_sprite, 1, 1.2, 1.2, 0); -- background type slot
 
     if _data.empty_slot==nil or _data.empty_slot~=true then
@@ -302,7 +309,7 @@ if gui_subfunc_loaded~=true then
     local _x_min, _y_min = select(8, GuiGetPreviousWidgetInfo(gui));
 
     GuiZSetForNextWidget(gui, __layer(layer));  ---- SLIDER
-    local _ret = math.floor(GuiSlider(gui, _nid(), x_base + margin, y_base + 10, "", slot_data.wand[slot_data.member], _bounds_min, _bounds_max, 0, 1, " ", panel_width ) + 0.5);
+    local _ret = GuiSlider(gui, _nid(), x_base + margin, y_base + 10, "", slot_data.wand[slot_data.member], _bounds_min, _bounds_max, 0, 1, " ", panel_width );
     GuiGuideTip(gui, "Scroll Mouse Wheel to quickly adjust", "Hold Shift for 5x\nHold Ctrl for 10x");
 
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
@@ -334,7 +341,7 @@ if gui_subfunc_loaded~=true then
       _ret =  math.min(math.max( _ret + (_factor * _mouse_scroll), _bounds_min), _bounds_max);
     end
 
-    return math.floor(_ret);
+    return _ret;
   end
 
   print("=========================");

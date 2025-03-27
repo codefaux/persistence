@@ -5,9 +5,7 @@
 -- Wand Icons don't line up consistently (best-effort, needs better fix)
 -- Mod order fixes?
 -- function EntityGetInRadius(pos_x, pos_y, radius) to auto close menu? -- EntityGetHerdRelationSafe( entity_a:int, entity_b:int )
--- Spell per-purchase options; per-spell, per-copy
--- Add linear/expo scaling option to above
--- Condense spell list, other modes?
+-- Spell per-purchase cost ramp options; per-spell, per-copy
 -- Mod setting for "allow research spells inside wands"?
 -- Translation table for translation mods, translation helper Mod Options setting for tooltips indicating strings and meanings
 -- Config option: Replace starter wand w/ templates 1, 2?
@@ -21,7 +19,7 @@
 -- =====================
 -- Options to disable persistent wand stat memory, spell memory, allowing per-run "fresh profile" with stashed money
 -- PRUNE DATASTORE/HELPER/WAND_SPELL_HELPER (second wave done)
--- Enable in parallel worlds -- look for controls_mouse and controls_wasd for new "lobby" area
+-- Enable in parallel worlds -- look for controls_mouse and controls_wasd for new "lobby" area?
 -- Flesh out and implement meta.lua rigorously
 -- Sort order drop-down
 

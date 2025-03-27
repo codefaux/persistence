@@ -70,6 +70,7 @@ if wand_template_loaded~=true then
           local _do_purchase = false;
 
           GuiZSetForNextWidget(gui, __layer(1));
+          GuiOptionsAddForNextWidget(gui, GUI_OPTION.NonInteractive);
           GuiImage(gui, _nid(), x_offset + 10, y_offset + 12, wand_type_to_sprite_file(template_previews[i].wand_type), 1, 1, 1, math.rad(0)); -- radians are annoying
 
           GuiZSetForNextWidget(gui, __layer(1));

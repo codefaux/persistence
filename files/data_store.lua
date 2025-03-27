@@ -64,16 +64,23 @@ if persistence_data_store_loaded~=true then
   ---@return wand_bounds_data
   local function _get_wand_bounds(profile_id)
     return {
-      wand_types = data_store[profile_id]["wand_types"],
-      always_casts = data_store[profile_id]["always_cast_spells"],
-      always_cast_count = data_store[profile_id]["always_cast_count"],
-      spells_per_cast = {1, data_store[profile_id]["spells_per_cast"] == nil and 1 or data_store[profile_id]["spells_per_cast"]},
-      mana_max = {2, data_store[profile_id]["mana_max"] or 2},
-      mana_charge_speed = {2, data_store[profile_id]["mana_charge_speed"] or 2},
-      capacity = {1, data_store[profile_id]["capacity"] == nil and 1 or data_store[profile_id]["capacity"]},
-      cast_delay = {data_store[profile_id]["cast_delay_min"], data_store[profile_id]["cast_delay_max"]},
-      recharge_time = {data_store[profile_id]["recharge_time_min"], data_store[profile_id]["recharge_time_max"]},
-      spread = {data_store[profile_id]["spread_min"], data_store[profile_id]["spread_max"]}
+      wand_types          =   data_store[profile_id]["wand_types"],
+      always_casts        =   data_store[profile_id]["always_cast_spells"],
+      always_cast_count   =   data_store[profile_id]["always_cast_count"],
+      spells_per_cast     = { 1,
+                              data_store[profile_id]["spells_per_cast"] or 1 },
+      mana_max            = { 1,
+                              data_store[profile_id]["mana_max"] or 50},
+      mana_charge_speed   = { 1,
+                              data_store[profile_id]["mana_charge_speed"] or 10},
+      capacity            = { 1,
+                              data_store[profile_id]["capacity"] or 1},
+      cast_delay          = { data_store[profile_id]["cast_delay_min"]==nil and 15 or data_store[profile_id]["cast_delay_min"],
+                              data_store[profile_id]["cast_delay_max"]==nil and 15 or data_store[profile_id]["cast_delay_max"]},
+      recharge_time       = { data_store[profile_id]["recharge_time_min"]==nil and 15 or data_store[profile_id]["recharge_time_min"],
+                              data_store[profile_id]["recharge_time_max"]==nil and 15 or data_store[profile_id]["recharge_time_max"]},
+      spread              = { data_store[profile_id]["spread_min"]==nil and 5 or data_store[profile_id]["spread_min"],
+                              data_store[profile_id]["spread_max"]==nil and 5 or data_store[profile_id]["spread_max"]}
     };
   end
 

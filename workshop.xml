@@ -67,6 +67,6 @@ I'd like to thank people directly, but I don't want to violate anyone's privacy.
 If you've made a suggestion I've implemented or reported an issue and would like credit, contact me and tell me how to address you.
 "
 	tags="gameplay,game modes,tweaks"
-	dont_upload_folders=".vscode|.git"
-	dont_upload_files=".gitignore|README.md|files/debug.lua|persistence.pdn">
+	dont_upload_folders=".vscode|.git|.github"
+	dont_upload_files=".gitignore|README.md|files/debug.lua|persistence.pdn|persistence.vdf|persistence.code-workspace|TODO.md|README.md">
 </Mod>

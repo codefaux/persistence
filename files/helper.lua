@@ -246,21 +246,26 @@ if persistence_helper_loaded~=true then
   end
 
   function get_player_wands()
-    local wands = {};
-    for ii = 1, 4 do
-      wands[ii] = {};
-    end
+    local wands = nil;
     local inv_quick;
     local inventory_quick_childs;
 
-    while inventory_quick_childs==nil or #inventory_quick_childs<1 do
-      if inv_quick~=0 then EntityKill(inv_quick); end
+    while inv_quick==nil do
+      if inv_quick~=0 and EntityGetParent(inv_quick) ~= player_e_id then
+        EntityKill(inv_quick);
+        inv_quick = nil;
+      end
       inv_quick=EntityGetWithName("inventory_quick");
       if inv_quick==nil or inv_quick==0 then return {}; end
       inventory_quick_childs = EntityGetAllChildren(inv_quick);
     end
 
-    if inventory_quick_childs ~=nil then
+    if inventory_quick_childs ~=nil and #inventory_quick_childs>0 then
+      wands = {};
+      for ii = 1, 4 do
+        wands[ii] = {};
+      end
+
       for _, item in ipairs(inventory_quick_childs) do
         if EntityHasTag(item, "wand") then
           local inventory_comp = EntityGetFirstComponentIncludingDisabled(item, "ItemComponent") or 0;

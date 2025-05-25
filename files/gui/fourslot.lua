@@ -178,6 +178,8 @@ if fourslot_loaded~=true then
 
       if _reload_data~=false then fourslot_table.slots_data = fourslot_table.slots_func(); _reload_data=false; end
 
+      if fourslot_table.slots_data == nil then return; end
+
       local x_base = 30;
       local y_base = 20;
       local margin = 4;

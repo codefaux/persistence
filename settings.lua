@@ -284,7 +284,7 @@ mod_settings =
       },
       {
         id = "enable_teleport_back_up",
-        ui_name = "Allow Teleport to Lobby in Holy Mountain",
+        ui_name = "Allow Teleport to Lobby from within Holy Mountain",
         ui_description = "Note: There is no return teleport!",
         value_default = true,
         scope = MOD_SETTING_SCOPE_NEW_GAME,
@@ -292,8 +292,8 @@ mod_settings =
       {
         id = "enable_menu_in_holy_mountain",
         ui_name = "Allow Persistence menu in Holy Mountain",
-        ui_description = "Allow access to menu for money deposit/withdraw, research, buy, etc in Holy Mountain",
-        value_default = false,
+        ui_description = "Allow access to Persistence menu (for stash deposit/withdraw, research, buy) in Holy Mountain",
+        value_default = true,
         scope = MOD_SETTING_SCOPE_NEW_GAME,
       },
       {

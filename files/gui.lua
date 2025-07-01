@@ -56,7 +56,9 @@ end
 if selected_profile_id~=-1 then
   _in_lobby = GlobalsGetValue("lobby_collider_triggered", "0")~="0";
   _in_workshop = GlobalsGetValue("workshop_collider_triggered", "0")~="0";
-  _in_persistence_area = _in_lobby==true or _in_workshop==true;
+  _allow_teleport = _in_workshop and mod_setting.enable_teleport_back_up==true;
+  _allow_workshop = _in_workshop and mod_setting.enable_menu_in_holy_mountain==true;
+  _in_persistence_area = _in_lobby or _allow_workshop;
   _persistence_available = _in_persistence_area or mod_setting.global_persistence==true;
 
   data_store_everyframe();
@@ -75,7 +77,7 @@ if selected_profile_id~=-1 then
       close_open_windows();
     end
 
-    if _in_workshop then
+    if _allow_teleport then
       present_teleport();
     else
       close_teleport();

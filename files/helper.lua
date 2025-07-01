@@ -251,12 +251,16 @@ if persistence_helper_loaded~=true then
     local inventory_quick_childs;
 
     while inv_quick==nil do
-      if inv_quick~=0 and EntityGetParent(inv_quick) ~= player_e_id then
-        EntityKill(inv_quick);
-        inv_quick = nil;
+      if inv_quick~=0 then
+        if EntityGetParent(inv_quick) ~= player_e_id then
+          EntityKill(inv_quick);
+          inv_quick = nil;
+        else
+          return nil;
+        end
       end
       inv_quick=EntityGetWithName("inventory_quick");
-      if inv_quick==nil or inv_quick==0 then return {}; end
+      if inv_quick==nil or inv_quick==0 then return nil; end
       inventory_quick_childs = EntityGetAllChildren(inv_quick);
     end
 

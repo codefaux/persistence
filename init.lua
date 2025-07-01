@@ -30,6 +30,7 @@ function ReadModSettings()
     always_choose_save_id =    tonumber(ModSettingGet("persistence.always_choose_save_id")),
     enable_edit_wands_in_lobby =        ModSettingGet("persistence.enable_edit_wands_in_lobby"),
     reusable_holy_mountain =            ModSettingGet("persistence.reusable_holy_mountain"),
+    enable_menu_in_holy_mountain =      ModSettingGet("persistence.enable_menu_in_holy_mountain"),
     allow_scanner =                     ModSettingGet("persistence.allow_scanner"),
     enable_teleport_back_up =           ModSettingGet("persistence.enable_teleport_back_up"),
     global_persistence =                ModSettingGet("persistence.global_persistence")

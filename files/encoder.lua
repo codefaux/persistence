@@ -30,9 +30,9 @@ if persistence_encoder_loaded~=true then
   ---@param name string name of psuedo-variable
   ---@param hex string|nil
   local function write_encode_hex(name, hex)
-    print(string.format("write_encode '%s' '%s'", name, hex))
+    -- print(string.format("write_encode '%s' '%s'", name, hex))
     if encoder_read_only then
-      print("suppressed");
+      -- print("suppressed");
       return;
     end
 
@@ -66,7 +66,7 @@ if persistence_encoder_loaded~=true then
   ---@param name string name of pseudo-variable
   ---@return string
   local function load_decode_hex(name)
-    print(string.format("load_decode '%s'", name))
+    -- print(string.format("load_decode '%s'", name))
     local output = "";
     local i = 1;
     repeat
@@ -89,9 +89,9 @@ if persistence_encoder_loaded~=true then
   ---clear named flag from disk
   ---@param name string name of flag
   function encoder_clear_flag(name)
-    print(string.format("encoder_clear '%s'", name))
+    -- print(string.format("encoder_clear '%s'", name))
     if encoder_read_only then
-      print("suppressed");
+      -- print("suppressed");
       return;
     end
 
@@ -101,9 +101,9 @@ if persistence_encoder_loaded~=true then
   ---add named flag to disk
   ---@param name string name of flag
   function encoder_add_flag(name)
-    print(string.format("encoder_add '%s'", name))
+    -- print(string.format("encoder_add '%s'", name))
     if encoder_read_only then
-      print("suppressed");
+      -- print("suppressed");
       return;
     end
 
@@ -113,7 +113,7 @@ if persistence_encoder_loaded~=true then
   ---check named flag from disk
   ---@param name string name of flag
   function encoder_has_flag(name)
-    print(string.format("encoder_has '%s'", name))
+    -- print(string.format("encoder_has '%s'", name))
     return HasFlagPersistent(mod_flag_name .. "_" .. name);
   end
 

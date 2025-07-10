@@ -250,25 +250,12 @@ if persistence_helper_loaded~=true then
     local inv_quick;
     local inventory_quick_childs;
 
-    while inv_quick==nil do
-      if inv_quick~=0 then
-        if EntityGetParent(inv_quick) ~= player_e_id then
-          EntityKill(inv_quick);
-          inv_quick = nil;
-        else
-          return nil;
-        end
-      end
-      inv_quick=EntityGetWithName("inventory_quick");
-      if inv_quick==nil or inv_quick==0 then return nil; end
-      inventory_quick_childs = EntityGetAllChildren(inv_quick);
-    end
+    inv_quick=EntityGetWithName("inventory_quick");
+    if inv_quick==nil or inv_quick==0 then return {}; end
+    inventory_quick_childs = EntityGetAllChildren(inv_quick);
 
     if inventory_quick_childs ~=nil and #inventory_quick_childs>0 then
-      wands = {};
-      for ii = 1, 4 do
-        wands[ii] = {};
-      end
+      wands = {{}, {}, {}, {}};
 
       for _, item in ipairs(inventory_quick_childs) do
         if EntityHasTag(item, "wand") then

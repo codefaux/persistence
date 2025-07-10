@@ -20,6 +20,7 @@ function ReadModSettings()
     show_guide_tips =                   ModSettingGet("persistence.show_guide_tips"),
     start_with_money =                  ModSettingGet("persistence.start_with_money"), --- see profile load
     holy_mountain_money =               ModSettingGet("persistence.holy_mountain_money"), --- see entity_mgr
+    holy_mountain_reward =              ModSettingGet("persistence.holy_mountain_reward"), --- see entity_mgr
     cap_money_saved_on_death =          ModSettingGet("persistence.cap_money_saved_on_death") * 1000,
     allow_stash =              tonumber(ModSettingGet("persistence.allow_stash")), --- 1, allow   0, disable  -1, deposit only
     buy_wand_price_multiplier =         ModSettingGet("persistence.buy_wand_price_multiplier"),

@@ -75,23 +75,41 @@ if persistence_encoder_loaded~=true then
     return (output == "" and nil or output);
   end
 
+  ---clear named flag from disk
+  ---@param name string name of flag
+  function encoder_clear_flag(name)
+    RemoveFlagPersistent(mod_flag_name .. "_" .. name);
+  end
+
+  ---add named flag to disk
+  ---@param name string name of flag
+  function encoder_add_flag(name)
+    AddFlagPersistent(mod_flag_name .. "_" .. name);
+  end
+
+  ---check named flag from disk
+  ---@param name string name of flag
+  function encoder_has_flag(name)
+    return HasFlagPersistent(mod_flag_name .. "_" .. name);
+  end
+
   ---decode number value of named tag from disk
   ---@param name string name of pseudo-variable (mod_flag_name will be prepended)
   ---@return number
-  function load_decode_integer(name)
+  function encoder_load_integer(name)
     return hex_to_number(load_decode_hex(name));
   end
 
   ---write encoded number value of named tag to disk
   ---@param name string name of pseudo-variable (mod_flag_name will be prepended)
   ---@param value integer value of pseudo-variable
-  function write_encode_integer(name, value)
+  function encoder_write_integer(name, value)
     write_encode_hex(name, number_to_hex(value));
   end
 
-  ---write encoded number value of named tag to disk
+  ---clear encoded number value of named tag from disk
   ---@param name string name of pseudo-variable (mod_flag_name will be prepended)
-  function clear_encode_integer(name)
+  function encoder_clear_integer(name)
     write_encode_hex(name, nil);
   end
   ---end function declarations, run code here;

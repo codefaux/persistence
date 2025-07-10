@@ -110,7 +110,7 @@ if persistence_data_store_loaded~=true then
       if known then spells_known = spells_known + 1; end
     end
     data_store[profile_id]["spells_known"] = spells_known;
-    write_encode_integer(profile_id .. "_spells_known", spells_known);
+    encoder_write_integer(profile_id .. "_spells_known", spells_known);
     return spells_known;
   end
 
@@ -121,7 +121,7 @@ if persistence_data_store_loaded~=true then
     if spells == nil or #spells == 0 then return; end
     for _, spell_id in ipairs(spells) do
       data_store[profile_id]["spells"][spell_id] = true;
-      AddFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_spell_" .. string.lower(spell_id));
+      encoder_add_flag(profile_id .. "_spell_" .. string.lower(spell_id));
     end
     _update_spells_known_count(profile_id);
   end
@@ -143,7 +143,7 @@ if persistence_data_store_loaded~=true then
       if known then always_casts_known = always_casts_known + 1; end
     end
     data_store[profile_id]["always_cast_spells_known"]=always_casts_known;
-    write_encode_integer(profile_id .. "_always_cast_spells_known", always_casts_known);
+    encoder_write_integer(profile_id .. "_always_cast_spells_known", always_casts_known);
     return always_casts_known;
   end
 
@@ -154,7 +154,7 @@ if persistence_data_store_loaded~=true then
     if ac_spells == nil or #ac_spells == 0 then return; end
     for _, curr_ac_spell_id in ipairs(ac_spells) do
       data_store[profile_id]["always_cast_spells"][curr_ac_spell_id] = true;
-      AddFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_always_cast_spell_" .. string.lower(curr_ac_spell_id));
+      encoder_add_flag(profile_id .. "_always_cast_spell_" .. string.lower(curr_ac_spell_id));
     end
     _update_always_cast_spells_known_count(profile_id);
   end
@@ -163,12 +163,12 @@ if persistence_data_store_loaded~=true then
   ---@param profile_id integer
   local function _load_profile_spells(profile_id)
     if data_store ~= nil and data_store[profile_id] ~= nil then
-      local prefixed_string = mod_flag_name .. "_" .. profile_id;
+      local prefixed_string = profile_id;
       data_store[profile_id]["always_cast_spells"] = {};
       data_store[profile_id]["spells"] = {};
       for curr_action_id, _ in pairs(actions_by_id) do
-        if HasFlagPersistent(prefixed_string .. "_spell_" .. string.lower(curr_action_id)) then data_store[profile_id]["spells"][curr_action_id] = true; end
-        if HasFlagPersistent(prefixed_string .. "_always_cast_spell_" .. string.lower(curr_action_id)) then  data_store[profile_id]["always_cast_spells"][curr_action_id] = true; end
+        if encoder_has_flag(prefixed_string .. "_spell_" .. string.lower(curr_action_id)) then data_store[profile_id]["spells"][curr_action_id] = true; end
+        if encoder_has_flag(prefixed_string .. "_always_cast_spell_" .. string.lower(curr_action_id)) then  data_store[profile_id]["always_cast_spells"][curr_action_id] = true; end
       end
       data_store[profile_id]["spells_known"] = _update_spells_known_count(profile_id);
       data_store[profile_id]["always_cast_spells_known"] = _update_always_cast_spells_known_count(profile_id);
@@ -184,7 +184,7 @@ if persistence_data_store_loaded~=true then
       if known then wand_types_known = wand_types_known + 1; end
     end
     data_store[profile_id]["wand_types_known"]=wand_types_known;
-    write_encode_integer(profile_id .. "_wand_types_known", wand_types_known);
+    encoder_write_integer(profile_id .. "_wand_types_known", wand_types_known);
     return wand_types_known;
   end
 
@@ -195,7 +195,7 @@ if persistence_data_store_loaded~=true then
     for _, curr_wand_type in ipairs(wand_types) do
       if string.sub(curr_wand_type, 1, #"default") ~= "default" then
         data_store[profile_id]["wand_types"][curr_wand_type] = true;
-        AddFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_wand_type_" .. string.lower(curr_wand_type));
+        encoder_add_flag(profile_id .. "_wand_type_" .. string.lower(curr_wand_type));
       end
     end
     _update_wand_types_known_count(profile_id);
@@ -208,7 +208,7 @@ if persistence_data_store_loaded~=true then
     data_store[profile_id]["wand_types"] = {};
     data_store[profile_id]["wand_types_idx"] = {};
     ---TODO: is this actually necessary? Debug and check
-    local prefixed_string = mod_flag_name .. "_" .. profile_id;
+    local prefixed_string = profile_id;
     for i, _ in ipairs(default_wands) do
       idx = idx + 1;
       data_store[profile_id]["wand_types"]["default_" .. i] = true;
@@ -216,7 +216,7 @@ if persistence_data_store_loaded~=true then
     end
     for _, scan_wand in ipairs(wands) do
       local scan_wand_type = sprite_file_to_wand_type(scan_wand.file);
-      if HasFlagPersistent(prefixed_string .. "_wand_type_" .. string.lower(scan_wand_type)) then
+      if encoder_has_flag(prefixed_string .. "_wand_type_" .. string.lower(scan_wand_type)) then
         idx = idx + 1;
         data_store[profile_id]["wand_types"][scan_wand_type] = true;
         data_store[profile_id]["wand_types_idx"][idx] = scan_wand_type;
@@ -227,52 +227,52 @@ if persistence_data_store_loaded~=true then
 
   local function _set_spells_per_cast(profile_id, value)
     data_store[profile_id]["spells_per_cast"] = value;
-    write_encode_integer(profile_id .. "_spells_per_cast", data_store[profile_id]["spells_per_cast"]);
+    encoder_write_integer(profile_id .. "_spells_per_cast", data_store[profile_id]["spells_per_cast"]);
   end
 
   local function _set_cast_delay_min(profile_id, value)
     data_store[profile_id]["cast_delay_min"] = value;
-    write_encode_integer(profile_id .. "_cast_delay_min", data_store[profile_id]["cast_delay_min"]);
+    encoder_write_integer(profile_id .. "_cast_delay_min", data_store[profile_id]["cast_delay_min"]);
   end
 
   local function _set_cast_delay_max(profile_id, value)
     data_store[profile_id]["cast_delay_max"] = value;
-    write_encode_integer(profile_id .. "_cast_delay_max", data_store[profile_id]["cast_delay_max"]);
+    encoder_write_integer(profile_id .. "_cast_delay_max", data_store[profile_id]["cast_delay_max"]);
   end
 
   local function _set_recharge_time_min(profile_id, value)
     data_store[profile_id]["recharge_time_min"] = value;
-    write_encode_integer(profile_id .. "_recharge_time_min", data_store[profile_id]["recharge_time_min"]);
+    encoder_write_integer(profile_id .. "_recharge_time_min", data_store[profile_id]["recharge_time_min"]);
   end
 
   local function _set_recharge_time_max(profile_id, value)
     data_store[profile_id]["recharge_time_max"] = value;
-    write_encode_integer(profile_id .. "_recharge_time_max", data_store[profile_id]["recharge_time_max"]);
+    encoder_write_integer(profile_id .. "_recharge_time_max", data_store[profile_id]["recharge_time_max"]);
   end
 
   local function _set_mana_max(profile_id, value)
     data_store[profile_id]["mana_max"] = value;
-    write_encode_integer(profile_id .. "_mana_max", data_store[profile_id]["mana_max"]);
+    encoder_write_integer(profile_id .. "_mana_max", data_store[profile_id]["mana_max"]);
   end
 
   local function _set_mana_charge_speed(profile_id, value)
     data_store[profile_id]["mana_charge_speed"] = value;
-    write_encode_integer(profile_id .. "_mana_charge_speed", data_store[profile_id]["mana_charge_speed"]);
+    encoder_write_integer(profile_id .. "_mana_charge_speed", data_store[profile_id]["mana_charge_speed"]);
   end
 
   local function _set_capacity(profile_id, value)
     data_store[profile_id]["capacity"] = value;
-    write_encode_integer(profile_id .. "_capacity", data_store[profile_id]["capacity"]);
+    encoder_write_integer(profile_id .. "_capacity", data_store[profile_id]["capacity"]);
   end
 
   local function _set_spread_min(profile_id, value)
     data_store[profile_id]["spread_min"] = value;
-    write_encode_integer(profile_id .. "_spread_min", data_store[profile_id]["spread_min"] == nil and nil or math.floor(data_store[profile_id]["spread_min"] * 10));
+    encoder_write_integer(profile_id .. "_spread_min", data_store[profile_id]["spread_min"] == nil and nil or math.floor(data_store[profile_id]["spread_min"] * 10));
   end
 
   local function _set_spread_max(profile_id, value)
     data_store[profile_id]["spread_max"] = value;
-    write_encode_integer(profile_id .. "_spread_max", data_store[profile_id]["spread_max"] == nil and nil or math.ceil(data_store[profile_id]["spread_max"] * 10));
+    encoder_write_integer(profile_id .. "_spread_max", data_store[profile_id]["spread_max"] == nil and nil or math.ceil(data_store[profile_id]["spread_max"] * 10));
   end
 
   -- money
@@ -282,7 +282,7 @@ if persistence_data_store_loaded~=true then
 
   local function _set_stash_money(profile_id, value)
     data_store[profile_id]["money"] = value;
-    write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
+    encoder_write_integer(profile_id .. "_money", data_store[profile_id]["money"]);
   end
 
   ---increments stash money, returns success
@@ -295,7 +295,7 @@ if persistence_data_store_loaded~=true then
     if _stash > _target then return false; end
 
     data_store[profile_id]["money"] = _target;
-    write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
+    encoder_write_integer(profile_id .. "_money", data_store[profile_id]["money"]);
     return true;
   end
 
@@ -309,7 +309,7 @@ if persistence_data_store_loaded~=true then
     if _stash < _target then return false; end
 
     data_store[profile_id]["money"] = _target;
-    write_encode_integer(profile_id .. "_money", data_store[profile_id]["money"]);
+    encoder_write_integer(profile_id .. "_money", data_store[profile_id]["money"]);
     return true;
   end
 
@@ -320,7 +320,7 @@ if persistence_data_store_loaded~=true then
 
   local function _set_always_cast_count(profile_id, value)
     data_store[profile_id]["always_cast_count"] = value;
-    write_encode_integer(tostring(profile_id) .. "_always_cast_count", data_store[profile_id]["always_cast_count"]);
+    encoder_write_integer(tostring(profile_id) .. "_always_cast_count", data_store[profile_id]["always_cast_count"]);
   end
 
 
@@ -359,10 +359,10 @@ if persistence_data_store_loaded~=true then
   ---@return integer|nil spells quantity known spells
   ---@return integer|nil wand_types quantity known wand types
   local function _load_profile_quick(profile_id)
-    local money = load_decode_integer(profile_id .. "_money") or 0;
-    local always_cast = load_decode_integer(profile_id .. "_always_cast_spells_known") or 0;
-    local spells = load_decode_integer(profile_id .. "_spells_known") or 0;
-    local wand_types = load_decode_integer(profile_id .. "_wand_types_known") or 0;
+    local money = encoder_load_integer(profile_id .. "_money") or 0;
+    local always_cast = encoder_load_integer(profile_id .. "_always_cast_spells_known") or 0;
+    local spells = encoder_load_integer(profile_id .. "_spells_known") or 0;
+    local wand_types = encoder_load_integer(profile_id .. "_wand_types_known") or 0;
 
     if always_cast==0 or spells==0 or wand_types==0 then
       _load_profile_spells(profile_id);
@@ -384,30 +384,30 @@ if persistence_data_store_loaded~=true then
     local template_id_string = template_id;
 
     local _template = {};
-    if HasFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_template_" .. template_id_string) then
-      if HasFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_template_" .. template_id_string .. "_shuffle") then
+    if encoder_has_flag(profile_id .. "_template_" .. template_id_string) then
+      if encoder_has_flag(profile_id .. "_template_" .. template_id_string .. "_shuffle") then
         _template["shuffle"] = true;
       else
         _template["shuffle"] = false;
       end
-      _template["spells_per_cast"] = load_decode_integer(profile_id .. "_template_" .. template_id_string .. "_spells_per_cast");
-      _template["cast_delay"] = load_decode_integer(profile_id .. "_template_" .. template_id_string .. "_cast_delay");
-      _template["recharge_time"] = load_decode_integer(profile_id .. "_template_" .. template_id_string .. "_recharge_time");
-      _template["mana_max"] = load_decode_integer(profile_id .. "_template_" .. template_id_string .. "_mana_max");
-      _template["mana_charge_speed"] = load_decode_integer(profile_id .. "_template_" .. template_id_string .. "_mana_charge_speed");
-      _template["capacity"] = load_decode_integer(profile_id .. "_template_" .. template_id_string .. "_capacity");
-      _template["spread"] = load_decode_integer(profile_id .. "_template_" .. template_id_string .. "_spread") / 10;
+      _template["spells_per_cast"] = encoder_load_integer(profile_id .. "_template_" .. template_id_string .. "_spells_per_cast");
+      _template["cast_delay"] = encoder_load_integer(profile_id .. "_template_" .. template_id_string .. "_cast_delay");
+      _template["recharge_time"] = encoder_load_integer(profile_id .. "_template_" .. template_id_string .. "_recharge_time");
+      _template["mana_max"] = encoder_load_integer(profile_id .. "_template_" .. template_id_string .. "_mana_max");
+      _template["mana_charge_speed"] = encoder_load_integer(profile_id .. "_template_" .. template_id_string .. "_mana_charge_speed");
+      _template["capacity"] = encoder_load_integer(profile_id .. "_template_" .. template_id_string .. "_capacity");
+      _template["spread"] = encoder_load_integer(profile_id .. "_template_" .. template_id_string .. "_spread") / 10;
 
       _template["always_cast_spells"] = {};
       for key, _ in pairs(data_store[profile_id]["always_cast_spells"]) do
-        if HasFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_template_" .. template_id_string .. "_always_cast_spell_" .. string.lower(key)) then
+        if encoder_has_flag(profile_id .. "_template_" .. template_id_string .. "_always_cast_spell_" .. string.lower(key)) then
           table.insert(_template["always_cast_spells"], key);
         end
       end
       _template["always_cast_count"] = #_template["always_cast_spells"];
 
       for key, _ in pairs(data_store[profile_id]["wand_types"]) do
-        if HasFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_template_" .. template_id_string .. "_wand_type_" .. string.lower(key)) then
+        if encoder_has_flag(profile_id .. "_template_" .. template_id_string .. "_wand_type_" .. string.lower(key)) then
           _template["wand_type"] = key;
           break;
         end
@@ -427,28 +427,27 @@ if persistence_data_store_loaded~=true then
 
   local function _delete_template(profile_id, template_id)
     local template_prefix = profile_id .. "_template_" .. template_id;
-    local template_flag_prefix = mod_flag_name .. "_" .. template_prefix;
-    RemoveFlagPersistent(template_flag_prefix .. "_shuffle");
-    clear_encode_integer(template_prefix .. "_spells_per_cast");
-    clear_encode_integer(template_prefix .. "_cast_delay");
-    clear_encode_integer(template_prefix .. "_recharge_time");
-    clear_encode_integer(template_prefix .. "_mana_max");
-    clear_encode_integer(template_prefix .. "_mana_charge_speed");
-    clear_encode_integer(template_prefix .. "_capacity");
-    clear_encode_integer(template_prefix .. "_spread");
+    encoder_clear_flag(template_prefix .. "_shuffle");
+    encoder_clear_integer(template_prefix .. "_spells_per_cast");
+    encoder_clear_integer(template_prefix .. "_cast_delay");
+    encoder_clear_integer(template_prefix .. "_recharge_time");
+    encoder_clear_integer(template_prefix .. "_mana_max");
+    encoder_clear_integer(template_prefix .. "_mana_charge_speed");
+    encoder_clear_integer(template_prefix .. "_capacity");
+    encoder_clear_integer(template_prefix .. "_spread");
 
     for scan_action_id, _ in pairs(actions_by_id) do
-      RemoveFlagPersistent(template_flag_prefix .. "_always_cast_spell_" .. string.lower(scan_action_id));
+      encoder_clear_flag(template_prefix .. "_always_cast_spell_" .. string.lower(scan_action_id));
     end
 
     for def_idx, _ in ipairs(default_wands) do
-      RemoveFlagPersistent(template_flag_prefix .. "_wand_type_default_" .. def_idx);
+      encoder_clear_flag(template_prefix .. "_wand_type_default_" .. def_idx);
     end
     for _, scan_wand in ipairs(wands) do
-      RemoveFlagPersistent(template_flag_prefix .. "_wand_type_" .. string.lower(sprite_file_to_wand_type(scan_wand.file)));
+      encoder_clear_flag(template_prefix .. "_wand_type_" .. string.lower(sprite_file_to_wand_type(scan_wand.file)));
     end
 
-    RemoveFlagPersistent(template_flag_prefix);
+    encoder_clear_flag(template_prefix);
   end
 
   local function _set_template(profile_id, template_id, wand_data)
@@ -457,25 +456,24 @@ if persistence_data_store_loaded~=true then
       return;
     end
     local template_prefix = profile_id .. "_template_" .. template_id;
-    local template_flag_prefix = mod_flag_name .. "_" .. template_prefix;
     if wand_data["shuffle"] then
-      AddFlagPersistent(template_flag_prefix .. "_shuffle");
+      encoder_add_flag(template_prefix .. "_shuffle");
     end
-    write_encode_integer(template_prefix .. "_spells_per_cast", wand_data["spells_per_cast"]);
-    write_encode_integer(template_prefix .. "_cast_delay", wand_data["cast_delay"]);
-    write_encode_integer(template_prefix .. "_recharge_time", wand_data["recharge_time"]);
-    write_encode_integer(template_prefix .. "_mana_max", wand_data["mana_max"]);
-    write_encode_integer(template_prefix .. "_mana_charge_speed", wand_data["mana_charge_speed"]);
-    write_encode_integer(template_prefix .. "_capacity", wand_data["capacity"]);
-    write_encode_integer(template_prefix .. "_spread", math.floor(wand_data["spread"] * 10 + 0.5));
+    encoder_write_integer(template_prefix .. "_spells_per_cast", wand_data["spells_per_cast"]);
+    encoder_write_integer(template_prefix .. "_cast_delay", wand_data["cast_delay"]);
+    encoder_write_integer(template_prefix .. "_recharge_time", wand_data["recharge_time"]);
+    encoder_write_integer(template_prefix .. "_mana_max", wand_data["mana_max"]);
+    encoder_write_integer(template_prefix .. "_mana_charge_speed", wand_data["mana_charge_speed"]);
+    encoder_write_integer(template_prefix .. "_capacity", wand_data["capacity"]);
+    encoder_write_integer(template_prefix .. "_spread", math.floor(wand_data["spread"] * 10 + 0.5));
 
     for _, spell in ipairs(wand_data["always_cast_spells"]) do
-      AddFlagPersistent(template_flag_prefix .. "_always_cast_spell_" .. string.lower(spell));
+      encoder_add_flag(template_prefix .. "_always_cast_spell_" .. string.lower(spell));
     end
 
-    AddFlagPersistent(template_flag_prefix .. "_wand_type_" .. string.lower(wand_data["wand_type"]));
+    encoder_add_flag(template_prefix .. "_wand_type_" .. string.lower(wand_data["wand_type"]));
 
-    AddFlagPersistent(template_flag_prefix);
+    encoder_add_flag(template_prefix);
   end
 
   --- Check if and how a wand entity is new research for profile
@@ -770,40 +768,40 @@ if persistence_data_store_loaded~=true then
 
     delete_profile(profile_id);
     load_profile(profile_id);
-    AddFlagPersistent(mod_flag_name .. "_" .. profile_id);
+    encoder_add_flag(tostring(profile_id));
     selected_profile_id=profile_id;
   end
 
   ---erase profile slot and mark empty, clear in-memory datastore for profile
   ---@param profile_id integer
   function delete_profile(profile_id)
-    clear_encode_integer(profile_id .. "_spells_per_cast");
-    clear_encode_integer(profile_id .. "_cast_delay_min");
-    clear_encode_integer(profile_id .. "_cast_delay_max");
-    clear_encode_integer(profile_id .. "_recharge_time_min");
-    clear_encode_integer(profile_id .. "_recharge_time_max");
-    clear_encode_integer(profile_id .. "_mana_max");
-    clear_encode_integer(profile_id .. "_capacity");
-    clear_encode_integer(profile_id .. "_always_cast_count");
-    clear_encode_integer(profile_id .. "_spread_min");
-    clear_encode_integer(profile_id .. "_spread_max");
-    clear_encode_integer(profile_id .. "_money");
-    clear_encode_integer(profile_id .. "_always_cast_spells_known");
-    clear_encode_integer(profile_id .. "_spells_known");
-    clear_encode_integer(profile_id .. "_wand_types_known");
+    encoder_clear_integer(profile_id .. "_spells_per_cast");
+    encoder_clear_integer(profile_id .. "_cast_delay_min");
+    encoder_clear_integer(profile_id .. "_cast_delay_max");
+    encoder_clear_integer(profile_id .. "_recharge_time_min");
+    encoder_clear_integer(profile_id .. "_recharge_time_max");
+    encoder_clear_integer(profile_id .. "_mana_max");
+    encoder_clear_integer(profile_id .. "_capacity");
+    encoder_clear_integer(profile_id .. "_always_cast_count");
+    encoder_clear_integer(profile_id .. "_spread_min");
+    encoder_clear_integer(profile_id .. "_spread_max");
+    encoder_clear_integer(profile_id .. "_money");
+    encoder_clear_integer(profile_id .. "_always_cast_spells_known");
+    encoder_clear_integer(profile_id .. "_spells_known");
+    encoder_clear_integer(profile_id .. "_wand_types_known");
     for _, curr_action in ipairs(actions_by_id) do
-        RemoveFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_spell_" .. string.lower(curr_action.id));
-      RemoveFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_always_cast_spell_" .. string.lower(curr_action.id));
+        encoder_clear_flag(profile_id .. "_spell_" .. string.lower(curr_action.id));
+      encoder_clear_flag(profile_id .. "_always_cast_spell_" .. string.lower(curr_action.id));
     end
     for _, curr_wand in ipairs(wands) do
-      RemoveFlagPersistent(mod_flag_name .. "_" .. profile_id .. "_wand_type_" .. sprite_file_to_wand_type(curr_wand.file));
+      encoder_clear_flag(profile_id .. "_wand_type_" .. sprite_file_to_wand_type(curr_wand.file));
     end
 
     for i = 1, get_template_count() do
       _delete_template(profile_id, i);
     end
 
-    RemoveFlagPersistent(mod_flag_name .. "_" .. profile_id); -- remove profile exists tag
+    encoder_clear_flag(tostring(profile_id)); -- remove profile exists tag
     data_store[profile_id] = nil;
   end
 
@@ -835,21 +833,21 @@ if persistence_data_store_loaded~=true then
 
     _load_profile_quick(profile_id);
 
-    data_store[profile_id]["spells_per_cast"] = load_decode_integer(profile_id .. "_spells_per_cast");
-    data_store[profile_id]["cast_delay_min"] = load_decode_integer(profile_id .. "_cast_delay_min");
-    data_store[profile_id]["cast_delay_max"] = load_decode_integer(profile_id .. "_cast_delay_max");
-    data_store[profile_id]["recharge_time_min"] = load_decode_integer(profile_id .. "_recharge_time_min");
-    data_store[profile_id]["recharge_time_max"] = load_decode_integer(profile_id .. "_recharge_time_max");
-    data_store[profile_id]["mana_max"] = load_decode_integer(profile_id .. "_mana_max");
-    data_store[profile_id]["mana_charge_speed"] = load_decode_integer(profile_id .. "_mana_charge_speed");
-    data_store[profile_id]["always_cast_count"] = load_decode_integer(profile_id .. "_always_cast_count");
-    data_store[profile_id]["capacity"] = load_decode_integer(profile_id .. "_capacity");
-    local spread_min = load_decode_integer(profile_id .. "_spread_min");
+    data_store[profile_id]["spells_per_cast"] = encoder_load_integer(profile_id .. "_spells_per_cast");
+    data_store[profile_id]["cast_delay_min"] = encoder_load_integer(profile_id .. "_cast_delay_min");
+    data_store[profile_id]["cast_delay_max"] = encoder_load_integer(profile_id .. "_cast_delay_max");
+    data_store[profile_id]["recharge_time_min"] = encoder_load_integer(profile_id .. "_recharge_time_min");
+    data_store[profile_id]["recharge_time_max"] = encoder_load_integer(profile_id .. "_recharge_time_max");
+    data_store[profile_id]["mana_max"] = encoder_load_integer(profile_id .. "_mana_max");
+    data_store[profile_id]["mana_charge_speed"] = encoder_load_integer(profile_id .. "_mana_charge_speed");
+    data_store[profile_id]["always_cast_count"] = encoder_load_integer(profile_id .. "_always_cast_count");
+    data_store[profile_id]["capacity"] = encoder_load_integer(profile_id .. "_capacity");
+    local spread_min = encoder_load_integer(profile_id .. "_spread_min");
     if spread_min ~= nil then
       spread_min = spread_min / 10;
     end
     data_store[profile_id]["spread_min"] = spread_min;
-    local spread_max = load_decode_integer(profile_id .. "_spread_max");
+    local spread_max = encoder_load_integer(profile_id .. "_spread_max");
     if spread_max ~= nil then
       spread_max = spread_max / 10;
     end
@@ -890,7 +888,7 @@ if persistence_data_store_loaded~=true then
 
   for profile_idx = 1, get_profile_count() do
     data_store[profile_idx]=data_store[profile_idx] or {};
-    if HasFlagPersistent(mod_flag_name .. "_" .. profile_idx) then
+    if encoder_has_flag(tostring(profile_idx)) then
       _load_profile_quick(profile_idx)
     end
   end

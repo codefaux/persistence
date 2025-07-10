@@ -128,7 +128,7 @@ if fourslot_loaded~=true then
               GuiZSetForNextWidget(gui, __layer(layer));
               GuiText(gui, x_base + 2 + x_offset, y_base + row3_y_offset, "UNRESEARCHED SPELLS", small_text_scale);
               GuiGuideTip(gui, "Spells on wands are destroyed", "At least one spell is unresearched");
-            else
+            elseif (not EntityHasTag(slot_data.e_id, "persistence")) then
               GuiColorNextWidgetEnum(gui, COLORS.Yellow);
               GuiZSetForNextWidget(gui, __layer(layer));
               GuiText(gui, x_base + 0 + x_offset, y_base + row2_y_offset, "Wand contains spells which", small_text_scale);

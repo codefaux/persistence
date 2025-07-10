@@ -68,7 +68,7 @@ if spell_loadouts_loaded~=true then
     active_windows["spell_loadout"] = function(_nid)
       local _y_offset = 0;
 
-      if _reload_data==true then _wands = get_player_wands(); _saved_spell_loadouts = _get_stored_loadouts(); _reload_data=false; end;
+      if _reload_data==true or _wands == {} then _wands = get_player_wands(); _saved_spell_loadouts = _get_stored_loadouts(); _reload_data=false; end;
 
 
       GuiZSetForNextWidget(gui, __layer(2));

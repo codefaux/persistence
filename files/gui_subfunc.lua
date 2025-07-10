@@ -188,7 +188,7 @@ if gui_subfunc_loaded~=true then
     end
     GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
     GuiZSetForNextWidget(gui, __layer(layer));
-    GuiText(gui, x_base + panel_width - margin, y_base, "$ " .. __human_scale(_data.value), small_text_scale);
+    GuiText(gui, x_base + panel_width - margin, y_base, " $" .. __human_scale(_data.value), small_text_scale);
     if _data.research~=nil then GuiGuideTip(gui, (_data.research~=nil and type(_data.color_val)=="boolean" and _data.color_val==true) and "Contributes to research" or "Does not contribute to research", ""); end
   end
 

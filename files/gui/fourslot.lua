@@ -10,11 +10,30 @@ if fourslot_loaded~=true then
     slot_title = "Profile slot %i:",
     render_below_footer = function (x_base, y_base, width, height, fourslot_table, _nid)
         GuiBeginAutoBox(gui);
+
+        GuiZSetForNextWidget(gui, __layer(5));
+        GuiColorNextWidgetBool(gui, not encoder_read_only);
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+        if GuiButton(gui, _nid(), x_base + (width/2), y_base + height + 30, "Play with Persistence") then
+          encoder_read_only = false;
+        end
+        GuiGuideTip(gui, "(Normal) Persistence is enabled, profile saving is automatic.", "");
+
+        GuiZSetForNextWidget(gui, __layer(5));
+        GuiColorNextWidgetBool(gui, encoder_read_only);
+        GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
+        if GuiButton(gui, _nid(), x_base + (width/2), y_base + height + 40, "Play in Amnesiac Mode") then
+          encoder_read_only = true;
+        end
+        GuiGuideTip(gui, "Amnesiac Mode will allow players to LOAD a profile (or not)", "but CHANGES WILL NOT BE SAVED.");
+
         GuiZSetForNextWidget(gui, __layer(5));
         GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
-        if GuiButton(gui, _nid(), x_base + (width/2), y_base + height + 35, "Play without Persistence") then
+        if GuiButton(gui, _nid(), x_base + (width/2), y_base + height + 60, "Start without Persistence") then
           selected_profile_id = DISABLE_PROFILE_ID;
         end
+        GuiGuideTip(gui, "(Disable) Persistence is disabled. Profiles will not be saved or loaded.", "Click to play.");
+
         GuiZSetForNextWidget(gui, __layer(4));
         GuiEndAutoBoxNinePiece(gui, 10);
       end,

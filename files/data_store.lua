@@ -12,6 +12,8 @@ if persistence_data_store_loaded~=true then
   ---@type integer
   selected_profile_id = 0;
   ---@type integer
+  DISABLE_PROFILE_ID = -999;
+  ---@type integer
   loaded_profile_id = 0;
 
   function get_profile_count() return 4; end

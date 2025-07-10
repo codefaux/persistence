@@ -53,7 +53,7 @@ if persistence_gui_loaded~=true then
   persistence_gui_loaded=true;
 end
 -- every frame;
-if selected_profile_id~=-1 then
+if selected_profile_id~=DISABLE_PROFILE_ID then
   _in_lobby = GlobalsGetValue("lobby_collider_triggered", "0")~="0";
   _in_workshop = GlobalsGetValue("workshop_collider_triggered", "0")~="0";
   _allow_teleport = _in_workshop and mod_setting.enable_teleport_back_up==true;
@@ -87,7 +87,7 @@ if selected_profile_id~=-1 then
     else
       close_persistence_menu();
     end
-  elseif selected_profile_id==-1 then
+  elseif selected_profile_id==DISABLE_PROFILE_ID then
     if isLocked() then UnlockPlayer(); end
     close_open_windows();
     close_profile_select();

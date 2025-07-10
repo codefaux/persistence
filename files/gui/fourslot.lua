@@ -13,7 +13,7 @@ if fourslot_loaded~=true then
         GuiZSetForNextWidget(gui, __layer(5));
         GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_HorizontalCenter);
         if GuiButton(gui, _nid(), x_base + (width/2), y_base + height + 35, "Play without Persistence") then
-          selected_profile_id = -1;
+          selected_profile_id = DISABLE_PROFILE_ID;
         end
         GuiZSetForNextWidget(gui, __layer(4));
         GuiEndAutoBoxNinePiece(gui, 10);

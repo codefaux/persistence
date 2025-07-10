@@ -58,7 +58,9 @@ if persistence_menu_loaded~=true then
         end
       end
 
-      if InputIsKeyJustDown(Key_GRAVE) and not _keywait then
+      _key_just_triggered = InputIsKeyJustDown(Key_GRAVE) or InputIsKeyJustDown(KEY_TAB);
+
+      if _key_just_triggered and not _keywait then
         if persistence_expanded==false then _toggle_state(); end
 
         local _shift = InputIsKeyDown(Key_LSHIFT);
@@ -70,7 +72,7 @@ if persistence_menu_loaded~=true then
         end
       end
 
-      if _keywait and (not InputIsKeyJustDown(Key_GRAVE) and not InputIsJoystickButtonJustDown(0, mod_setting.gamepad_menu_trigger) ) then
+      if _keywait and (not _key_just_triggered and not InputIsJoystickButtonJustDown(0, mod_setting.gamepad_menu_trigger) ) then
         _keywait = false;
       end
 

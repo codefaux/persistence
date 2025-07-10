@@ -73,7 +73,7 @@ if selected_profile_id~=-1 then
 
     present_scan_nearby_entities();
 
-    if InputIsKeyJustDown(Key_TAB) or InputIsKeyJustDown(Key_ESCAPE) then
+    if InputIsKeyJustDown(Key_ESCAPE) then
       close_open_windows();
     end
 

@@ -22,7 +22,7 @@
 -- Enable in parallel worlds -- look for controls_mouse and controls_wasd for new "lobby" area?
 -- Flesh out and implement meta.lua rigorously
 -- Sort order drop-down
-
+-- Unresearched spells on wands not indicated in Research Wand menu
 
 -- ====================
 --  REQUESTS / IDEAS

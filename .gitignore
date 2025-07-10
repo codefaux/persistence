@@ -1,3 +1,4 @@
 persistence.pdn
 persistence.code-workspace
 files/inspect.lua
+steam-update-persistence.sh

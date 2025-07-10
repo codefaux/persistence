@@ -111,7 +111,7 @@ if GameGetFrameNum()%_frame_skip==0 then -- every ten frames, for performance
       if workshop_hitbox_comp~=nil then
         local workshop_hitbox = ComponentGetMembers(workshop_hitbox_comp);
         if workshop_hitbox~=nil then
-          print("persistence: entity_mgr.lua: cloend workshop " .. workshop_e_id);
+          print("persistence: entity_mgr.lua: cloned workshop " .. workshop_e_id);
           local _width = workshop_hitbox["aabb_max_x"] - workshop_hitbox["aabb_min_x"];
           local _height = workshop_hitbox["aabb_max_y"] - workshop_hitbox["aabb_min_y"];
           local _xloc, _yloc = EntityGetFirstHitboxCenter(workshop_e_id);

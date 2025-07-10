@@ -45,12 +45,16 @@ if persistence_data_store_loaded~=true then
 
     ---@diagnostic disable-next-line: param-type-mismatch
     local _withdraw = math.min(get_stash_money(), mod_setting.holy_mountain_money);
-    GamePrint(string.format("Persistence: Holy Mountain paycheck, $ %i from Stash", _withdraw));
-    transfer_money_stash_to_player(_withdraw);
+    if _withdraw > 0 then
+      GamePrint(string.format("Persistence: Holy Mountain paycheck, $ %i from Stash", _withdraw));
+      transfer_money_stash_to_player(_withdraw);
+    end
 
     local _reward = mod_setting.holy_mountain_reward;
-    GamePrint(string.format("Persistence: Holy Mountain paycheck, $ %i", _reward));
-    increment_player_money(_reward);
+    if _reward > 0 then
+      GamePrint(string.format("Persistence: Holy Mountain paycheck, $ %i", _reward));
+      increment_player_money(_reward);
+    end
 
     local _ent_x, _ent_y = EntityGetTransform(_workshop_e_id);
     local _workshops_here = EntityGetInRadiusWithTag(_ent_x, _ent_y, 500, "persistence_workshop");

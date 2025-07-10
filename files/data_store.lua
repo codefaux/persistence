@@ -36,7 +36,7 @@ if persistence_data_store_loaded~=true then
   end
 
   local function _do_holy_mountain_paycheck_check()
-    if mod_setting.holy_mountain_money==0 then return; end
+    if mod_setting.holy_mountain_money==0 and mod_setting.holy_mountain_reward==0 then return; end
 
     local _workshop_e_id = tonumber(GlobalsGetValue("workshop_e_id", "0")) or 0;
     if not EntityHasTag(_workshop_e_id, "persistence_visited") then return; end
@@ -47,11 +47,14 @@ if persistence_data_store_loaded~=true then
     local _withdraw = math.min(get_stash_money(), mod_setting.holy_mountain_money);
     GamePrint(string.format("Persistence: Holy Mountain paycheck, $ %i from Stash", _withdraw));
     transfer_money_stash_to_player(_withdraw);
-    local _ent_x, _ent_y = EntityGetTransform(_workshop_e_id);
 
+    local _reward = mod_setting.holy_mountain_reward;
+    GamePrint(string.format("Persistence: Holy Mountain paycheck, $ %i", _reward));
+    increment_player_money(_reward);
+
+    local _ent_x, _ent_y = EntityGetTransform(_workshop_e_id);
     local _workshops_here = EntityGetInRadiusWithTag(_ent_x, _ent_y, 500, "persistence_workshop");
     for _, _test_e_id in ipairs(_workshops_here) do
-      -- GamePrint("Persistence: Marking workshop as paid");
       EntityRemoveTag(_test_e_id, "persistence_unpaid");
       EntityAddTag(_test_e_id, "persistence_paid");
       EntityAddTag(_test_e_id, "persistence_visited");

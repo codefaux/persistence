@@ -70,5 +70,5 @@ A scanner runs while you explore the world. The scanner is a quality of life fea
 Many thanks to everyone using the mod, and doubly so to anyone who reports an issue, suggests a feature, or just says thanks.
 I'd like to thank people directly, but I don't want to violate anyone's privacy.
 If you've made a suggestion I've implemented or reported an issue and would like credit, contact me and tell me how to address you."
-	"changenote"		"- Theoretically fixed destroying player data w/ empty inventory"
+	"changenote"		"- Minor fixes with warning display, race condition crash. Add Holy Mountain Reward setting."
 }

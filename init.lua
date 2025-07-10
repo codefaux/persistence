@@ -159,14 +159,20 @@ function OnPlayerDied(entity_id)
   if _mod_cap>0 then
     _pain = math.floor(_money_to_save - math.min(_money_to_save, _mod_cap));
     _money_to_save = math.ceil(_money_to_save - _pain);
+  elseif encoder_read_only then
+    _pain = _money_to_save;
+    _money_to_save = 0;
   end
 
   GamePrintImportant("You died", string.format(" $ %i was saved.", _money_to_save) );
   print(string.format(" $ %i was saved.", _money_to_save) );
-  if _pain>0 then
+  if _pain>0 or encoder_read_only then
     GamePrintImportant("You died", string.format(" $ %i evaporated, and you asked for it.", _pain));
     print("recovery cap: " .. _mod_cap);
     print(string.format(" $ %i evaporated, and you asked for it.", _pain));
   end
-  increment_stash_money(_money_to_save);
+
+  if not encoder_read_only then
+    increment_stash_money(_money_to_save);
+  end
 end

@@ -70,6 +70,8 @@ if gui_subfunc_loaded~=true then
   __type = function(value) return action_type_to_string(value); end
   __cntarr = function(value) if type(value)=="table" then return #value; end return -1; end
 
+  __human_scale = function(value) if tonumber(value) and tonumber(value) >= 100000 then _str = {"", "k", "M", "G", "T"}; _d = math.floor(#tostring(math.floor(math.abs(value)))/3); return string.format("%d%s", value / ( 1000 ^ (_d-1)), _str[_d]); else return value; end; end
+
   function __render_wand_slot(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
     GuiZSet(gui, __layer(layer)); ---gui frame
     GuiImageNinePiece(gui, _nid(), x_base, y_base, panel_width, panel_height);

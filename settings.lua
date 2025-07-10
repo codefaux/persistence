@@ -176,8 +176,8 @@ mod_settings =
       },
       {
         id = "holy_mountain_money",
-        ui_name = "Holy Mountain Paycheck",
-        ui_description = "Money to withdraw from your Stash at each Holy Mountain",
+        ui_name = "Holy Mountain Reward (Stash)",
+        ui_description = "Money to withdraw from your Stash at each Holy Mountain, useful if Stash access is disabled as a challenge",
         ui_fn = mod_setting_number_multiple,
         round_to = 25,
         value_default = 0,
@@ -189,7 +189,7 @@ mod_settings =
       },
       {
         id = "holy_mountain_reward",
-        ui_name = "Holy Mountain Reward",
+        ui_name = "Holy Mountain Reward (Bonus)",
         ui_description = "Money to reward player for reaching each Holy Mountain",
         ui_fn = mod_setting_number_multiple,
         round_to = 50,

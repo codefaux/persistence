@@ -380,7 +380,7 @@ if persistence_data_store_loaded~=true then
   end
 
   -- templates
-  local function _get_template(profile_id, template_id)
+  local function _load_template(profile_id, template_id)
     local template_id_string = template_id;
 
     local _template = {};
@@ -417,12 +417,20 @@ if persistence_data_store_loaded~=true then
     return _template;
   end
 
-  local function _get_templates(profile_id)
+  local function _load_templates(profile_id)
     local _templates = {};
     for _idx = 1, get_template_count() do
-      table.insert(_templates, _get_template(profile_id, _idx));
+      table.insert(_templates, _load_template(profile_id, _idx));
     end
-    return _templates;
+    data_store[profile_id]["template"] = _templates;
+  end
+
+  local function _get_template(profile_id, template_id)
+    return data_store[profile_id]["template"][template_id];
+  end
+
+  local function _get_templates(profile_id)
+    return data_store[profile_id]["template"];
   end
 
   local function _delete_template(profile_id, template_id)
@@ -448,6 +456,8 @@ if persistence_data_store_loaded~=true then
     end
 
     encoder_clear_flag(template_prefix);
+
+    data_store[profile_id]["template"][template_id] = {};
   end
 
   local function _set_template(profile_id, template_id, wand_data)
@@ -474,6 +484,8 @@ if persistence_data_store_loaded~=true then
     encoder_add_flag(template_prefix .. "_wand_type_" .. string.lower(wand_data["wand_type"]));
 
     encoder_add_flag(template_prefix);
+
+    data_store[profile_id]["template"][template_id] = wand_data or {};
   end
 
   --- Check if and how a wand entity is new research for profile
@@ -716,7 +728,7 @@ if persistence_data_store_loaded~=true then
   function research_wand(entity_id) return _research_wand(loaded_profile_id, entity_id); end
   function get_templates() return _get_templates(loaded_profile_id); end
   function get_template(template_id) return _get_template(loaded_profile_id, template_id); end
-  function load_template(template_id) return _get_template(loaded_profile_id, template_id); end
+  function load_templates() return _load_templates(loaded_profile_id); end
   function set_template(template_id, wand_data) _set_template(loaded_profile_id, template_id, wand_data); end
   function delete_template(template_id) _delete_template(loaded_profile_id, template_id); end
   function get_always_cast_spells() return _get_always_cast_spells(loaded_profile_id); end
@@ -856,6 +868,7 @@ if persistence_data_store_loaded~=true then
 
     _load_profile_spells(profile_id);
     _load_wand_types(profile_id);
+    _load_templates(profile_id);
 
     data_store[profile_id]["loaded"] = true;
 

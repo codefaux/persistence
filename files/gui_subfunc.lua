@@ -176,6 +176,38 @@ if gui_subfunc_loaded~=true then
     if _data.research~=nil then GuiGuideTip(gui, (_data.research~=nil and type(_data.color_val)=="boolean" and _data.color_val==true) and "Contributes to research" or "Does not contribute to research", ""); end
   end
 
+  function __render_money_stat(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
+    GuiZSetForNextWidget(gui, __layer(layer));
+    GuiText(gui, x_base + margin, y_base, _data.label, small_text_scale);
+    if _data.color_val~=nil then
+      if type(_data.color_val)=="boolean" then
+        GuiColorNextWidgetBool(gui, _data.color_val);
+      elseif type(_data.color_val)=="table" then
+        GuiColorNextWidgetEnum(gui, _data.color_val);
+      end
+    end
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
+    GuiZSetForNextWidget(gui, __layer(layer));
+    GuiText(gui, x_base + panel_width - margin, y_base, "$ " .. __human_scale(_data.value), small_text_scale);
+    if _data.research~=nil then GuiGuideTip(gui, (_data.research~=nil and type(_data.color_val)=="boolean" and _data.color_val==true) and "Contributes to research" or "Does not contribute to research", ""); end
+  end
+
+  function __render_big_stat(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
+    GuiZSetForNextWidget(gui, __layer(layer));
+    GuiText(gui, x_base + margin, y_base, _data.label, small_text_scale);
+    if _data.color_val~=nil then
+      if type(_data.color_val)=="boolean" then
+        GuiColorNextWidgetBool(gui, _data.color_val);
+      elseif type(_data.color_val)=="table" then
+        GuiColorNextWidgetEnum(gui, _data.color_val);
+      end
+    end
+    GuiOptionsAddForNextWidget(gui, GUI_OPTION.Align_Left);
+    GuiZSetForNextWidget(gui, __layer(layer));
+    GuiText(gui, x_base + panel_width - margin, y_base, __human_scale(_data.value), small_text_scale);
+    if _data.research~=nil then GuiGuideTip(gui, (_data.research~=nil and type(_data.color_val)=="boolean" and _data.color_val==true) and "Contributes to research" or "Does not contribute to research", ""); end
+  end
+
   function __render_spell_listentry(x_base, y_base, margin, panel_width, panel_height, layer, _data, _nid)
     local _offset_x = x_base + 45;
     local _after_icon_x = _offset_x + 20;

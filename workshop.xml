@@ -22,6 +22,8 @@ There are five player profile slots. (Slot 5 is only accessible via Mod Options 
 
 'Persistence areas' have been added. Persistence areas count as the player's spawn location and Holy Mountains. The Persistence features described below will only work inside a Persistence Area.
 
+'Amnesiac Mode' has been added. This makes Persistence forget all changes upon the death of your character, to give a less Rogue-Lite experience, or to allow expensive testing/experimentation.
+
 Money:
 - An ingame money stash has been added. Each profile stores a separate money stash.
 - Mod Options can lock the stash, only allow deposits, or allow deposits and withdrawals.

@@ -25,7 +25,7 @@ if money_loaded~=true then
       GuiImageNinePiece(gui, _nid(), base_x, base_y, 150, 75);
 
       GuiZSetForNextWidget(gui, __layer(1));
-      GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Player: $ %1.0f", player_money));
+      GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Player: $ %s", __human_scale(player_money)));
       idx = idx + 1;
 
       for _, _money_amt in ipairs(money_amts) do
@@ -34,11 +34,11 @@ if money_loaded~=true then
         if stash_money < _new_money_amt or _money_amt+player_money>=(2^29) or _allow_withdraw==false then
           GuiZSetForNextWidget(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Dark);
-          GuiText(gui, col_a, offset_y + (idx * 10), string.format("Take $ %1.0f", _new_money_amt));
+          GuiText(gui, col_a, offset_y + (idx * 10), string.format("Take $ %s", __human_scale(_new_money_amt)));
         else
           GuiZSetForNextWidget(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Green);
-          if GuiButton(gui, _nid(), col_a, offset_y + (idx * 10), string.format("Take $ %1.0f", _new_money_amt)) then
+          if GuiButton(gui, _nid(), col_a, offset_y + (idx * 10), string.format("Take $ %s", __human_scale(_new_money_amt))) then
             transfer_money_stash_to_player(_new_money_amt);
           end
         end
@@ -47,11 +47,11 @@ if money_loaded~=true then
         if player_money < _new_money_amt or _allow_deposit==false then
           GuiZSetForNextWidget(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Dark);
-          GuiText(gui, col_b, offset_y + (idx * 10), string.format("Stash $ %1.0f", _new_money_amt));
+          GuiText(gui, col_b, offset_y + (idx * 10), string.format("Stash $ %s", __human_scale(_new_money_amt)));
         else
           GuiZSetForNextWidget(gui, __layer(1));
           GuiColorNextWidgetEnum(gui, COLORS.Green);
-          if GuiButton(gui, _nid(), col_b, offset_y + (idx * 10), string.format("Stash $ %1.0f", _new_money_amt)) then
+          if GuiButton(gui, _nid(), col_b, offset_y + (idx * 10), string.format("Stash $ %s", __human_scale(_new_money_amt))) then
             transfer_money_player_to_stash(_new_money_amt);
           end
         end
@@ -74,7 +74,7 @@ if money_loaded~=true then
         GuiColorNextWidgetEnum(gui, COLORS.Dark);
         GuiText(gui, col_a, offset_y + (idx * 10), "Take ALL");
       end
-      GuiGuideTip(gui, "Withdraw limited to " .. (2^28), "");
+      GuiGuideTip(gui, "Withdraw limited to " .. __human_scale(2^28), "");
 
       if _allow_deposit==true then
         GuiZSetForNextWidget(gui, __layer(1));
@@ -90,7 +90,7 @@ if money_loaded~=true then
 
       idx = idx + 1;
       GuiZSetForNextWidget(gui, __layer(1));
-      GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Stashed: $ %1.0f", stash_money));
+      GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Stashed: $ %s", __human_scale(stash_money, true)));
       GuiGuideTip(gui, "Stashed money from previous runs", "See Mod Options for auomatic withdrawals");
     end
     money_open = true;

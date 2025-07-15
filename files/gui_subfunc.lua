@@ -70,7 +70,25 @@ if gui_subfunc_loaded~=true then
   __type = function(value) return action_type_to_string(value); end
   __cntarr = function(value) if type(value)=="table" then return #value; end return -1; end
 
-  __human_scale = function(value) if tonumber(value) and tonumber(value) >= 100000 then _str = {"", "k", "M", "G", "T"}; _d = math.floor(#tostring(math.floor(math.abs(value)))/3); return string.format("%d%s", value / ( 1000 ^ (_d-1)), _str[_d]); else return value; end; end
+  __human_scale = function(value, commas_only)
+    commas_only = commas_only or false;
+    if tonumber(value) < 1000 then return tostring(value); end
+
+    if commas_only==false and tonumber(value) and tonumber(value) >= 100000 then
+      _str = {"", "k", "M", "G", "T"};
+      _d = math.floor(#tostring(math.floor(math.abs(value)))/3);
+      _value = string.format("%d%s", value / ( 1000 ^ (_d-1)), _str[_d]);
+    else
+      _value = value;
+    end
+
+    local _formatted = tostring(_value):reverse():gsub("(%d%d%d)", "%1,"):reverse()
+    if _formatted:sub(1, 1) == "," then
+        _formatted = _formatted:sub(2)
+    end
+
+    return _formatted;
+  end
 
   function __render_wand_slot(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid)
     GuiZSet(gui, __layer(layer)); ---gui frame

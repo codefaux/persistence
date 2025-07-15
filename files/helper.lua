@@ -245,7 +245,8 @@ if persistence_helper_loaded~=true then
     return true;
   end
 
-  function get_player_wands()
+  function get_player_wands(quick)
+    local _quick = quick or false;
     local wands = nil;
     local inv_quick;
     local inventory_quick_childs;
@@ -263,7 +264,11 @@ if persistence_helper_loaded~=true then
           local inv_slot = ComponentGetValue2(inventory_comp, "inventory_slot") + 1;
           wands[inv_slot] = {};
           wands[inv_slot].e_id = item;
-          wands[inv_slot].research, wands[inv_slot].cost, wands[inv_slot].wand = get_wand_entity_research(item);
+          if _quick then
+            wands[inv_slot].wand = read_wand_entity(item);
+          else
+            wands[inv_slot].research, wands[inv_slot].cost, wands[inv_slot].wand = get_wand_entity_research(item);
+          end
         end
       end
     end

@@ -68,8 +68,9 @@ if spell_loadouts_loaded~=true then
     active_windows["spell_loadout"] = function(_nid)
       local _y_offset = 0;
 
-      if _reload_data==true or _wands == {} then _wands = get_player_wands(); _saved_spell_loadouts = _get_stored_loadouts(); _reload_data=false; end;
+      if _reload_data==true or type(_wands) ~= "table" or #_wands < 4 then _wands = get_player_wands(true); _saved_spell_loadouts = _get_stored_loadouts(); _reload_data=false; end;
 
+      if _wands == nil or #_wands < 4 then return; end -- Yeah it still sometimes doesn't populate _wands, betting I have to do this elsewhere too
 
       GuiZSetForNextWidget(gui, __layer(2));
       GuiBeginScrollContainer(gui, _nid(), x_base, y_base, _panel_width, _panel_height);

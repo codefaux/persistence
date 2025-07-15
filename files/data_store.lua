@@ -540,8 +540,6 @@ if persistence_data_store_loaded~=true then
         _cost.spells_per_cast = math.ceil(__cost_func_spells_per_cast(_in_wand_data["spells_per_cast"]));
       end
       if _wand_bounds.cast_delay[1] == nil or _wand_bounds.cast_delay[2] == nil then
-        b_cast_delay_min = _wand_bounds.cast_delay[1] == nil;
-        b_cast_delay_max = _wand_bounds.cast_delay[2] == nil;
         _research.b_cast_delay = true;
         _research.b_cast_delay_min = true;
         _research.b_cast_delay_max = true;
@@ -561,8 +559,6 @@ if persistence_data_store_loaded~=true then
         end
       end
       if _wand_bounds.recharge_time[1] == nil or _wand_bounds.recharge_time[2] == nil then
-        b_recharge_time_min = _wand_bounds.recharge_time[1] == nil;
-        b_recharge_time_max = _wand_bounds.recharge_time[2] == nil;
         _research.b_recharge_time = true;
         _research.b_recharge_time_min = true;
         _research.b_recharge_time_max = true;
@@ -598,8 +594,6 @@ if persistence_data_store_loaded~=true then
         _research.is_new = true;
       end
       if _wand_bounds.spread[1] == nil or _wand_bounds.spread[2] == nil then
-        b_spread_min = _wand_bounds.spread[1] == nil;
-        b_spread_max = _wand_bounds.spread[2] == nil;
         _research.b_spread = true;
         _research.b_spread_min = true;
         _research.b_spread_max = true;

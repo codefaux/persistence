@@ -457,7 +457,13 @@ if persistence_data_store_loaded~=true then
 
     encoder_clear_flag(template_prefix);
 
-    data_store[profile_id]["template"][template_id] = {};
+    if type(data_store[profile_id]) == "table" then
+      if type(data_store[profile_id]["template"]) == "table" then
+        data_store[profile_id]["template"][template_id] = {};
+      else
+        data_store[profile_id]["template"] = {};
+      end
+    end
   end
 
   local function _set_template(profile_id, template_id, wand_data)

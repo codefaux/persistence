@@ -17,7 +17,7 @@ if wand_template_loaded~=true then
     active_windows["template"] = function (_nid)
       local function _gui_nop(x_base, y_base, margin, panel_width, panel_height, layer, slot_data, _nid) return; end
 
-      if _reload_data then template_previews = get_templates(); _reload_data=false; end
+      if _reload_data then load_templates(); template_previews = get_templates(); _reload_data=false; end
 
       GuiZSetForNextWidget(gui, __layer(0));
       GuiImageNinePiece(gui, _nid(), x_base, y_base, width, height);
@@ -128,20 +128,23 @@ if wand_template_loaded~=true then
           local _preview_panel_height = 105;
           GuiZSetForNextWidget(gui, __layer(2));
           GuiBeginScrollContainer(gui, _nid(), _preview_x_loc, _preview_y_loc, _preview_panel_width, _preview_panel_height);
-          for ii = 2, modify_wand_table.datum_translation._index[0] do
-            local _member = modify_wand_table.datum_translation._index[ii];
-            local _value = template_previews[i][_member];
-            local _valfunc = modify_wand_table.datum_translation[_member][2];
-            local _height = modify_wand_table.datum_translation[_member][3] or 0;
-            local _data = {cost = {}};
-            _data.wand = template_previews[i];
-            _data.value = _valfunc(_value);
-            _data.member = _member;
-            _data.label = (modify_wand_table.datum_translation[_member][1]~=nil and modify_wand_table.datum_translation[_member][1]~="") and GameTextGetTranslatedOrNot(modify_wand_table.datum_translation[_member][1]) or "";
-            _data.render_slots_override = get_always_cast_count();
-            local _renderfunc = modify_wand_table.datum_translation[_member][4] or _gui_nop;
-            _renderfunc(_preview_datum_x_pos, _preview_datum_y_pos, margin, _preview_panel_width - margin, _preview_panel_height, 3, _data, _nid);
-            _preview_datum_y_pos = _preview_datum_y_pos + _height;
+
+          if not template_previews[i] == nil and not template_previews[i] == {} then
+            for ii = 2, modify_wand_table.datum_translation._index[0] do
+              local _member = modify_wand_table.datum_translation._index[ii];
+              local _value = template_previews[i][_member];
+              local _valfunc = modify_wand_table.datum_translation[_member][2];
+              local _height = modify_wand_table.datum_translation[_member][3] or 0;
+              local _data = {cost = {}};
+              _data.wand = template_previews[i];
+              _data.value = _valfunc(_value);
+              _data.member = _member;
+              _data.label = (modify_wand_table.datum_translation[_member][1]~=nil and modify_wand_table.datum_translation[_member][1]~="") and GameTextGetTranslatedOrNot(modify_wand_table.datum_translation[_member][1]) or "";
+              _data.render_slots_override = get_always_cast_count();
+              local _renderfunc = modify_wand_table.datum_translation[_member][4] or _gui_nop;
+              _renderfunc(_preview_datum_x_pos, _preview_datum_y_pos, margin, _preview_panel_width - margin, _preview_panel_height, 3, _data, _nid);
+              _preview_datum_y_pos = _preview_datum_y_pos + _height;
+            end
           end
           GuiEndScrollContainer(gui);
         end

@@ -37,7 +37,7 @@ function __cost_func_spread(_spread)
 end
 
 function __cost_func_always_cast_spells(_alwayscasts)
-  local _val = 0; for _, _a_c_id in ipairs(_alwayscasts) do if (_a_c_id~=nil and actions_by_id[_a_c_id]~=nil and actions_by_id[_a_c_id].price~=nil) then _val = _val + __get_ac_raw_cost(_a_c_id); end; end; return math.ceil(_val);
+  local _val = 0; for _, _a_c_id in pairs(_alwayscasts) do if (_a_c_id~=nil and actions_by_id[_a_c_id]~=nil and actions_by_id[_a_c_id].price~=nil) then _val = _val + __get_ac_raw_cost(_a_c_id); end; end; return math.ceil(_val);
 end
 
 function __cost_func_always_cast_spell(_alwayscast)

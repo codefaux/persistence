@@ -28,7 +28,7 @@ if money_loaded~=true then
       GuiText(gui, col_a + 20, offset_y + (idx * 10), string.format("Player: $ %s", __human_scale(player_money)));
       idx = idx + 1;
 
-      for _, _money_amt in ipairs(money_amts) do
+      for _, _money_amt in pairs(money_amts) do
         _new_money_amt = _money_amt * _multiplier;
 
         if stash_money < _new_money_amt or _money_amt+player_money>=(2^29) or _allow_withdraw==false then

@@ -38,7 +38,7 @@ if spell_loadouts_loaded~=true then
 
     local function save_spell_loadout(idx, spell_loadout)
       local _spell_string = spell_loadout.name;
-      for _, _spell_a_id in ipairs(spell_loadout.spells) do
+      for _, _spell_a_id in pairs(spell_loadout.spells) do
         _spell_string = _spell_string .. "," .. _spell_a_id;
       end
       print("persistence.loadout_" .. idx);

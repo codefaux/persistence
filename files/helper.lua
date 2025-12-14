@@ -9,7 +9,7 @@ if persistence_helper_loaded~=true then
 
   function sprite_file_to_wand_type(sprite_file)
     ---TODO: Debug this and see what actually happens here, intent: remove dependence on default_wands
-    for def_idx, _ in ipairs(default_wands) do
+    for def_idx, _ in pairs(default_wands) do
       if default_wands[def_idx].file == sprite_file then
         return "default_" .. def_idx;
       end
@@ -21,7 +21,7 @@ if persistence_helper_loaded~=true then
     local out_table = {};
     out_table.default_1 = default_wands[1];
     out_table.default_2 = default_wands[2];
-    for _, wand_entry in ipairs(wands) do
+    for _, wand_entry in pairs(wands) do
       out_table[sprite_file_to_wand_type(wand_entry.file)] = wand_entry;
     end
     return out_table;
@@ -100,7 +100,7 @@ if persistence_helper_loaded~=true then
       wand_data["always_cast_spells"] = {};
       local childs = EntityGetAllChildren(entity_id);
       if childs ~= nil then
-        for _, child_id in ipairs(childs) do
+        for _, child_id in pairs(childs) do
           local item_action_comp = EntityGetFirstComponentIncludingDisabled(child_id, "ItemActionComponent");
           if item_action_comp ~= nil and item_action_comp ~= 0 then
             local action_id = ComponentGetValue2(item_action_comp, "action_id");
@@ -162,7 +162,7 @@ if persistence_helper_loaded~=true then
 
     local childs = EntityGetAllChildren(slot_data.origin_e_id);
     if childs ~= nil then
-      for _, child_id in ipairs(childs) do
+      for _, child_id in pairs(childs) do
         local item_action_comp = EntityGetFirstComponentIncludingDisabled(child_id, "ItemActionComponent");
         if item_action_comp ~= nil and item_action_comp ~= 0 then
           local action_id = ComponentGetValue2(item_action_comp, "action_id");
@@ -174,7 +174,7 @@ if persistence_helper_loaded~=true then
     end
 
     if #slot_data.wand["always_cast_spells"] > 0 then
-      for _, curr_a_c_action_id in ipairs(slot_data.wand["always_cast_spells"]) do
+      for _, curr_a_c_action_id in pairs(slot_data.wand["always_cast_spells"]) do
         AddGunActionPermanent(slot_data.origin_e_id, curr_a_c_action_id);
       end
     end
@@ -214,7 +214,7 @@ if persistence_helper_loaded~=true then
     ComponentSetValue2(ability_comp, "item_recoil_recovery_speed", 15);
 
     if #wand_data["always_cast_spells"] > 0 then
-      for _, curr_a_c_action_id in ipairs(wand_data["always_cast_spells"]) do
+      for _, curr_a_c_action_id in pairs(wand_data["always_cast_spells"]) do
         AddGunActionPermanent(_new_wand_e_id, curr_a_c_action_id);
       end
     end
@@ -258,7 +258,7 @@ if persistence_helper_loaded~=true then
     if inventory_quick_childs ~=nil and #inventory_quick_childs>0 then
       wands = {{}, {}, {}, {}};
 
-      for _, item in ipairs(inventory_quick_childs) do
+      for _, item in pairs(inventory_quick_childs) do
         if EntityHasTag(item, "wand") then
           local inventory_comp = EntityGetFirstComponentIncludingDisabled(item, "ItemComponent") or 0;
           local inv_slot = ComponentGetValue2(inventory_comp, "inventory_slot") + 1;
@@ -281,7 +281,7 @@ if persistence_helper_loaded~=true then
     if EntityGetWithName("inventory_full") == nil then return {}; end
     local _inventory_full_children = EntityGetAllChildren(EntityGetWithName("inventory_full"));
     if _inventory_full_children ~=nil then
-      for _, _inventory_entity in ipairs(_inventory_full_children) do
+      for _, _inventory_entity in pairs(_inventory_full_children) do
         if EntityHasTag(_inventory_entity, "card_action") then
           table.insert(_spell_entities, _inventory_entity);
         end
@@ -308,7 +308,7 @@ if persistence_helper_loaded~=true then
     local _spell_idx = 0;
 
     _type_hash[99] = true; -- "all"
-    for _, _e_id in ipairs(_carrying_e_ids) do
+    for _, _e_id in pairs(_carrying_e_ids) do
       local _a_id = get_spell_entity_action_id(_e_id);
       _spell_idx = _spell_idx + 1;
       local _uses_max = actions_by_id[_a_id].max_uses;
@@ -415,7 +415,7 @@ if persistence_helper_loaded~=true then
   end
 
   function get_player_stats_component()
-    for _, w_s_child_id in ipairs(EntityGetAllChildren(get_world_state_entity_id()) or {}) do
+    for _, w_s_child_id in pairs(EntityGetAllChildren(get_world_state_entity_id()) or {}) do
       if w_s_child_id~=0 then return EntityGetFirstComponentIncludingDisabled(w_s_child_id, "PlayerStatsComponent"); end
     end
   end

@@ -60,7 +60,7 @@ if persistence_data_store_loaded~=true then
 
     local _ent_x, _ent_y = EntityGetTransform(_workshop_e_id);
     local _workshops_here = EntityGetInRadiusWithTag(_ent_x, _ent_y, 500, "persistence_workshop");
-    for _, _test_e_id in ipairs(_workshops_here) do
+    for _, _test_e_id in pairs(_workshops_here) do
       EntityRemoveTag(_test_e_id, "persistence_unpaid");
       EntityAddTag(_test_e_id, "persistence_paid");
       EntityAddTag(_test_e_id, "persistence_visited");
@@ -119,7 +119,7 @@ if persistence_data_store_loaded~=true then
   ---@param spells table {1=spell_id, 2=spell_id, ... }
   local function _add_spells(profile_id, spells)
     if spells == nil or #spells == 0 then return; end
-    for _, spell_id in ipairs(spells) do
+    for _, spell_id in pairs(spells) do
       data_store[profile_id]["spells"][spell_id] = true;
       encoder_add_flag(profile_id .. "_spell_" .. string.lower(spell_id));
     end
@@ -152,7 +152,7 @@ if persistence_data_store_loaded~=true then
   ---@param ac_spells table {1=spell_id, 2=spell_id, ... }
   local function _add_always_cast_spells(profile_id, ac_spells)
     if ac_spells == nil or #ac_spells == 0 then return; end
-    for _, curr_ac_spell_id in ipairs(ac_spells) do
+    for _, curr_ac_spell_id in pairs(ac_spells) do
       data_store[profile_id]["always_cast_spells"][curr_ac_spell_id] = true;
       encoder_add_flag(profile_id .. "_always_cast_spell_" .. string.lower(curr_ac_spell_id));
     end
@@ -192,7 +192,7 @@ if persistence_data_store_loaded~=true then
   ---@param profile_id integer
   ---@param wand_types table {1=wand_type, 2=wand_type, ... }
   local function _add_wand_types(profile_id, wand_types)
-    for _, curr_wand_type in ipairs(wand_types) do
+    for _, curr_wand_type in pairs(wand_types) do
       if string.sub(curr_wand_type, 1, #"default") ~= "default" then
         data_store[profile_id]["wand_types"][curr_wand_type] = true;
         encoder_add_flag(profile_id .. "_wand_type_" .. string.lower(curr_wand_type));
@@ -209,12 +209,13 @@ if persistence_data_store_loaded~=true then
     data_store[profile_id]["wand_types_idx"] = {};
     ---TODO: is this actually necessary? Debug and check
     local prefixed_string = profile_id;
-    for i, _ in ipairs(default_wands) do
+    for i, _ in pairs(default_wands) do
+      ---order not preserved w/pairs but only+always two entries
       idx = idx + 1;
       data_store[profile_id]["wand_types"]["default_" .. i] = true;
       data_store[profile_id]["wand_types_idx"][idx] = "default_" .. i;
     end
-    for _, scan_wand in ipairs(wands) do
+    for _, scan_wand in pairs(wands) do
       local scan_wand_type = sprite_file_to_wand_type(scan_wand.file);
       if encoder_has_flag(prefixed_string .. "_wand_type_" .. string.lower(scan_wand_type)) then
         idx = idx + 1;
@@ -444,14 +445,14 @@ if persistence_data_store_loaded~=true then
     encoder_clear_integer(template_prefix .. "_capacity");
     encoder_clear_integer(template_prefix .. "_spread");
 
-    for scan_action_id, _ in pairs(actions_by_id) do
-      encoder_clear_flag(template_prefix .. "_always_cast_spell_" .. string.lower(scan_action_id));
+    for _, scan_action in pairs(actions) do
+      encoder_clear_flag(template_prefix .. "_always_cast_spell_" .. string.lower(scan_action.id));
     end
 
-    for def_idx, _ in ipairs(default_wands) do
+    for def_idx, _ in pairs(default_wands) do
       encoder_clear_flag(template_prefix .. "_wand_type_default_" .. def_idx);
     end
-    for _, scan_wand in ipairs(wands) do
+    for _, scan_wand in pairs(wands) do
       encoder_clear_flag(template_prefix .. "_wand_type_" .. string.lower(sprite_file_to_wand_type(scan_wand.file)));
     end
 
@@ -483,7 +484,7 @@ if persistence_data_store_loaded~=true then
     encoder_write_integer(template_prefix .. "_capacity", wand_data["capacity"]);
     encoder_write_integer(template_prefix .. "_spread", math.floor(wand_data["spread"] * 10 + 0.5));
 
-    for _, spell in ipairs(wand_data["always_cast_spells"]) do
+    for _, spell in pairs(wand_data["always_cast_spells"]) do
       encoder_add_flag(template_prefix .. "_always_cast_spell_" .. string.lower(spell));
     end
 
@@ -761,7 +762,7 @@ if persistence_data_store_loaded~=true then
       _table.wand.wand_type = data_store[loaded_profile_id]["wand_types_idx"][1];
       _table.wand.sprite = wand_type_to_sprite_file(_table.wand.wand_type);
       _table.wand.shuffle = false;
-      for _, _member in ipairs(_members) do
+      for _, _member in pairs(_members) do
         _table.wand[_member] = math.floor( (_table.bounds[_member][1] + _table.bounds[_member][2]) / 2 );
       end
     end
@@ -801,11 +802,11 @@ if persistence_data_store_loaded~=true then
     encoder_clear_integer(profile_id .. "_always_cast_spells_known");
     encoder_clear_integer(profile_id .. "_spells_known");
     encoder_clear_integer(profile_id .. "_wand_types_known");
-    for _, curr_action in ipairs(actions_by_id) do
-        encoder_clear_flag(profile_id .. "_spell_" .. string.lower(curr_action.id));
+    for _, curr_action in pairs(actions) do
+      encoder_clear_flag(profile_id .. "_spell_" .. string.lower(curr_action.id));
       encoder_clear_flag(profile_id .. "_always_cast_spell_" .. string.lower(curr_action.id));
     end
-    for _, curr_wand in ipairs(wands) do
+    for _, curr_wand in pairs(wands) do
       encoder_clear_flag(profile_id .. "_wand_type_" .. sprite_file_to_wand_type(curr_wand.file));
     end
 

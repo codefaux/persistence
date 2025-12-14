@@ -27,7 +27,7 @@ if spell_tooltip_loaded~=true then
         GuiOptionsAdd(gui, GUI_OPTION.NonInteractive);
 
         local action_struct_pool = get_action_struct(curr_spell);
-        for _, action_struct in ipairs(action_struct_pool) do
+        for _, action_struct in pairs(action_struct_pool) do
           if action_struct.name=="name" then
             GuiZSetForNextWidget(gui, __layer(5));
             GuiText(gui, col_a, y_loc, action_struct.value);      -- NAME

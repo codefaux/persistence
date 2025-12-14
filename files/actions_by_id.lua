@@ -510,7 +510,7 @@ if actions_by_id__init_done~=true then
 			end
 		end
 
-		for _, member_pool in ipairs(source_pool) do
+		for _, member_pool in pairs(source_pool) do
 			for member_name, member_value in pairs(member_pool) do
 				for datum_name, datum_formatting in pairs(spell_tooltip_stats_format) do
 					if member_name==datum_name and (datum_formatting[3](member_value)==true) then

@@ -10,7 +10,7 @@ if entity_mgr_loaded==false then
       local _lobby_effect_pool = EntityGetWithName("persistence_lobby_effect_entity");
       if _lobby_effect_pool==nil or _lobby_effect_pool==0 then
         if type(_lobby_effect_pool)=="table" then
-          for _, _e_id in ipairs(_lobby_effect_pool) do
+          for _, _e_id in pairs(_lobby_effect_pool) do
             EntityKill(_e_id);
           end
         end
@@ -105,7 +105,7 @@ if GameGetFrameNum()%_frame_skip==0 then -- every ten frames, for performance
   end
 
   local workshop_pool = EntityGetWithTag("workshop");
-  for _, workshop_e_id in ipairs(workshop_pool) do
+  for _, workshop_e_id in pairs(workshop_pool) do
     if not EntityHasTag(workshop_e_id, "persistence_cloned") then
       local workshop_hitbox_comp = EntityGetComponent(workshop_e_id, "HitboxComponent")[1];
       if workshop_hitbox_comp~=nil then
